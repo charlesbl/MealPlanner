@@ -8,15 +8,17 @@ const LOCAL_STORAGE_KEY = 'calendarCurrentStartDate';
 
 // --- Date Logic (Remains in the parent view) ---
 const today = new Date();
-today.setHours(0, 0, 0, 0);
+today.setUTCHours(0, 0, 0, 0);
 const todayISO = today.toISOString().split('T')[0];
 
 const getStartOfWeek = (date: Date) => {
   const d = new Date(date);
   const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
-  const diff = d.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1); // Adjust to Monday
+  console.log(date)
+  console.log(dayOfWeek); // Debugging line to check the day of the week
+  const diff = d.getDate() - dayOfWeek + 1; // Adjust to get Monday as the start of the week
   const monday = new Date(d.setDate(diff));
-  monday.setHours(0, 0, 0, 0);
+  monday.setUTCHours(0, 0, 0, 0);
   return monday;
 };
 
@@ -52,7 +54,7 @@ const daysInView = computed(() => {
   for (let i = 0; i < 7; i++) {
     const date = new Date(currentStartDate.value);
     date.setDate(date.getDate() + i);
-    date.setHours(0, 0, 0, 0);
+    date.setUTCHours(0, 0, 0, 0);
     const isoDate = date.toISOString().split('T')[0];
     days.push({
       isoDate,

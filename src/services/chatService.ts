@@ -116,7 +116,7 @@ const llm = new ChatOpenAI({
     baseURL: OPENROUTER_BASE_URL,
   },
   apiKey: OPENROUTER_API_KEY,
-  modelName: "openai/gpt-4o", // Or another model supporting tool calls
+  modelName: "google/gemini-2.5-pro-preview-03-25", // Or another model supporting tool calls
   temperature: 0.7,
 });
 
@@ -151,7 +151,7 @@ const agent = createToolCallingAgent({
 const agentExecutor = new AgentExecutor({
   agent: agent as Runnable<any, any>, // Cast agent if necessary, depending on Langchain version/types
   tools,
-  verbose: true,
+  verbose: false,
 });
 
 // --- Chat History Management ---

@@ -5,8 +5,8 @@ import { reactive, watch } from 'vue'; // Import watch
 export enum MealSlot {
   Breakfast = 'Breakfast',
   Lunch = 'Lunch',
+  Snack = 'Snack',
   Dinner = 'Dinner',
-  Snack = 'Snack' // Added Snack as an example, adjust as needed
 }
 
 // Define the structure for a meal entry using the enum and a mapped type
@@ -47,6 +47,7 @@ export const useMealStore = defineStore('mealStore', () => {
 
   // Action to add or update a meal, using MealSlot for the slot parameter
   function setMeal(date: string, slot: MealSlot, mealName: string) {
+    console.log(`Setting meal for ${date} at ${slot}: ${mealName}`);
     const trimmedName = mealName.trim();
 
     if (!meals[date]) {
@@ -76,11 +77,13 @@ export const useMealStore = defineStore('mealStore', () => {
 
   // Action to get a meal for a specific date and slot, using MealSlot
   function getMeal(date: string, slot: MealSlot): string | undefined {
+    console.log(`Getting meal for ${date} at ${slot}`);
     return meals[date]?.[slot];
   }
 
   // Action to get meals for a specific date range
   function getMealsForPeriod(startDate: string, endDate: string): MealsState {
+    console.log(`Getting meals from ${startDate} to ${endDate}`);
     const result: MealsState = {};
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -92,7 +95,7 @@ export const useMealStore = defineStore('mealStore', () => {
     }
 
     // Normalize end date to include the whole day
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     Object.keys(meals).forEach(dateStr => {
       const currentDate = new Date(dateStr);
