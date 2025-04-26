@@ -116,7 +116,8 @@ const llm = new ChatOpenAI({
     baseURL: OPENROUTER_BASE_URL,
   },
   apiKey: OPENROUTER_API_KEY,
-  modelName: "google/gemini-2.5-pro-preview-03-25", // Or another model supporting tool calls
+  // modelName: "google/gemini-2.5-pro-preview-03-25",
+  modelName: "google/gemini-2.5-flash-preview:thinking",
   temperature: 0.7,
 });
 
@@ -127,13 +128,19 @@ const llmWithTools = llm.bindTools(tools);
 // --- Define Agent Prompt ---
 // Get MealSlot values dynamically
 const mealSlotValues = Object.values(MealSlot).join(', ');
+// Get current date and day of the week
+const today = new Date();
+const todayDateString = today.toISOString().split('T')[0];
+const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }); // Get full day name
 
 const prompt = ChatPromptTemplate.fromMessages([
-  // Update the system prompt to include MealSlot values
+  // Update the system prompt to include MealSlot values, recipe/macro instructions, and date handling
   ["system", `You are a helpful assistant for a meal planning application. You have access to tools to manage meals (read, add/update, delete).
 Available meal slots are: ${mealSlotValues}.
-Always use YYYY-MM-DD format for dates. Today's date is ${new Date().toISOString().split('T')[0]}.
-Respond directly to the user after using a tool. If a date is ambiguous (e.g., "next Tuesday"), ask for clarification in YYYY-MM-DD format.`],
+Always use YYYY-MM-DD format for dates. Today's date is ${todayDateString} (which is a ${dayOfWeek}).
+When a user mentions a relative day (e.g., "tomorrow", "next Monday", "last Friday"), try to calculate the specific date in YYYY-MM-DD format based on today's date. If the date is ambiguous or you are unsure, ask for clarification in YYYY-MM-DD format.
+When a meal is added or discussed, automatically generate a simple recipe for it and estimate its macronutrients (calories, protein, carbohydrates, fat).
+Respond directly to the user after using a tool or providing recipe/macro information.`],
   new MessagesPlaceholder("chat_history"),
   ["human", "{input}"],
   new MessagesPlaceholder("agent_scratchpad"),
