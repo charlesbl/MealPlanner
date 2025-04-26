@@ -8,24 +8,90 @@ export enum MealSlot {
   Snack = 'Snack',
   Dinner = 'Dinner',
 }
+const validSlots = Object.values(MealSlot); // Cache valid slots
+
+// Define the Meal interface
+export interface Meal { // Add export
+  name: string;
+  recipe?: string; // Recipe is optional
+  macros?: { // Macros are optional
+    calories?: number;
+    protein?: number;
+    carbs?: number;
+    fat?: number;
+  };
+}
 
 // Define the structure for a meal entry using the enum and a mapped type
-export interface Meal extends Partial<Record<MealSlot, string>> {} // Use Partial<Record<MealSlot, string>>
+export interface DayMeals extends Partial<Record<MealSlot, Meal>> {} // Use Partial<Record<MealSlot, Meal>>
 
 // Define the structure for the meals state
 export interface MealsState {
-  [date: string]: Meal; // e.g., { '2024-05-10': { Breakfast: '...' } }
+  [date: string]: DayMeals; // e.g., { '2024-05-10': { Breakfast: { name: 'Oatmeal', ... } } }
 }
+
+// Helper function to validate the loaded meals data
+function isValidMealsState(data: any): data is MealsState {
+  if (typeof data !== 'object' || data === null) {
+    console.warn("Invalid meals data: not an object.");
+    return false;
+  }
+
+  for (const dateKey in data) {
+    // Basic check if the key looks like a date (YYYY-MM-DD)
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+      console.warn(`Invalid meals data: invalid date key format "${dateKey}".`);
+      return false;
+    }
+
+    const dayMeals = data[dateKey];
+    if (typeof dayMeals !== 'object' || dayMeals === null) {
+      console.warn(`Invalid meals data: dayMeals for "${dateKey}" is not an object.`);
+      return false;
+    }
+
+    for (const slotKey in dayMeals) {
+      // Check if the slot key is a valid MealSlot enum value
+      if (!validSlots.includes(slotKey as MealSlot)) {
+        console.warn(`Invalid meals data: invalid slot key "${slotKey}" for date "${dateKey}".`);
+        return false;
+      }
+
+      const meal = dayMeals[slotKey];
+      // Check if the meal is an object and has a non-empty name property
+      if (typeof meal !== 'object' || meal === null || typeof meal.name !== 'string' || meal.name.trim() === '') {
+        console.warn(`Invalid meals data: invalid meal structure for slot "${slotKey}" on date "${dateKey}".`, meal);
+        return false;
+      }
+      // Optional: Add more checks for recipe/macros structure if needed
+    }
+  }
+
+  return true; // Data structure seems valid
+}
+
 
 // Helper function to load meals from localStorage
 function loadMealsFromLocalStorage(): MealsState {
   const storedMeals = localStorage.getItem('meals');
   if (storedMeals) {
+    let parsedMeals: any;
     try {
-      return JSON.parse(storedMeals);
+      parsedMeals = JSON.parse(storedMeals);
     } catch (e) {
       console.error("Error parsing meals from localStorage", e);
-      // Return empty object if parsing fails
+      // If parsing fails, remove the invalid item and return empty
+      localStorage.removeItem('meals');
+      return {};
+    }
+
+    // Validate the parsed data structure
+    if (isValidMealsState(parsedMeals)) {
+      return parsedMeals; // Return validated data
+    } else {
+      console.warn("Stored meals data failed validation. Discarding invalid data.");
+      // If validation fails, remove the invalid item and return empty
+      localStorage.removeItem('meals');
       return {};
     }
   }
@@ -34,7 +100,7 @@ function loadMealsFromLocalStorage(): MealsState {
 
 export const useMealStore = defineStore('mealStore', () => {
   // --- State ---
-  // Initialize state from localStorage
+  // Initialize state from localStorage (now with validation)
   const meals = reactive<MealsState>(loadMealsFromLocalStorage());
 
   // --- Watch for changes and save to localStorage ---
@@ -45,45 +111,39 @@ export const useMealStore = defineStore('mealStore', () => {
 
   // --- Actions ---
 
-  // Action to add or update a meal, using MealSlot for the slot parameter
-  function setMeal(date: string, slot: MealSlot, mealName: string) {
-    console.log(`Setting meal for ${date} at ${slot}: ${mealName}`);
-    const trimmedName = mealName.trim();
-
+  // Action to add or update a meal, accepting a Meal object
+  function setMeal(date: string, slot: MealSlot, meal: Meal | null) { // Accept Meal object or null to delete
     if (!meals[date]) {
-      // Ensure the date entry exists if we are adding a meal
-      if (trimmedName !== '') {
-        // Initialize with an empty object, type assertion is not strictly needed
-        // but can be kept for clarity if preferred.
+      // Ensure the date entry exists only if we are adding/updating a meal
+      if (meal) {
         meals[date] = {};
       } else {
-        // Don't create an entry if the name is empty
+        // Don't create an entry if the meal is null/empty
         return;
       }
     }
 
-    if (trimmedName === '') {
-      // Delete meal if input is empty
+    if (!meal || !meal.name || meal.name.trim() === '') { // Check if meal is null or name is empty
+      // Delete meal if input is null or name is empty/whitespace
       delete meals[date][slot];
       // Clean up empty date entry
       if (Object.keys(meals[date]).length === 0) {
         delete meals[date];
       }
     } else {
-      // Add or update meal
-      meals[date][slot] = trimmedName;
+      // Add or update meal with the provided Meal object
+      // Trim the name just in case
+      meals[date][slot] = { ...meal, name: meal.name.trim() };
     }
   }
 
-  // Action to get a meal for a specific date and slot, using MealSlot
-  function getMeal(date: string, slot: MealSlot): string | undefined {
-    console.log(`Getting meal for ${date} at ${slot}`);
+  // Action to get a meal for a specific date and slot, returning a Meal object
+  function getMeal(date: string, slot: MealSlot): Meal | undefined {
     return meals[date]?.[slot];
   }
 
-  // Action to get meals for a specific date range
+  // Action to get meals for a specific date range (no changes needed here as it works with MealsState)
   function getMealsForPeriod(startDate: string, endDate: string): MealsState {
-    console.log(`Getting meals from ${startDate} to ${endDate}`);
     const result: MealsState = {};
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -98,14 +158,19 @@ export const useMealStore = defineStore('mealStore', () => {
     end.setUTCHours(23, 59, 59, 999);
 
     Object.keys(meals).forEach(dateStr => {
-      const currentDate = new Date(dateStr);
-      // Ensure dateStr is valid before comparison
-      if (!isNaN(currentDate.getTime()) && currentDate >= start && currentDate <= end) {
-        result[dateStr] = meals[dateStr];
+      try {
+        // Attempt to create a date object, ensuring it's valid
+        const currentDate = new Date(dateStr);
+        if (!isNaN(currentDate.getTime()) && currentDate >= start && currentDate <= end) {
+          result[dateStr] = meals[dateStr];
+        }
+      } catch (e) {
+        console.error(`Invalid date key in meals data: ${dateStr}`, e);
       }
     });
     return result;
   }
+
 
   // --- Getters ---
   // (Optional: Add getters if needed for computed properties based on meals state)

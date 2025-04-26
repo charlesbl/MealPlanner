@@ -175,7 +175,6 @@ const resetChat = () => {
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 20px;
-  margin-right: 10px;
   font-size: 1rem;
 }
 

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, nextTick, defineProps } from 'vue';
-import { useMealStore, MealSlot } from '@/stores/mealStore';
+import { ref, nextTick, defineProps, computed } from 'vue'; // Import computed
+import { useMealStore, MealSlot, type Meal } from '@/stores/mealStore';
 
-const props = defineProps<{ 
+const props = defineProps<{
   date: string;
   slot: MealSlot; // Use MealSlot enum type
 }>();
@@ -11,8 +11,16 @@ const mealStore = useMealStore();
 
 // --- Local Editing State ---
 const isEditing = ref(false);
-const editValue = ref('');
+const editValue = ref<Meal | undefined>();
 const editInputRef = ref<HTMLTextAreaElement | null>(null); // Single textarea ref
+const editName = ref<string>(''); // For storing the name of the meal
+
+// --- Display Toggles ---
+const showRecipe = ref(false);
+const showMacros = ref(false);
+
+// --- Computed property for the current meal ---
+const currentMeal = computed(() => mealStore.getMeal(props.date, props.slot));
 
 // Function to adjust textarea height dynamically
 function adjustTextareaHeight(event?: Event) {
@@ -26,7 +34,11 @@ function adjustTextareaHeight(event?: Event) {
 // Function to start editing a meal slot
 function startEdit() {
   isEditing.value = true;
-  editValue.value = mealStore.getMeal(props.date, props.slot) || '';
+  // Reset toggles when starting edit
+  showRecipe.value = false;
+  showMacros.value = false;
+  editValue.value = JSON.parse(JSON.stringify(currentMeal.value || { name: '' })); // Deep copy or create new
+  editName.value = editValue.value?.name || '';
 
   nextTick(() => {
     if (editInputRef.value) {
@@ -38,18 +50,51 @@ function startEdit() {
 
 // Function to save the edited meal
 function saveEdit() {
-  if (!isEditing.value) return;
-  const trimmedValue = editValue.value.trim();
-  mealStore.setMeal(props.date, props.slot, trimmedValue);
+  if (!isEditing.value || !editValue.value) return; // Check !editValue.value
+  const trimmedName = editName.value.trim();
+
+  // Create a new meal object or update the existing one
+  const mealToSave: Meal = {
+      ...(editValue.value || {}), // Spread existing properties (like recipe/macros if they were editable)
+      name: trimmedName,
+  };
+
+  // If name is empty, treat as deletion
+  if (!trimmedName) {
+      mealStore.setMeal(props.date, props.slot, null);
+  } else {
+      mealStore.setMeal(props.date, props.slot, mealToSave);
+  }
+
   isEditing.value = false;
-  editValue.value = '';
+  editValue.value = undefined; // Clear edit state
+  editName.value = '';
+  // Reset toggles after saving
+  showRecipe.value = false;
+  showMacros.value = false;
 }
 
 // Function to cancel editing
 function cancelEdit() {
   isEditing.value = false;
-  editValue.value = '';
+  editValue.value = undefined; // Clear edit state
+  editName.value = '';
+  // Reset toggles after cancelling
+  showRecipe.value = false;
+  showMacros.value = false;
 }
+
+// --- Toggle Functions ---
+function toggleRecipe() {
+  showRecipe.value = !showRecipe.value;
+  if (showRecipe.value) showMacros.value = false; // Optionally close macros when opening recipe
+}
+
+function toggleMacros() {
+  showMacros.value = !showMacros.value;
+  if (showMacros.value) showRecipe.value = false; // Optionally close recipe when opening macros
+}
+
 </script>
 
 <template>
@@ -58,22 +103,49 @@ function cancelEdit() {
     <template v-if="isEditing">
       <textarea
         ref="editInputRef"
-        v-model="editValue"
+        v-model="editName"
         class="edit-input"
+        placeholder="Meal name..."
         @input="adjustTextareaHeight"
-        @blur="saveEdit" 
-        @keydown.enter.prevent="saveEdit" 
+        @blur="saveEdit"
+        @keydown.enter.prevent="saveEdit"
         @keydown.esc.prevent="cancelEdit"
       ></textarea>
+      <!-- TODO: Add inputs for recipe/macros here if editing is needed -->
       <div class="edit-actions">
          <button @click.stop="saveEdit" class="btn-save">Save</button>
          <button @click.stop="cancelEdit" class="btn-cancel">Cancel</button>
       </div>
     </template>
     <template v-else>
-      <span v-if="mealStore.meals[date]?.[slot]" class="meal-item" @click="startEdit">
-        {{ mealStore.meals[date][slot] }}
-      </span>
+      <div v-if="currentMeal" class="meal-display">
+        <span class="meal-name" @click="startEdit">{{ currentMeal.name }}</span>
+
+        <!-- Recipe Toggle & Display -->
+        <div v-if="currentMeal.recipe" class="meal-details">
+          <button @click.stop="toggleRecipe" class="btn-toggle">
+            {{ showRecipe ? 'Hide' : 'Show' }} Recipe
+          </button>
+          <div v-if="showRecipe" class="meal-recipe">
+            <pre>{{ currentMeal.recipe }}</pre>
+          </div>
+        </div>
+
+        <!-- Macros Toggle & Display -->
+        <div v-if="currentMeal.macros && Object.keys(currentMeal.macros).length > 0" class="meal-details">
+           <button @click.stop="toggleMacros" class="btn-toggle">
+             {{ showMacros ? 'Hide' : 'Show' }} Macros
+           </button>
+           <div v-if="showMacros" class="meal-macros">
+             <ul>
+               <li v-if="currentMeal.macros.calories">Calories: {{ currentMeal.macros.calories }}</li>
+               <li v-if="currentMeal.macros.protein">Protein: {{ currentMeal.macros.protein }}g</li>
+               <li v-if="currentMeal.macros.carbs">Carbs: {{ currentMeal.macros.carbs }}g</li>
+               <li v-if="currentMeal.macros.fat">Fat: {{ currentMeal.macros.fat }}g</li>
+             </ul>
+           </div>
+        </div>
+      </div>
       <span v-else class="meal-placeholder" @click="startEdit">
         + Add Meal
       </span>
@@ -94,8 +166,25 @@ function cancelEdit() {
 .meal-slot strong {
   color: #555;
   display: block; /* Make label take its own line */
-  margin-bottom: 2px; /* Add a small space below the label */
+  margin-bottom: 4px; /* Slightly more space */
 }
+
+.meal-display {
+  /* Container for name and details */
+}
+
+.meal-name {
+  font-weight: bold;
+  cursor: pointer;
+  display: block; /* Ensure it takes its own line */
+  margin-bottom: 4px;
+  white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+  word-break: break-word;
+}
+.meal-name:hover {
+  text-decoration: underline;
+}
+
 
 .meal-item, .meal-placeholder, .edit-input {
   cursor: pointer;
@@ -165,8 +254,56 @@ function cancelEdit() {
   border-color: #bd2130;
 }
 
-/* Style the displayed meal item to respect whitespace */
-.meal-item {
-  white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+/* Styles for toggles and details */
+.meal-details {
+  margin-top: 5px;
+  font-size: 0.9em;
 }
+
+.btn-toggle {
+  background-color: #e0e0e0;
+  border: 1px solid #ccc;
+  padding: 2px 6px;
+  font-size: 0.85em;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-bottom: 3px;
+}
+.btn-toggle:hover {
+  background-color: #d0d0d0;
+}
+
+.meal-recipe, .meal-macros {
+  background-color: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  padding: 4px 6px;
+  border-radius: 3px;
+  margin-top: 2px;
+}
+
+.meal-recipe pre {
+  white-space: pre-wrap; /* Wrap recipe text */
+  word-break: break-word;
+  margin: 0; /* Remove default pre margins */
+  font-family: inherit; /* Use component font */
+  font-size: inherit;
+}
+
+.meal-macros ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.meal-macros li {
+  margin-bottom: 2px;
+}
+
+/* Style the displayed meal item to respect whitespace */
+/* .meal-item is replaced by .meal-name and detail sections */
+/* Remove if .meal-item class is no longer used */
+/*
+.meal-item {
+  white-space: pre-wrap;
+}
+*/
 </style>
