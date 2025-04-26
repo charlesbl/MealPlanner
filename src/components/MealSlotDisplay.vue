@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick, defineProps, computed } from 'vue'; // Import computed
 import { useMealStore, MealSlot, type Meal } from '@/stores/mealStore';
+import { marked } from 'marked'; // Import marked
 
 const props = defineProps<{
   date: string;
@@ -95,6 +96,18 @@ function toggleMacros() {
   if (showMacros.value) showRecipe.value = false; // Optionally close recipe when opening macros
 }
 
+// Function to render markdown (consider adding a sanitizer like DOMPurify for security)
+const renderMarkdown = (text: string | undefined) => {
+  if (!text) return '';
+  try {
+    // Basic configuration, you can customize marked options here if needed
+    return marked.parse(text);
+  } catch (e) {
+    console.error("Error parsing markdown:", e);
+    return text; // Return original text on error
+  }
+};
+
 </script>
 
 <template>
@@ -126,9 +139,8 @@ function toggleMacros() {
           <button @click.stop="toggleRecipe" class="btn-toggle">
             {{ showRecipe ? 'Hide' : 'Show' }} Recipe
           </button>
-          <div v-if="showRecipe" class="meal-recipe">
-            <pre>{{ currentMeal.recipe }}</pre>
-          </div>
+          <!-- Use v-html to render markdown -->
+          <div v-if="showRecipe" class="meal-recipe" v-html="renderMarkdown(currentMeal.recipe)"></div>
         </div>
 
         <!-- Macros Toggle & Display -->
@@ -273,21 +285,55 @@ function toggleMacros() {
   background-color: #d0d0d0;
 }
 
-.meal-recipe, .meal-macros {
+.meal-recipe {
   background-color: #f0f0f0;
   border: 1px solid #e0e0e0;
   padding: 4px 6px;
   border-radius: 3px;
   margin-top: 2px;
+  /* Add styles for markdown elements within the recipe if needed */
+  /* These are similar to the chat example, adjust as necessary */
+}
+.meal-recipe :deep(p) {
+  margin: 0 0 0.5em 0;
+}
+.meal-recipe :deep(ul), .meal-recipe :deep(ol) {
+  padding-left: 20px;
+  margin-bottom: 0.5em;
+}
+.meal-recipe :deep(li) {
+  margin-bottom: 0.2em;
+}
+.meal-recipe :deep(code) {
+  background-color: rgba(0,0,0,0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 0.95em; /* Slightly smaller for inline code */
+}
+.meal-recipe :deep(pre) {
+  background-color: rgba(0,0,0,0.07);
+  padding: 8px; /* Adjust padding */
+  border-radius: 5px;
+  overflow-x: auto;
+  font-size: 0.9em; /* Adjust font size for code blocks */
+}
+.meal-recipe :deep(pre) code {
+  background-color: transparent;
+  padding: 0;
+  font-size: inherit; /* Inherit pre's font size */
+}
+.meal-recipe :deep(a) {
+  color: #007bff;
+  text-decoration: underline;
+}
+.meal-recipe :deep(blockquote) {
+  border-left: 3px solid #ccc;
+  padding-left: 10px;
+  margin-left: 0;
+  color: #555;
 }
 
-.meal-recipe pre {
-  white-space: pre-wrap; /* Wrap recipe text */
-  word-break: break-word;
-  margin: 0; /* Remove default pre margins */
-  font-family: inherit; /* Use component font */
-  font-size: inherit;
-}
 
 .meal-macros ul {
   list-style: none;

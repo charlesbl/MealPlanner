@@ -1,11 +1,135 @@
+<script setup lang="ts">
+import { ref, nextTick, onMounted } from "vue";
+import {
+  sendMessageToBot,
+  getChatHistory,
+  clearChatHistory,
+} from "@/services/chatService"; // Import clearChatHistory
+import { marked } from "marked"; // Import marked
+
+interface Message {
+  text: string;
+  sender: "user" | "bot";
+}
+
+const newMessage = ref("");
+const messages = ref<Message[]>([]);
+const isLoading = ref(false);
+const messagesContainer = ref<HTMLElement | null>(null);
+
+// Function to render markdown
+// Note: For security, especially if rendering user-generated markdown,
+// consider using a sanitizer like DOMPurify after marked.parse()
+const renderMarkdown = (text: string) => {
+  // Basic check to avoid parsing simple strings unnecessarily
+  if (
+    !text ||
+    (text.indexOf("*") === -1 &&
+      text.indexOf("_") === -1 &&
+      text.indexOf("`") === -1 &&
+      text.indexOf("[") === -1 &&
+      text.indexOf("#") === -1)
+  ) {
+    return text; // Return plain text if no common markdown characters are found
+  }
+  try {
+    return marked.parse(text);
+  } catch (e) {
+    console.error("Error parsing markdown:", e);
+    return text; // Return original text on error
+  }
+};
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messagesContainer.value) {
+      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+    }
+  });
+};
+
+const loadHistory = () => {
+  const historyFromService = getChatHistory();
+  messages.value = historyFromService.map((msg) => ({
+    // Assuming HumanMessage maps to 'user' and AIMessage maps to 'bot'
+    // You might need to import HumanMessage/AIMessage to check instanceof
+    // or rely on the simplified structure saved in localStorage if that's easier
+    sender: msg._getType() === "human" ? "user" : "bot",
+    text:
+      typeof msg.content === "string"
+        ? msg.content
+        : JSON.stringify(msg.content), // Ensure text is string
+  }));
+  // Add a welcome message if history is empty
+  if (messages.value.length === 0) {
+    messages.value.push({
+      text: "Welcome! How can I help you plan your meals?",
+      sender: "bot",
+    });
+  }
+  scrollToBottom(); // Scroll after loading
+};
+
+onMounted(() => {
+  loadHistory(); 
+});
+
+const sendMessage = async () => {
+  const text = newMessage.value.trim();
+  if (!text || isLoading.value) return;
+
+  // Add user message
+  messages.value.push({ text, sender: "user" });
+  newMessage.value = "";
+  isLoading.value = true;
+  scrollToBottom();
+
+  // Get bot response
+  try {
+    const botResponse = await sendMessageToBot(text);
+    messages.value.push({ text: botResponse, sender: "bot" });
+  } catch (error) {
+    messages.value.push({
+      text: "Error getting response from bot.",
+      sender: "bot",
+    });
+    console.error("Error sending message:", error);
+  }
+
+  isLoading.value = false;
+  scrollToBottom();
+};
+
+// Initial scroll to bottom
+nextTick(scrollToBottom);
+
+const resetChat = () => {
+  clearChatHistory(); // Clear history in service and local storage
+  messages.value = []; // Clear messages in the component
+  // Add a starting message after reset
+  messages.value.push({
+    text: "New chat started. How can I help you plan your meals?",
+    sender: "bot",
+  });
+  scrollToBottom(); // Scroll after resetting
+};
+</script>
+
 <template>
   <div class="chat-container">
-    <div class="chat-header"> <!-- Add header div -->
-      <button @click="resetChat" class="new-chat-button">New Chat</button> <!-- Move and rename button -->
+    <div class="chat-header">
+      <!-- Add header div -->
+      <button @click="resetChat" class="new-chat-button">New Chat</button>
+      <!-- Move and rename button -->
     </div>
     <div class="messages" ref="messagesContainer">
-      <div v-for="(msg, index) in messages" :key="index" :class="['message', msg.sender]">
-        <p>{{ msg.text }}</p>
+      <!-- Use v-html to render Markdown -->
+      <div
+        v-for="(msg, index) in messages"
+        :key="index"
+        :class="['message', msg.sender]"
+      >
+        <div v-html="renderMarkdown(msg.text)"></div>
       </div>
       <div v-if="isLoading" class="message bot typing">...</div>
     </div>
@@ -21,84 +145,6 @@
     </div>
   </div>
 </template>
-
-<script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
-import { sendMessageToBot, getChatHistory, clearChatHistory } from '@/services/chatService'; // Import clearChatHistory
-
-interface Message {
-  text: string;
-  sender: 'user' | 'bot';
-}
-
-const newMessage = ref('');
-const messages = ref<Message[]>([]);
-const isLoading = ref(false);
-const messagesContainer = ref<HTMLElement | null>(null);
-
-const scrollToBottom = () => {
-  nextTick(() => {
-    if (messagesContainer.value) {
-      messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
-    }
-  });
-};
-
-const loadHistory = () => {
-  const historyFromService = getChatHistory();
-  messages.value = historyFromService.map(msg => ({
-    // Assuming HumanMessage maps to 'user' and AIMessage maps to 'bot'
-    // You might need to import HumanMessage/AIMessage to check instanceof
-    // or rely on the simplified structure saved in localStorage if that's easier
-    sender: msg._getType() === 'human' ? 'user' : 'bot',
-    text: typeof msg.content === 'string' ? msg.content : JSON.stringify(msg.content) // Ensure text is string
-  }));
-  // Add a welcome message if history is empty
-  if (messages.value.length === 0) {
-    messages.value.push({ text: "Welcome! How can I help you plan your meals?", sender: 'bot' });
-  }
-  scrollToBottom(); // Scroll after loading
-};
-
-onMounted(() => {
-  loadHistory();
-});
-
-const sendMessage = async () => {
-  const text = newMessage.value.trim();
-  if (!text || isLoading.value) return;
-
-  // Add user message
-  messages.value.push({ text, sender: 'user' });
-  newMessage.value = '';
-  isLoading.value = true;
-  scrollToBottom();
-
-  // Get bot response
-  try {
-    const botResponse = await sendMessageToBot(text);
-    messages.value.push({ text: botResponse, sender: 'bot' });
-  } catch (error) {
-    messages.value.push({ text: 'Error getting response from bot.', sender: 'bot' });
-    console.error("Error sending message:", error);
-  }
-
-  isLoading.value = false;
-  scrollToBottom();
-};
-
-// Initial scroll to bottom
-nextTick(scrollToBottom);
-
-const resetChat = () => {
-  clearChatHistory(); // Clear history in service and local storage
-  messages.value = []; // Clear messages in the component
-  // Add a starting message after reset
-  messages.value.push({ text: "New chat started. How can I help you plan your meals?", sender: 'bot' });
-  scrollToBottom(); // Scroll after resetting
-};
-
-</script>
 
 <style scoped>
 .chat-container {
@@ -152,13 +198,13 @@ const resetChat = () => {
 }
 
 .message.user {
-  background-color: #DCF8C6; /* Light green for user */
+  background-color: #dcf8c6; /* Light green for user */
   align-self: flex-end;
   margin-left: auto; /* Push user messages to the right */
 }
 
 .message.bot {
-  background-color: #E5E5EA; /* Light grey for bot */
+  background-color: #e5e5ea; /* Light grey for bot */
   align-self: flex-start;
   margin-right: auto; /* Push bot messages to the left */
 }
@@ -206,5 +252,44 @@ const resetChat = () => {
 .typing {
   font-style: italic;
   color: #888;
+}
+
+/* Add styles for rendered markdown elements if needed */
+.message :deep(p) {
+  margin: 0 0 0.5em 0; /* Adjust paragraph spacing within messages */
+}
+.message :deep(ul),
+.message :deep(ol) {
+  padding-left: 20px;
+  margin-bottom: 0.5em;
+}
+.message :deep(li) {
+  margin-bottom: 0.2em;
+}
+.message :deep(code) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: monospace;
+}
+.message :deep(pre) {
+  background-color: rgba(0, 0, 0, 0.07);
+  padding: 10px;
+  border-radius: 5px;
+  overflow-x: auto;
+}
+.message :deep(pre) code {
+  background-color: transparent;
+  padding: 0;
+}
+.message :deep(a) {
+  color: #007bff;
+  text-decoration: underline;
+}
+.message :deep(blockquote) {
+  border-left: 3px solid #ccc;
+  padding-left: 10px;
+  margin-left: 0;
+  color: #555;
 }
 </style>
