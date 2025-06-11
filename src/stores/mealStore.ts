@@ -3,9 +3,7 @@ import { reactive, watch } from 'vue'; // Import watch
 
 // Define the enum for meal slots
 export enum MealSlot {
-  Breakfast = 'Breakfast',
   Lunch = 'Lunch',
-  Snack = 'Snack',
   Dinner = 'Dinner',
 }
 const validSlots = Object.values(MealSlot); // Cache valid slots

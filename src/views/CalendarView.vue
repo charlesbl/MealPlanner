@@ -14,8 +14,6 @@ const todayISO = today.toISOString().split('T')[0];
 const getStartOfWeek = (date: Date) => {
   const d = new Date(date);
   const dayOfWeek = d.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
-  console.log(date)
-  console.log(dayOfWeek); // Debugging line to check the day of the week
   const diff = d.getDate() - dayOfWeek + 1; // Adjust to get Monday as the start of the week
   const monday = new Date(d.setDate(diff));
   monday.setUTCHours(0, 0, 0, 0);

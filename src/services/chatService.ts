@@ -1,19 +1,14 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatPromptTemplate, MessagesPlaceholder } from "@langchain/core/prompts";
-// Import StructuredTool
 import { StructuredTool } from "@langchain/core/tools";
-import type { Tool } from "@langchain/core/tools";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
-// Correctly import message types
-import { AIMessage, HumanMessage, BaseMessage, SystemMessage } from "@langchain/core/messages";
+import { AIMessage, HumanMessage, BaseMessage } from "@langchain/core/messages";
 import { z } from 'zod';
-import { Runnable } from "@langchain/core/runnables"; // Import Runnable
+import { ReadMealsTool } from './tools/readMealsTool';
+import { AddOrUpdateMealTool } from './tools/addOrUpdateMealTool';
+import { DeleteMealTool } from './tools/deleteMealTool';
+import { systemPromptString } from './prompt'; 
 
-// Import meal store functions and types
-import { useMealStore, MealSlot } from '@/stores/mealStore'; // MealSlot is imported here
-import type { MealsState, Meal } from '@/stores/mealStore'; // Import Meal type
-
-// --- Environment Variable Setup ---
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 
@@ -21,123 +16,10 @@ if (!OPENROUTER_API_KEY) {
   console.warn("OpenRouter API key not found. Please set VITE_OPENROUTER_API_KEY in your .env file.");
 }
 
-// --- Define Tool Schemas with Zod ---
-const readMealsSchema = z.object({
-    startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "startDate must be in YYYY-MM-DD format").describe("The start date of the period (YYYY-MM-DD)"),
-    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "endDate must be in YYYY-MM-DD format").describe("The end date of the period (YYYY-MM-DD)"),
-});
-
-// Define the schema for macros
-const macrosSchema = z.object({
-    calories: z.number().optional().describe("Estimated calories"),
-    protein: z.number().optional().describe("Estimated protein in grams"),
-    carbs: z.number().optional().describe("Estimated carbohydrates in grams"),
-    fat: z.number().optional().describe("Estimated fat in grams"),
-}).optional().describe("Optional estimated macronutrients for the meal");
-
-
-// Update schema to include optional recipe and macros
-const addOrUpdateMealSchema = z.object({
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be in YYYY-MM-DD format").describe("The date for the meal (YYYY-MM-DD)"),
-    slot: z.nativeEnum(MealSlot).describe(`The meal slot (${Object.values(MealSlot).join(' | ')})`),
-    mealName: z.string().min(1, "mealName cannot be empty").describe("The name of the meal to add or update"),
-    recipe: z.string().optional().describe("Optional recipe details or instructions"),
-    macros: macrosSchema, // Use the defined macros schema
-});
-
-const deleteMealSchema = z.object({
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be in YYYY-MM-DD format").describe("The date of the meal to delete (YYYY-MM-DD)"),
-    slot: z.nativeEnum(MealSlot).describe(`The meal slot to delete (${Object.values(MealSlot).join(' | ')})`),
-});
-
-
-// --- Define Tools using StructuredTool ---
-class ReadMealsTool extends StructuredTool<typeof readMealsSchema> {
-  name = "read_meals_for_period";
-  description = "Reads all meals planned between a start date and an end date. Dates must be in YYYY-MM-DD format.";
-  schema = readMealsSchema;
-
-  async _call(input: z.infer<typeof readMealsSchema>): Promise<string> {
-    const mealStore = useMealStore();
-    try {
-      const meals: MealsState = mealStore.getMealsForPeriod(input.startDate, input.endDate);
-      const mealCount = Object.keys(meals).reduce((count, date) => count + Object.keys(meals[date]).length, 0);
-      if (mealCount === 0) {
-          return "No meals found for this period.";
-      }
-      // Format output for better readability
-      let output = "Meals found:\\n";
-      Object.entries(meals).forEach(([date, dayMeals]) => {
-          output += `${date}:\\n`;
-          // Access meal.name for the output
-          Object.entries(dayMeals).forEach(([slot, meal]) => {
-              // Explicitly check if meal exists and has a name property
-              const typedMeal = meal as Meal | null;
-              if (typedMeal && typedMeal.name) {
-                output += `  - ${slot}: ${typedMeal.name}\\n`;
-                // Future: Could add recipe/macros here if available
-                // if (typedMeal.recipe) output += `    Recipe: ${typedMeal.recipe}\\n`;
-                // if (typedMeal.macros) output += `    Macros: ${JSON.stringify(typedMeal.macros)}\\n`;
-              }
-          });
-      });
-      return output;
-    } catch (error: any) {
-      console.error("Error in readMealsTool:", error);
-      return `Error reading meals: ${error.message}`;
-    }
-  }
-}
-
-class AddOrUpdateMealTool extends StructuredTool<typeof addOrUpdateMealSchema> {
-  name = "add_or_update_meal";
-  description = `Adds a new meal or updates an existing meal for a specific date and meal slot, optionally including recipe and macros. Valid slots are: ${Object.values(MealSlot).join(', ')}. Date must be in YYYY-MM-DD format.`; // Updated description
-  schema = addOrUpdateMealSchema;
-
-  async _call(input: z.infer<typeof addOrUpdateMealSchema>): Promise<string> {
-    const mealStore = useMealStore();
-    try {
-      // Create the Meal object including optional fields
-      const mealToAdd: Meal = {
-        name: input.mealName,
-        recipe: input.recipe, // Pass recipe if provided
-        macros: input.macros, // Pass macros if provided
-      };
-      mealStore.setMeal(input.date, input.slot, mealToAdd);
-      let responseMessage = `Successfully set '${input.mealName}' for ${input.slot} on ${input.date}.`;
-      if (input.recipe) responseMessage += ` Recipe added.`;
-      if (input.macros) responseMessage += ` Macros added.`;
-      return responseMessage;
-    } catch (error: any) {
-      console.error("Error in addOrUpdateMealTool:", error);
-      return `Error setting meal: ${error.message}`;
-    }
-  }
-}
-
-class DeleteMealTool extends StructuredTool<typeof deleteMealSchema> {
-  name = "delete_meal";
-  description = `Deletes a meal for a specific date and meal slot. Valid slots are: ${Object.values(MealSlot).join(', ')}. Date must be in YYYY-MM-DD format.`;
-  schema = deleteMealSchema;
-
-  async _call(input: z.infer<typeof deleteMealSchema>): Promise<string> {
-    const mealStore = useMealStore();
-    try {
-      // Pass null to setMeal to delete the meal entry
-      mealStore.setMeal(input.date, input.slot, null);
-      return `Successfully deleted meal for ${input.slot} on ${input.date}.`;
-    } catch (error: any) {
-      console.error("Error in deleteMealTool:", error);
-      return `Error deleting meal: ${error.message}`;
-    }
-  }
-}
-
-// Instantiate the tools
 const tools: StructuredTool[] = [
-    new ReadMealsTool(),
-    new AddOrUpdateMealTool(),
-    new DeleteMealTool()
+    ReadMealsTool,
+    AddOrUpdateMealTool,
+    DeleteMealTool
 ];
 
 // --- Initialize LLM ---
@@ -146,7 +28,7 @@ const llm = new ChatOpenAI({
     baseURL: OPENROUTER_BASE_URL,
   },
   apiKey: OPENROUTER_API_KEY,
-  // modelName: "google/gemini-2.5-pro-preview-03-25",
+  // modelName: "google/gemini-2.5-pro-preview", 
   modelName: "google/gemini-2.5-flash-preview:thinking",
   temperature: 0.7,
 });
@@ -156,21 +38,8 @@ const llm = new ChatOpenAI({
 const llmWithTools = llm.bindTools(tools);
 
 // --- Define Agent Prompt ---
-// Get MealSlot values dynamically
-const mealSlotValues = Object.values(MealSlot).join(', ');
-// Get current date and day of the week
-const today = new Date();
-const todayDateString = today.toISOString().split('T')[0];
-const dayOfWeek = today.toLocaleDateString('en-US', { weekday: 'long' }); // Get full day name
-
-const prompt = ChatPromptTemplate.fromMessages([
-  // Update the system prompt to include MealSlot values, recipe/macro instructions, and date handling
-  ["system", `You are a helpful assistant for a meal planning application. You have access to tools to manage meals (read, add/update, delete).
-Available meal slots are: ${mealSlotValues}.
-Always use YYYY-MM-DD format for dates. Today's date is ${todayDateString} (which is a ${dayOfWeek}).
-When a user mentions a relative day (e.g., "tomorrow", "next Monday", "last Friday"), try to calculate the specific date in YYYY-MM-DD format based on today's date. If the date is ambiguous or you are unsure, ask for clarification in YYYY-MM-DD format.
-When a meal is added or discussed, automatically YOU HAVE TO generate a simple recipe for it and estimate its macronutrients (calories, protein, carbohydrates, fat).
-Respond directly to the user after using a tool or providing recipe/macro information.`],
+const fullAgentPrompt = ChatPromptTemplate.fromMessages([
+  ["system", systemPromptString], // Use the imported string directly
   new MessagesPlaceholder("chat_history"),
   ["human", "{input}"],
   new MessagesPlaceholder("agent_scratchpad"),
@@ -180,15 +49,15 @@ Respond directly to the user after using a tool or providing recipe/macro inform
 // Use await and pass the LLM with tools bound
 const agent = createToolCallingAgent({
   llm: llmWithTools,
-  prompt,
+  prompt: fullAgentPrompt, // Use the reconstructed prompt
   tools,
 })
 
 // Ensure the agent type is compatible with AgentExecutor
 const agentExecutor = new AgentExecutor({
-  agent: agent as Runnable<any, any>, // Cast agent if necessary, depending on Langchain version/types
+  agent,
   tools,
-  verbose: false,
+  verbose: true,
 });
 
 // --- Chat History Management ---
@@ -290,5 +159,4 @@ export async function sendMessageToBot(message: string): Promise<string> {
 export function clearChatHistory(): void {
     chatHistory = [];
     localStorage.removeItem(LOCAL_STORAGE_KEY);
-    console.log("Chat history cleared.");
 }
