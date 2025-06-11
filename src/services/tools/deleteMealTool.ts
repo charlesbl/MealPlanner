@@ -1,22 +1,29 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from 'zod';
-import { useMealStore, MealSlot } from '@/stores/mealStore';
+import { useMealStore } from '@/stores/mealStore';
 
 const deleteMealSchema = z.object({
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "date must be in YYYY-MM-DD format").describe("The date of the meal to delete (YYYY-MM-DD)"),
-    slot: z.nativeEnum(MealSlot).describe(`The meal slot to delete (${Object.values(MealSlot).join(' | ')})`),
+    mealId: z.string().describe("The ID of the meal to delete"),
 });
 
 export const DeleteMealTool = new DynamicStructuredTool({
   name: "delete_meal",
-  description: `Deletes a meal for a specific date and meal slot. Valid slots are: ${Object.values(MealSlot).join(', ')}. Date must be in YYYY-MM-DD format.`,
+  description: "Deletes a meal by its ID.",
   schema: deleteMealSchema,
   func: async (input: z.infer<typeof deleteMealSchema>): Promise<string> => {
     const mealStore = useMealStore();
     try {
-      // Pass null to setMeal to delete the meal entry
-      mealStore.setMeal(input.date, input.slot, null);
-      return `Successfully deleted meal for ${input.slot} on ${input.date}.`;
+      const mealToDelete = mealStore.getMealById(input.mealId);
+      if (!mealToDelete) {
+        return `Error: Could not find meal with ID '${input.mealId}' to delete.`;
+      }
+      
+      const success = mealStore.deleteMeal(input.mealId);
+      if (success) {
+        return `Successfully deleted meal: '${mealToDelete.name}' (${mealToDelete.mealType}).`;
+      } else {
+        return `Error: Could not delete meal with ID '${input.mealId}'.`;
+      }
     } catch (error: any) {
       console.error("Error in deleteMealTool:", error);
       return `Error deleting meal: ${error.message}`;

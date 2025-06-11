@@ -1,31 +1,36 @@
 import { defineStore } from 'pinia';
-import { reactive, watch } from 'vue'; // Import watch
+import { reactive, watch } from 'vue';
 
-// Define the enum for meal slots
-export enum MealSlot {
+// Define the meal types
+export enum MealType {
+  Breakfast = 'Breakfast',
   Lunch = 'Lunch',
   Dinner = 'Dinner',
+  Snacks = 'Snacks',
 }
-const validSlots = Object.values(MealSlot); // Cache valid slots
 
 // Define the Meal interface
-export interface Meal { // Add export
+export interface Meal {
+  id: string;
   name: string;
-  recipe?: string; // Recipe is optional
-  macros?: { // Macros are optional
-    calories?: number;
-    protein?: number;
-    carbs?: number;
-    fat?: number;
-  };
+  description: string;
+  mealType: MealType;
+  date: Date;
+  createdAt: Date;
 }
 
-// Define the structure for a meal entry using the enum and a mapped type
-export interface DayMeals extends Partial<Record<MealSlot, Meal>> {} // Use Partial<Record<MealSlot, Meal>>
+// Define the structure for date-based meal assignments
+export interface DateMeal {
+  id: string;
+  mealId: string;
+  date: string; // YYYY-MM-DD format
+  createdAt: Date;
+}
 
-// Define the structure for the meals state
+// Update the meals state to include date assignments
 export interface MealsState {
-  [date: string]: DayMeals; // e.g., { '2024-05-10': { Breakfast: { name: 'Oatmeal', ... } } }
+  meals: Meal[];
+  dateMeals: DateMeal[]; // New field for date-based assignments
 }
 
 // Helper function to validate the loaded meals data
@@ -35,39 +40,28 @@ function isValidMealsState(data: any): data is MealsState {
     return false;
   }
 
-  for (const dateKey in data) {
-    // Basic check if the key looks like a date (YYYY-MM-DD)
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
-      console.warn(`Invalid meals data: invalid date key format "${dateKey}".`);
+  if (!Array.isArray(data.meals)) {
+    console.warn("Invalid meals data: meals is not an array.");
+    return false;
+  }
+  for (const meal of data.meals) {
+    if (
+      typeof meal !== 'object' ||
+      meal === null ||
+      typeof meal.id !== 'string' ||
+      typeof meal.name !== 'string' ||
+      typeof meal.description !== 'string' ||
+      !Object.values(MealType).includes(meal.mealType) ||
+      !meal.date ||
+      !meal.createdAt
+    ) {
+      console.warn("Invalid meals data: invalid meal structure.", meal);
       return false;
-    }
-
-    const dayMeals = data[dateKey];
-    if (typeof dayMeals !== 'object' || dayMeals === null) {
-      console.warn(`Invalid meals data: dayMeals for "${dateKey}" is not an object.`);
-      return false;
-    }
-
-    for (const slotKey in dayMeals) {
-      // Check if the slot key is a valid MealSlot enum value
-      if (!validSlots.includes(slotKey as MealSlot)) {
-        console.warn(`Invalid meals data: invalid slot key "${slotKey}" for date "${dateKey}".`);
-        return false;
-      }
-
-      const meal = dayMeals[slotKey];
-      // Check if the meal is an object and has a non-empty name property
-      if (typeof meal !== 'object' || meal === null || typeof meal.name !== 'string' || meal.name.trim() === '') {
-        console.warn(`Invalid meals data: invalid meal structure for slot "${slotKey}" on date "${dateKey}".`, meal);
-        return false;
-      }
-      // Optional: Add more checks for recipe/macros structure if needed
     }
   }
 
-  return true; // Data structure seems valid
+  return true;
 }
-
 
 // Helper function to load meals from localStorage
 function loadMealsFromLocalStorage(): MealsState {
@@ -78,105 +72,147 @@ function loadMealsFromLocalStorage(): MealsState {
       parsedMeals = JSON.parse(storedMeals);
     } catch (e) {
       console.error("Error parsing meals from localStorage", e);
-      // If parsing fails, remove the invalid item and return empty
       localStorage.removeItem('meals');
-      return {};
+      return { meals: [], dateMeals: [] };
+    }    // Convert createdAt and date strings back to Date objects
+    if (parsedMeals.meals) {
+      parsedMeals.meals = parsedMeals.meals.map((meal: any) => ({
+        ...meal,
+        date: new Date(meal.date),
+        createdAt: new Date(meal.createdAt)
+      }));
     }
 
-    // Validate the parsed data structure
     if (isValidMealsState(parsedMeals)) {
-      return parsedMeals; // Return validated data
+      return parsedMeals;
     } else {
       console.warn("Stored meals data failed validation. Discarding invalid data.");
-      // If validation fails, remove the invalid item and return empty
       localStorage.removeItem('meals');
-      return {};
+      return { meals: [], dateMeals: [] };
     }
   }
-  return {}; // Return empty object if nothing is stored
+  return { meals: [], dateMeals: [] };
+}
+
+// Helper function to generate unique ID
+function generateId(): string {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 export const useMealStore = defineStore('mealStore', () => {
   // --- State ---
-  // Initialize state from localStorage (now with validation)
-  const meals = reactive<MealsState>(loadMealsFromLocalStorage());
+  const state = reactive<MealsState>(loadMealsFromLocalStorage());
 
   // --- Watch for changes and save to localStorage ---
-  watch(meals, (newMeals) => {
-    localStorage.setItem('meals', JSON.stringify(newMeals));
-  }, { deep: true }); // Use deep watch to detect nested changes
-
+  watch(state, (newState) => {
+    localStorage.setItem('meals', JSON.stringify(newState));
+  }, { deep: true });
 
   // --- Actions ---
-
-  // Action to add or update a meal, accepting a Meal object
-  function setMeal(date: string, slot: MealSlot, meal: Meal | null) { // Accept Meal object or null to delete
-    if (!meals[date]) {
-      // Ensure the date entry exists only if we are adding/updating a meal
-      if (meal) {
-        meals[date] = {};
-      } else {
-        // Don't create an entry if the meal is null/empty
-        return;
-      }
+  // Action to add a new meal
+  function addMeal(name: string, description: string, mealType: MealType, date: Date = new Date()): string {
+    const id = generateId();
+    const newMeal: Meal = {
+      id,
+      name: name.trim(),
+      description: description.trim(),
+      mealType,
+      date,
+      createdAt: new Date()
+    };
+    state.meals.push(newMeal);
+    return id;
+  }
+  // Action to update an existing meal
+  function updateMeal(id: string, updates: Partial<Omit<Meal, 'id' | 'createdAt'>>): boolean {
+    const mealIndex = state.meals.findIndex(meal => meal.id === id);
+    if (mealIndex === -1) {
+      return false;
     }
 
-    if (!meal || !meal.name || meal.name.trim() === '') { // Check if meal is null or name is empty
-      // Delete meal if input is null or name is empty/whitespace
-      delete meals[date][slot];
-      // Clean up empty date entry
-      if (Object.keys(meals[date]).length === 0) {
-        delete meals[date];
-      }
-    } else {
-      // Add or update meal with the provided Meal object
-      // Trim the name just in case
-      meals[date][slot] = { ...meal, name: meal.name.trim() };
+    // Update the meal with new values
+    if (updates.name !== undefined) {
+      state.meals[mealIndex].name = updates.name.trim();
     }
+    if (updates.description !== undefined) {
+      state.meals[mealIndex].description = updates.description.trim();
+    }
+    if (updates.mealType !== undefined) {
+      state.meals[mealIndex].mealType = updates.mealType;
+    }
+    if (updates.date !== undefined) {
+      state.meals[mealIndex].date = updates.date;
+    }
+
+    return true;
   }
 
-  // Action to get a meal for a specific date and slot, returning a Meal object
-  function getMeal(date: string, slot: MealSlot): Meal | undefined {
-    return meals[date]?.[slot];
+  // Action to delete a meal
+  function deleteMeal(id: string): boolean {
+    const mealIndex = state.meals.findIndex(meal => meal.id === id);
+    if (mealIndex === -1) {
+      return false;
+    }
+    state.meals.splice(mealIndex, 1);
+    return true;
   }
 
-  // Action to get meals for a specific date range (no changes needed here as it works with MealsState)
-  function getMealsForPeriod(startDate: string, endDate: string): MealsState {
-    const result: MealsState = {};
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  // Action to get a meal by ID
+  function getMealById(id: string): Meal | undefined {
+    return state.meals.find(meal => meal.id === id);
+  }
 
-    // Ensure dates are valid
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-      console.error("Invalid date format provided to getMealsForPeriod");
-      return {};
-    }
+  // Action to get meals by type
+  function getMealsByType(mealType: MealType): Meal[] {
+    return state.meals.filter(meal => meal.mealType === mealType);
+  }
 
-    // Normalize end date to include the whole day
-    end.setUTCHours(23, 59, 59, 999);
-
-    Object.keys(meals).forEach(dateStr => {
-      try {
-        // Attempt to create a date object, ensuring it's valid
-        const currentDate = new Date(dateStr);
-        if (!isNaN(currentDate.getTime()) && currentDate >= start && currentDate <= end) {
-          result[dateStr] = meals[dateStr];
-        }
-      } catch (e) {
-        console.error(`Invalid date key in meals data: ${dateStr}`, e);
-      }
+  // Action to get all meals sorted by creation date (newest first)
+  function getAllMeals(): Meal[] {
+    return [...state.meals].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+  // Action to get meals by date
+  function getMealsByDate(date: Date): Meal[] {
+    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    return state.meals.filter(meal => {
+      const mealDate = new Date(meal.date.getFullYear(), meal.date.getMonth(), meal.date.getDate());
+      return mealDate.getTime() === targetDate.getTime();
     });
-    return result;
   }
 
+  // Action to get meals within a date range
+  function getMealsByDateRange(startDate: Date, endDate: Date): Meal[] {
+    return state.meals.filter(meal => {
+      const mealDate = new Date(meal.date.getFullYear(), meal.date.getMonth(), meal.date.getDate());
+      const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+      const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+      return mealDate >= start && mealDate <= end;
+    }).sort((a, b) => a.date.getTime() - b.date.getTime());
+  }
 
+  // Action to get all meals sorted by date (newest first)
+  function getAllMealsSortedByDate(): Meal[] {
+    return [...state.meals].sort((a, b) => b.date.getTime() - a.date.getTime());
+  }
   // --- Getters ---
-  // (Optional: Add getters if needed for computed properties based on meals state)
+  const mealCount = () => state.meals.length;
 
   return {
-    meals,
-    setMeal,
-    getMeal,
-    getMealsForPeriod, // Expose the new function
+    // State
+    meals: state.meals,
+    
+    // Actions
+    addMeal,
+    updateMeal,
+    deleteMeal,
+    getMealById,
+    getMealsByType,
+    getAllMeals,
+    getMealsByDate,
+    getMealsByDateRange,
+    getAllMealsSortedByDate,
+    
+    // Getters
+    mealCount,
   };
 });

@@ -6,14 +6,14 @@ A web application built with Vue.js and TypeScript to help users plan their week
 
 ## 2. Core Functionality
 
-*   **Calendar View:**
-    *   Display a weekly calendar (e.g., Monday to Sunday).
-    *   Navigate between weeks (previous/next).
-    *   Clearly indicate the current date.
-*   **Meal Planning:**
-    *   Ability to assign meals to specific days and meal slots (e.g., Breakfast, Lunch, Dinner, Snacks).
-    *   Users should be able to enter a simple meal description.
-    *   Ability to add, edit, and delete planned meals from the calendar.
+*   **Meal List View:**
+    *   Display meals in a scrollable list of cards.
+    *   Each card represents a single meal with details like name, description, and meal type.
+    *   Cards should be visually distinct and easy to scan.
+*   **Meal Management:**
+    *   Ability to create new meals with name, description, and meal type (e.g., Breakfast, Lunch, Dinner, Snacks).
+    *   Users should be able to enter meal details including ingredients or notes.
+    *   Ability to add, edit, and delete meals from the list.
 
 ## 3. Technical Specifications
 
@@ -27,10 +27,11 @@ A web application built with Vue.js and TypeScript to help users plan their week
 ## 4. User Interface (UI) / User Experience (UX)
 
 *   Clean, intuitive, and responsive design.
-*   Easy-to-use calendar interface for planning.
-*   Simple forms for adding/editing meals and recipes.
+*   Easy-to-use scrollable list interface for viewing meals.
+*   Simple forms for adding/editing meals.
 *   Clear visual feedback for user actions.
-*   (Optional Nice-to-have): Drag-and-drop interface for assigning recipes to calendar slots.
+*   Card-based layout with good visual hierarchy and spacing.
+*   (Optional Nice-to-have): Search and filter functionality for meals.
 
 ## 5. Non-Functional Requirements
 
@@ -39,11 +40,12 @@ A web application built with Vue.js and TypeScript to help users plan their week
 
 ## 6. Future Enhancements (Optional)
 
-*   AI agent for automated meal planning.
+*   AI agent for automated meal suggestions.
 *   User accounts and authentication.
 *   Cloud storage and synchronization across devices.
 *   Nutritional information calculation.
-*   Meal plan sharing.
+*   Meal sharing and community features.
 *   Importing recipes from external websites.
-*   Tagging/categorizing recipes.
+*   Tagging/categorizing meals.
+*   Search and advanced filtering options.
 *   Mobile-specific optimizations or a PWA (Progressive Web App).

@@ -43,11 +43,11 @@ A web application built with Vue.js 3, TypeScript, and Vite to help users plan t
 *   `public/`: Static assets.
 *   `src/`: Main application source code.
     *   `assets/`: Static assets processed by Vite.
-    *   `components/`: Reusable Vue components (e.g., `CalendarGrid.vue`, `DayCell.vue`, `ChatBot.vue`).
+    *   `components/`: Reusable Vue components (e.g., `MealCard.vue`, `AddMealForm.vue`, `ChatBot.vue`).
     *   `services/`: Modules for external interactions (e.g., `chatService.ts`).
     *   `stores/`: Pinia state management stores (e.g., `mealStore.ts`).
     *   `types/`: TypeScript type definitions.
-    *   `views/`: Top-level page components (e.g., `CalendarView.vue`).
+    *   `views/`: Top-level page components (e.g., `MealListView.vue`).
     *   `App.vue`: Root Vue component.
     *   `main.ts`: Application entry point.
     *   `style.css`: Global styles.

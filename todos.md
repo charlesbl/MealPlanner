@@ -10,38 +10,35 @@ This document outlines the steps to build the Meal Planner application based on 
 - [x] Set up basic project structure (components, views/pages, stores)
 - [x] Choose and set up a styling solution (e.g., Tailwind CSS, basic CSS)
 
-## Phase 2: Core Functionality - Calendar View
+## Phase 2: Core Functionality - Meal List View
 
-- [ ] Create `CalendarView.vue` component.
-- [ ] Implement logic to display the current week (e.g., Monday-Sunday).
-- [ ] Add navigation buttons (Previous/Next Week).
-- [ ] Implement logic to update the displayed week based on navigation.
-- [ ] Display dates within each day cell.
-- [ ] Highlight the current date.
-- [ ] Structure day cells to hold meal slots (Breakfast, Lunch, Dinner, Snacks).
+- [ ] Create `MealListView.vue` component.
+- [ ] Implement scrollable container for meal cards.
+- [ ] Create `MealCard.vue` component to display individual meals.
+- [ ] Design card layout with meal name, description, and meal type.
+- [ ] Add visual styling to make cards distinct and readable.
+- [ ] Implement responsive design for different screen sizes.
 
-## Phase 3: Core Functionality - Meal Planning
+## Phase 3: Core Functionality - Meal Management
 
-- [ ] Create `MealSlot.vue` component (or similar) to represent a meal area within a day.
-- [ ] Create a simple data structure for planned meals (e.g., `{ date: 'YYYY-MM-DD', slot: 'Breakfast', description: 'Oatmeal' }`).
-- [ ] Implement Pinia store (`mealStore.ts`) to manage planned meals.
-- [ ] Display planned meals from the store in the correct date/slot on the calendar.
+- [ ] Create a simple data structure for meals (e.g., `{ id: string, name: string, description: string, mealType: 'Breakfast' | 'Lunch' | 'Dinner' | 'Snacks', createdAt: Date }`).
+- [ ] Implement Pinia store (`mealStore.ts`) to manage meals collection.
+- [ ] Display meals from the store as cards in the scrollable list.
 - [ ] Add functionality to add a new meal:
     - [ ] Create a modal or form (`AddMealForm.vue`).
-    - [ ] Allow users to select a date and slot (pre-filled if clicking on a specific slot).
-    - [ ] Allow users to enter a meal description.
+    - [ ] Allow users to enter meal name, description, and select meal type.
     - [ ] Save the new meal to the Pinia store.
 - [ ] Add functionality to edit an existing meal:
-    - [ ] Trigger edit mode (e.g., click on a meal).
+    - [ ] Trigger edit mode (e.g., click on a meal card).
     - [ ] Populate the form with existing meal data.
     - [ ] Update the meal in the Pinia store.
-- [ ] Add functionality to delete a planned meal:
-    - [ ] Add a delete button/icon to planned meals.
+- [ ] Add functionality to delete a meal:
+    - [ ] Add a delete button/icon to meal cards.
     - [ ] Remove the meal from the Pinia store upon confirmation.
 
 ## Phase 4: Data Persistence
 
-- [ ] Implement logic to save the Pinia store state (planned meals) to Local Storage whenever it changes.
+- [ ] Implement logic to save the Pinia store state (meals collection) to Local Storage whenever it changes.
 - [ ] Implement logic to load the state from Local Storage when the application starts.
 
 ## Phase 5: Styling & Refinement
