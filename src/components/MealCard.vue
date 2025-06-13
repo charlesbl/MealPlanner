@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+import { renderMarkdown } from '@/utils/markdown';
 import { type Meal } from '@/stores/mealStore';
 
 interface Props {
@@ -12,6 +14,12 @@ interface Emits {
 
 const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+// Convert markdown description to HTML
+const renderedDescription = computed(() => {
+  if (!props.meal.description) return '';
+  return renderMarkdown(props.meal.description);
+});
 
 // Format date for display
 function formatDate(date: Date): string {
@@ -49,7 +57,7 @@ function getMealTypeColor(mealType: string): string {
       </div>
     </div>
       <div class="meal-content">      <h3 class="meal-name">{{ props.meal.name }}</h3>
-      <p class="meal-description">{{ props.meal.description }}</p>
+      <div class="meal-description" v-html="renderedDescription"></div>
       <div class="meal-date">
         <span class="date-label">📅 {{ formatDate(props.meal.date) }}</span>
       </div>
@@ -146,6 +154,76 @@ function getMealTypeColor(mealType: string): string {
   color: #666;
   line-height: 1.5;
   font-size: 0.95rem;
+}
+
+/* Markdown content styling */
+.meal-description :deep(h1),
+.meal-description :deep(h2),
+.meal-description :deep(h3),
+.meal-description :deep(h4),
+.meal-description :deep(h5),
+.meal-description :deep(h6) {
+  margin: 0.5rem 0 0.25rem 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.meal-description :deep(h1) { font-size: 1.1rem; }
+.meal-description :deep(h2) { font-size: 1rem; }
+.meal-description :deep(h3) { font-size: 0.95rem; }
+.meal-description :deep(h4) { font-size: 0.9rem; }
+.meal-description :deep(h5) { font-size: 0.85rem; }
+.meal-description :deep(h6) { font-size: 0.8rem; }
+
+.meal-description :deep(p) {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+}
+
+.meal-description :deep(ul),
+.meal-description :deep(ol) {
+  margin: 0.25rem 0;
+  padding-left: 1.5rem;
+}
+
+.meal-description :deep(li) {
+  margin: 0.125rem 0;
+}
+
+.meal-description :deep(strong) {
+  font-weight: 600;
+  color: #333;
+}
+
+.meal-description :deep(em) {
+  font-style: italic;
+  color: #555;
+}
+
+.meal-description :deep(code) {
+  background-color: #f5f5f5;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: #d73502;
+}
+
+.meal-description :deep(blockquote) {
+  border-left: 3px solid #ddd;
+  margin: 0.5rem 0;
+  padding-left: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.meal-description :deep(a) {
+  color: #2196F3;
+  text-decoration: none;
+}
+
+.meal-description :deep(a:hover) {
+  text-decoration: underline;
 }
 
 .meal-date {

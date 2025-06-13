@@ -8,6 +8,7 @@ import { ReadMealsTool } from './tools/readMealsTool';
 import { AddOrUpdateMealTool } from './tools/addOrUpdateMealTool';
 import { DeleteMealTool } from './tools/deleteMealTool';
 import { systemPromptString } from './prompt'; 
+import { SearchMealsByDateTool } from "./tools/searchMealsByDateTool";
 
 const OPENROUTER_API_KEY = import.meta.env.VITE_OPENROUTER_API_KEY;
 const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
@@ -19,7 +20,8 @@ if (!OPENROUTER_API_KEY) {
 const tools: StructuredTool[] = [
     ReadMealsTool,
     AddOrUpdateMealTool,
-    DeleteMealTool
+    DeleteMealTool,
+    SearchMealsByDateTool
 ];
 
 // --- Initialize LLM ---

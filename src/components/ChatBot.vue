@@ -5,7 +5,7 @@ import {
   getChatHistory,
   clearChatHistory,
 } from "@/services/chatService"; // Import clearChatHistory
-import { marked } from "marked"; // Import marked
+import { renderMarkdown } from "@/utils/markdown"; // Import from utility
 
 interface Message {
   text: string;
@@ -16,29 +16,6 @@ const newMessage = ref("");
 const messages = ref<Message[]>([]);
 const isLoading = ref(false);
 const messagesContainer = ref<HTMLElement | null>(null);
-
-// Function to render markdown
-// Note: For security, especially if rendering user-generated markdown,
-// consider using a sanitizer like DOMPurify after marked.parse()
-const renderMarkdown = (text: string) => {
-  // Basic check to avoid parsing simple strings unnecessarily
-  if (
-    !text ||
-    (text.indexOf("*") === -1 &&
-      text.indexOf("_") === -1 &&
-      text.indexOf("`") === -1 &&
-      text.indexOf("[") === -1 &&
-      text.indexOf("#") === -1)
-  ) {
-    return text; // Return plain text if no common markdown characters are found
-  }
-  try {
-    return marked.parse(text);
-  } catch (e) {
-    console.error("Error parsing markdown:", e);
-    return text; // Return original text on error
-  }
-};
 
 const scrollToBottom = () => {
   nextTick(() => {
