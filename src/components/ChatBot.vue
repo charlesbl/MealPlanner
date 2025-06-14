@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from "vue";
+import { ref, nextTick, onMounted, computed } from "vue";
 import {
-  sendMessageToBot,
+  sendMessageToBotStream,
   getChatHistory,
   clearChatHistory,
 } from "@/services/chatService"; // Import clearChatHistory
@@ -61,20 +61,27 @@ const sendMessage = async () => {
   isLoading.value = true;
   scrollToBottom();
 
-  // Get bot response
+  // Add an empty bot message that we'll update as we stream
+  const botMessageIndex = messages.value.length;
+  messages.value.push({ text: "", sender: "bot" });
+
+  // Get bot response using streaming
   try {
-    const botResponse = await sendMessageToBot(text);
-    messages.value.push({ text: botResponse, sender: "bot" });
+    let fullResponse = "";
+    for await (const chunk of sendMessageToBotStream(text)) {
+      fullResponse += chunk;
+      // Update the bot message in real-time
+      messages.value[botMessageIndex].text = fullResponse;
+      scrollToBottom();
+    }
   } catch (error) {
-    messages.value.push({
-      text: "Error getting response from bot.",
-      sender: "bot",
-    });
+    messages.value[botMessageIndex].text = "Error getting response from bot.";
     console.error("Error sending message:", error);
   }
 
   isLoading.value = false;
   scrollToBottom();
+
 };
 
 // Initial scroll to bottom
@@ -90,6 +97,10 @@ const resetChat = () => {
   });
   scrollToBottom(); // Scroll after resetting
 };
+
+const noEmptyMessages = computed(() => {
+  return messages.value.filter((msg) => msg.text.trim() !== "");
+});
 </script>
 
 <template>
@@ -102,13 +113,19 @@ const resetChat = () => {
     <div class="messages" ref="messagesContainer">
       <!-- Use v-html to render Markdown -->
       <div
-        v-for="(msg, index) in messages"
+        v-for="(msg, index) in noEmptyMessages"
         :key="index"
         :class="['message', msg.sender]"
       >
         <div v-html="renderMarkdown(msg.text)"></div>
       </div>
-      <div v-if="isLoading" class="message bot typing">...</div>
+      <div v-if="isLoading" class="message bot typing">
+        <div class="typing-indicator">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
     </div>
     <div class="input-area">
       <input
@@ -229,6 +246,38 @@ const resetChat = () => {
 .typing {
   font-style: italic;
   color: #888;
+}
+
+/* Typing indicator styles */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.typing-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #999;
+  animation: bounce 1.4s ease-in-out infinite both;
+}
+
+.typing-indicator span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-indicator span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
 }
 
 /* Add styles for rendered markdown elements if needed */
