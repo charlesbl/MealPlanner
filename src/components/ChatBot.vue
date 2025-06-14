@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import { chatHistoryManager } from "@/chat/chatHistoryManager";
 import { sendMessageToBotStream } from "@/services/chatService"; // Import clearChatHistory
+import type {
+    ChatModelStreamEventData,
+    ToolCallEventData,
+    ToolEndEventData,
+} from "@/streaming/streamEventHandlers";
 import { renderMarkdown } from "@/utils/markdown"; // Import from utility
 import { isHumanMessage } from "@langchain/core/messages";
 import { computed, nextTick, onMounted, ref } from "vue";
 
 interface Message {
-    text: string;
+    content: MessageContent[];
     sender: "user" | "bot";
+}
+interface MessageContent {
+    type: "text" | "tool";
+}
+interface TextContent extends MessageContent {
+    type: "text";
+    text: string;
+}
+interface ToolContent extends MessageContent {
+    type: "tool";
+    toolName: string;
+    toolArgs: Record<string, any>;
+    isActive?: boolean;
 }
 
 const newMessage = ref("");
@@ -28,10 +46,15 @@ const loadHistory = () => {
     const historyFromService = chatHistoryManager.getChatHistory();
     messages.value = historyFromService.map((msg) => ({
         sender: isHumanMessage(msg) ? "user" : "bot",
-        text:
-            typeof msg.content === "string"
-                ? msg.content
-                : JSON.stringify(msg.content), // Ensure text is string
+        content: [
+            {
+                type: "text" as const,
+                text:
+                    typeof msg.content === "string"
+                        ? msg.content
+                        : JSON.stringify(msg.content),
+            },
+        ],
     }));
     scrollToBottom();
 };
@@ -43,26 +66,79 @@ onMounted(() => {
 const sendMessage = async () => {
     const text = newMessage.value.trim();
     if (!text || isLoading.value) return;
-
-    messages.value.push({ text, sender: "user" });
+    messages.value.push({
+        content: [{ type: "text", text } as TextContent],
+        sender: "user",
+    });
     newMessage.value = "";
     isLoading.value = true;
     scrollToBottom();
 
     // Add an empty bot message that we'll update as we stream
     const botMessageIndex = messages.value.length;
-    messages.value.push({ text: "", sender: "bot" });
-
+    messages.value.push({
+        content: [],
+        sender: "bot",
+    });
     try {
-        let fullResponse = "";
-        for await (const chunk of sendMessageToBotStream(text)) {
-            fullResponse = chunk.fullResponse;
-            messages.value[botMessageIndex].text = fullResponse;
+        for await (const streamEventData of sendMessageToBotStream(text)) {
+            // Update message with stream data
+            const botMessage = messages.value[botMessageIndex];
+
+            if (streamEventData.type === "chat_model_stream") {
+                const chunk = (streamEventData as ChatModelStreamEventData)
+                    .chunk;
+                const lastContent =
+                    botMessage.content[botMessage.content.length - 1];
+                if (lastContent !== undefined && lastContent.type === "text") {
+                    (lastContent as TextContent).text += chunk;
+                } else {
+                    botMessage.content.push({
+                        type: "text",
+                        text: chunk,
+                    } as TextContent);
+                }
+            }
+            if (streamEventData.type === "tool_call") {
+                const toolName = (streamEventData as ToolCallEventData)
+                    .toolName;
+                botMessage.content.push({
+                    type: "tool",
+                    toolName: toolName,
+                    toolArgs: {
+                        arg1: "value1", // Example argument, replace with actual args
+                        arg2: "value2", // Example argument, replace with actual args
+                    },
+                    isActive: true,
+                } as ToolContent);
+            }
+            if (streamEventData.type === "tool_end") {
+                const toolName = (streamEventData as ToolEndEventData).toolName;
+                const toolContent = botMessage.content.find(
+                    (c) =>
+                        c.type === "tool" &&
+                        (c as ToolContent).toolName === toolName &&
+                        (c as ToolContent).isActive
+                ) as ToolContent | undefined;
+                if (toolContent) {
+                    toolContent.isActive = false;
+                } else {
+                    console.error(
+                        `Active tool content for ${toolName} not found in message.`
+                    );
+                }
+            }
+
             scrollToBottom();
         }
     } catch (error) {
-        messages.value[botMessageIndex].text =
-            "Error getting response from bot.";
+        const botMessage = messages.value[botMessageIndex];
+        const textContent = botMessage.content.find(
+            (c) => c.type === "text"
+        ) as TextContent;
+        if (textContent) {
+            textContent.text = "Error getting response from bot.";
+        }
         console.error("Error sending message:", error);
     }
 
@@ -77,7 +153,7 @@ const resetChat = () => {
 };
 
 const noEmptyMessages = computed(() => {
-    return messages.value.filter((msg) => msg.text.trim() !== "");
+    return messages.value.filter((msg) => msg.content.length > 0);
 });
 </script>
 
@@ -92,7 +168,33 @@ const noEmptyMessages = computed(() => {
                 :key="index"
                 :class="['message', msg.sender]"
             >
-                <div v-html="renderMarkdown(msg.text)"></div>
+                <div
+                    v-for="(content, contentIndex) in msg.content"
+                    :key="`${index}-${contentIndex}`"
+                >
+                    <!-- Display active tools -->
+                    <div
+                        v-if="content.type === 'tool' && (content as ToolContent).isActive"
+                        class="tool-indicator active"
+                    >
+                        <span class="tool-spinner"></span>
+                        Using tool: {{ (content as ToolContent).toolName }}
+                    </div>
+
+                    <!-- Display completed tools -->
+                    <div
+                        v-if="content.type === 'tool' && !(content as ToolContent).isActive"
+                        class="tool-indicator completed"
+                    >
+                        ✓ Completed: {{ (content as ToolContent).toolName }}
+                    </div>
+
+                    <!-- Display text content -->
+                    <div
+                        v-if="content.type === 'text'"
+                        v-html="renderMarkdown((content as TextContent).text)"
+                    ></div>
+                </div>
             </div>
             <div v-if="isLoading" class="message bot typing">
                 <div class="typing-indicator">
@@ -220,6 +322,47 @@ const noEmptyMessages = computed(() => {
 .typing {
     font-style: italic;
     color: #888;
+}
+
+/* Tool indicator styles */
+.tool-indicator {
+    font-size: 0.85em;
+    padding: 4px 8px;
+    margin-bottom: 6px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.tool-indicator.active {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.tool-indicator.completed {
+    background-color: #d1edff;
+    color: #0c5460;
+    border: 1px solid #b8daff;
+}
+
+.tool-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #856404;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* Typing indicator styles */

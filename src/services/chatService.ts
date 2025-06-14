@@ -19,9 +19,11 @@
 
 import {
     streamEventHandler,
-    type StreamState,
+    type ChainEndEventData,
+    type StreamEventData,
 } from "@/streaming/streamEventHandlers";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
+import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { agentExecutor } from "../agents/agentFactory";
 import { chatHistoryManager } from "../chat/chatHistoryManager";
 import { isApiKeyConfigured } from "../config/llmConfig";
@@ -30,7 +32,7 @@ const HISTORY_MAX_LENGTH = 10;
 
 export async function* sendMessageToBotStream(
     message: string
-): AsyncGenerator<StreamState, void, unknown> {
+): AsyncGenerator<StreamEventData, void, unknown> {
     if (!isApiKeyConfigured()) {
         throw new Error(
             "OpenRouter API key is not configured. Please set VITE_OPENROUTER_API_KEY in your .env file."
@@ -46,40 +48,45 @@ export async function* sendMessageToBotStream(
         },
         { version: "v2" }
     );
-
-    let lastState: StreamState = {
-        fullResponse: "",
-    };
+    let lastMessage = "";
 
     for await (const event of stream) {
         const handler = eventHandlers.get(event.event);
         if (handler === undefined) {
-            yield streamEventHandler.logUnhandledEvent(event, lastState);
+            yield streamEventHandler.logUnhandledEvent(event);
             continue;
         }
-        lastState = handler(event, lastState);
-        yield lastState;
+        const eventData = handler(event);
+        if (eventData.type === "chain_end") {
+            lastMessage = (eventData as ChainEndEventData).finalOutput;
+        }
+        yield eventData;
     }
 
     // Update chat history with the complete response
-    if (lastState.fullResponse) {
-        chatHistoryManager.addMessage(new AIMessage(lastState.fullResponse));
+    if (lastMessage.trim().length > 0) {
+        chatHistoryManager.addMessage(new AIMessage(lastMessage));
     }
 
     // Keep history length manageable
     chatHistoryManager.trimHistory(HISTORY_MAX_LENGTH);
 }
 
-const eventHandlers = new Map<
-    string,
-    (event: any, state: StreamState) => StreamState
->([
+const eventHandlers = new Map<string, (event: StreamEvent) => StreamEventData>([
+    ["on_chat_model_start", streamEventHandler.handleUselessEvent],
     ["on_chat_model_stream", streamEventHandler.handleChatModelStreamEvent],
+    ["on_chat_model_end", streamEventHandler.handleUselessEvent],
+
+    ["on_chain_start", streamEventHandler.handleUselessEvent],
+    ["on_chain_stream", streamEventHandler.handleUselessEvent],
     ["on_chain_end", streamEventHandler.handleChainEndEvent],
+
     ["on_tool_start", streamEventHandler.handleToolCallEvent],
     ["on_tool_end", streamEventHandler.handleToolEndEvent],
+
     ["on_prompt_start", streamEventHandler.handleUselessEvent],
     ["on_prompt_end", streamEventHandler.handleUselessEvent],
+
     ["on_parser_start", streamEventHandler.handleUselessEvent],
     ["on_parser_end", streamEventHandler.handleUselessEvent],
 ]);
