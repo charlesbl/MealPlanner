@@ -5,7 +5,7 @@ import type {
     ChatModelStreamEventData,
     ToolCallEventData,
     ToolEndEventData,
-} from "@/streaming/streamEventHandlers";
+} from "@/services/streamEventHandlers";
 import { renderMarkdown } from "@/utils/markdown"; // Import from utility
 import { isHumanMessage } from "@langchain/core/messages";
 import { computed, nextTick, onMounted, ref } from "vue";

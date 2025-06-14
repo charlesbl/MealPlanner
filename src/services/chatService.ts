@@ -21,7 +21,7 @@ import {
     streamEventHandler,
     type ChainEndEventData,
     type StreamEventData,
-} from "@/streaming/streamEventHandlers";
+} from "@/services/streamEventHandlers";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { agentExecutor } from "../agents/agentFactory";
