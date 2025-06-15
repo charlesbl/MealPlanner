@@ -3,27 +3,26 @@ import AddMealForm from "@/components/AddMealForm.vue";
 import DateRangeFilter from "@/components/DateRangeFilter.vue";
 import MealCard from "@/components/MealCard.vue";
 import { useDateFilterStore } from "@/stores/dateFilterStore";
-import { MealType, useMealStore, type Meal } from "@/stores/mealStore";
+import { useMealStore, type Meal } from "@/stores/mealStore";
+import { useMealTypeFilterStore } from "@/stores/mealTypeFilterStore";
 import { computed, ref } from "vue";
 
 const mealStore = useMealStore();
 const dateFilterStore = useDateFilterStore();
+const mealTypeFilterStore = useMealTypeFilterStore();
 
 // Form state
 const showAddForm = ref(false);
 const editingMeal = ref<Meal | null>(null);
-
-// Filter state
-const selectedMealType = ref<MealType | "All">("All");
 
 // Computed properties
 const filteredMeals = computed(() => {
     let meals = mealStore.getAllMeals();
 
     // Apply meal type filter
-    if (selectedMealType.value !== "All") {
+    if (mealTypeFilterStore.selectedMealType !== "All") {
         meals = meals.filter(
-            (meal) => meal.mealType === selectedMealType.value
+            (meal) => meal.mealType === mealTypeFilterStore.selectedMealType
         );
     }
 
@@ -36,18 +35,15 @@ const filteredMeals = computed(() => {
             )
             .filter(
                 (meal) =>
-                    selectedMealType.value === "All" ||
-                    meal.mealType === selectedMealType.value
+                    mealTypeFilterStore.selectedMealType === "All" ||
+                    meal.mealType === mealTypeFilterStore.selectedMealType
             );
     }
 
     return meals;
 });
 
-const mealTypeOptions = computed(() => [
-    { value: "All", label: "All Meals" },
-    ...Object.values(MealType).map((type) => ({ value: type, label: type })),
-]);
+const mealTypeOptions = computed(() => mealTypeFilterStore.mealTypeOptions);
 
 // Methods
 function handleAddMeal() {
@@ -78,7 +74,11 @@ function handleFormClose() {
         <div class="header">
             <h1>My Meals</h1>
             <div class="header-actions">
-                <select v-model="selectedMealType" class="meal-type-filter">
+                <DateRangeFilter />
+                <select
+                    v-model="mealTypeFilterStore.selectedMealType"
+                    class="meal-type-filter"
+                >
                     <option
                         v-for="option in mealTypeOptions"
                         :key="option.value"
@@ -92,26 +92,23 @@ function handleFormClose() {
                 </button>
             </div>
         </div>
-
-        <!-- Date Range Filter -->
-        <DateRangeFilter />
         <!-- Meals List -->
         <div class="meals-container">
             <div v-if="filteredMeals.length === 0" class="empty-state">
                 <p
                     v-if="
                         dateFilterStore.isDateRangeActive &&
-                        selectedMealType === 'All'
+                        mealTypeFilterStore.selectedMealType === 'All'
                     "
                 >
                     No meals found for the selected date range.
                 </p>
                 <p v-else-if="dateFilterStore.isDateRangeActive">
-                    No {{ selectedMealType }} meals found for the selected date
-                    range.
+                    No {{ mealTypeFilterStore.selectedMealType }} meals found
+                    for the selected date range.
                 </p>
-                <p v-else-if="selectedMealType !== 'All'">
-                    No {{ selectedMealType }} meals yet.
+                <p v-else-if="mealTypeFilterStore.selectedMealType !== 'All'">
+                    No {{ mealTypeFilterStore.selectedMealType }} meals yet.
                 </p>
                 <p v-else>No meals found. Add your first meal!</p>
             </div>
@@ -165,6 +162,7 @@ function handleFormClose() {
     display: flex;
     gap: 1rem;
     align-items: center;
+    flex-wrap: wrap;
 }
 
 .meal-type-filter {
@@ -227,7 +225,9 @@ function handleFormClose() {
     }
 
     .header-actions {
-        justify-content: space-between;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.75rem;
     }
 
     .meals-grid {
