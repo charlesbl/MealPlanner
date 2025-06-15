@@ -17,7 +17,7 @@ const editingMeal = ref<Meal | null>(null);
 
 // Computed properties
 const filteredMeals = computed(() => {
-    let meals = mealStore.getAllMeals();
+    let meals = mealStore.getAllMealsSortedByDate();
 
     // Apply meal type filter
     if (mealTypeFilterStore.selectedMealType !== "All") {
