@@ -22,6 +22,7 @@ export const llm = new ChatOpenAI({
     apiKey: OPENROUTER_API_KEY,
     // modelName: "google/gemini-2.5-pro-preview",
     modelName: "google/gemini-2.5-flash-preview:thinking",
+    // modelName: "meta-llama/llama-4-maverick",
     temperature: 0.7,
 });
 
