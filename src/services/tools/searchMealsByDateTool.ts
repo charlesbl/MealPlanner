@@ -40,8 +40,6 @@ export const SearchMealsByDateTool = new DynamicStructuredTool({
     func: async (
         input: z.infer<typeof searchMealsByDateSchema>
     ): Promise<string> => {
-        //slepp 5000
-        await new Promise((resolve) => setTimeout(resolve, 5000));
         const mealStore = useMealStore();
         try {
             let meals;
