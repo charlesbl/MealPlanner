@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import ChatBot from "./components/ChatBot.vue";
-import MealListView from "./views/MealListView.vue";
+import Widgets from "./components/Widgets.vue";
 </script>
 
 <template>
     <div class="app-container">
-        <MealListView class="meal-view" />
         <ChatBot class="chat-bot" />
+        <Widgets></Widgets>
     </div>
 </template>
 
@@ -16,11 +16,7 @@ import MealListView from "./views/MealListView.vue";
     height: 100vh;
 }
 
-.meal-view {
-    flex: 1;
-}
-
 .chat-bot {
-    flex: 0 0 500px;
+    width: 50vw;
 }
 </style>

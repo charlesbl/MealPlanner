@@ -186,21 +186,32 @@ export const useMealStore = defineStore("mealStore", () => {
         return [...state.meals].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
         );
-    }
-    // Action to get meals by date
-    function getMealsByDate(date: Date): Meal[] {
-        const targetDate = new Date(
-            date.getFullYear(),
-            date.getMonth(),
-            date.getDate()
+    } // Action to get meals by date
+    function getMealsByDate(date: Date): Meal[];
+    function getMealsByDate(dateString: string): Meal[];
+    function getMealsByDate(dateInput: Date | string): Meal[] {
+        const targetDate =
+            typeof dateInput === "string"
+                ? new Date(dateInput)
+                : new Date(
+                      dateInput.getFullYear(),
+                      dateInput.getMonth(),
+                      dateInput.getDate()
+                  );
+
+        const normalizedTargetDate = new Date(
+            targetDate.getFullYear(),
+            targetDate.getMonth(),
+            targetDate.getDate()
         );
+
         return state.meals.filter((meal) => {
             const mealDate = new Date(
                 meal.date.getFullYear(),
                 meal.date.getMonth(),
                 meal.date.getDate()
             );
-            return mealDate.getTime() === targetDate.getTime();
+            return mealDate.getTime() === normalizedTargetDate.getTime();
         });
     }
 

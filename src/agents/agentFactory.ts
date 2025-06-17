@@ -18,8 +18,7 @@ import { AddOrUpdateMealTool } from "@/services/tools/addOrUpdateMealTool";
 import { DeleteMealTool } from "@/services/tools/deleteMealTool";
 import { ReadMealsTool } from "@/services/tools/readMealsTool";
 import { SearchMealsByDateTool } from "@/services/tools/searchMealsByDateTool";
-import { SetDateRangeFilterTool } from "@/services/tools/setDateRangeFilterTool";
-import { SetMealTypeFilterTool } from "@/services/tools/setMealTypeFilterTool";
+import { ShowWidgetTool } from "@/services/tools/showWidgetTool";
 import {
     ChatPromptTemplate,
     MessagesPlaceholder,
@@ -40,8 +39,7 @@ const tools: StructuredTool[] = [
     AddOrUpdateMealTool,
     DeleteMealTool,
     SearchMealsByDateTool,
-    SetDateRangeFilterTool,
-    SetMealTypeFilterTool,
+    ShowWidgetTool,
 ];
 
 const llmWithTools = llm.bindTools(tools);
