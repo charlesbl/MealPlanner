@@ -6,9 +6,9 @@ import { useWidgetsStore, WidgetType } from "../../stores/widgetsStore";
 // Schema for showing a widget
 const showWidgetSchema = z.object({
     type: z
-        .enum(["calendar", "meal-list", "meal"])
+        .enum(["meal-deck", "week-view", "meal-list", "meal"])
         .describe(
-            "The type of widget to show. Options: calendar (shows meals in calendar view), meal-list (shows list of meals with filters), meal (shows details of a specific meal)"
+            "The type of widget to show. Options: meal-deck (shows all meals as cards in a deck view), week-view (shows selected meals for the current week), meal-list (shows list of meals with filters), meal (shows details of a specific meal)"
         ),
     title: z
         .string()
@@ -18,15 +18,9 @@ const showWidgetSchema = z.object({
         .nativeEnum(MealType)
         .optional()
         .describe(
-            `Optional meal type filter for meal-list widget (${Object.values(
+            `Optional meal type filter for meal-deck or meal-list widget (${Object.values(
                 MealType
             ).join(" | ")})`
-        ),
-    date: z
-        .string()
-        .optional()
-        .describe(
-            "Optional date filter for meal-list widget (YYYY-MM-DD format)"
         ),
     mealId: z
         .string()
@@ -40,17 +34,17 @@ const showWidgetSchema = z.object({
         .boolean()
         .optional()
         .describe(
-            "Whether to show filter controls in meal-list (default: true)"
+            "Whether to show filter controls in meal-deck or meal-list (default: true)"
         ),
     showPagination: z
         .boolean()
         .optional()
-        .describe("Whether to show pagination in meal-list (default: true)"),
+        .describe("Whether to show pagination in meal-deck or meal-list (default: true)"),
 });
 
 export const ShowWidgetTool = new DynamicStructuredTool({
     name: "show_widget",
-    description: `Display a widget in the UI. Can show calendar view of meals, a filtered list of meals, or details of a specific meal. Use 'calendar' to show meals in calendar format, 'meal-list' to show a list of meals with optional filters, or 'meal' to show details of a specific meal (requires mealId).`,
+    description: `Display a widget in the UI. Can show meal deck (all meals as cards), week view (selected meals for the week), a filtered list of meals, or details of a specific meal. Use 'meal-deck' to browse all meals as cards, 'week-view' to manage weekly selection, 'meal-list' for filtered meal lists, or 'meal' for individual meal details (requires mealId).`,
     schema: showWidgetSchema,
     func: async (input: z.infer<typeof showWidgetSchema>): Promise<string> => {
         const widgetsStore = useWidgetsStore();
@@ -60,23 +54,26 @@ export const ShowWidgetTool = new DynamicStructuredTool({
             let props: Record<string, any> = {};
 
             switch (input.type) {
-                case "calendar":
-                    widgetType = WidgetType.Calendar;
+                case "meal-deck":
+                    widgetType = WidgetType.MealDeck;
+                    props = {
+                        mealType: input.mealType,
+                        showFilters: input.showFilters,
+                        showPagination: input.showPagination,
+                    };
+                    break;
+                case "week-view":
+                    widgetType = WidgetType.WeekView;
                     break;
                 case "meal-list":
                     widgetType = WidgetType.MealList;
                     props = {
                         title: input.title,
                         mealType: input.mealType,
-                        date: input.date,
                         limit: input.limit,
                         showFilters: input.showFilters,
                         showPagination: input.showPagination,
                     };
-                    // Remove undefined properties
-                    Object.keys(props).forEach(
-                        (key) => props[key] === undefined && delete props[key]
-                    );
                     break;
                 case "meal":
                     if (!input.mealId) {
@@ -88,23 +85,29 @@ export const ShowWidgetTool = new DynamicStructuredTool({
                     };
                     break;
                 default:
-                    return `Error: Unknown widget type '${input.type}'. Valid types are: calendar, meal-list, meal.`;
+                    return `Error: Unknown widget type '${input.type}'. Valid types are: meal-deck, week-view, meal-list, meal.`;
             }
+
+            // Remove undefined properties
+            Object.keys(props).forEach(
+                (key) => props[key] === undefined && delete props[key]
+            );
 
             widgetsStore.showWidget(widgetType, props);
 
             let message = `Successfully displayed ${input.type} widget.`;
 
-            if (input.type === "meal-list") {
+            if (input.type === "meal-deck" || input.type === "meal-list") {
                 const filters = [];
                 if (input.mealType)
                     filters.push(`meal type: ${input.mealType}`);
-                if (input.date) filters.push(`date: ${input.date}`);
                 if (filters.length > 0) {
                     message += ` Filtered by ${filters.join(", ")}.`;
                 }
             } else if (input.type === "meal") {
                 message += ` Showing meal with ID: ${input.mealId}.`;
+            } else if (input.type === "week-view") {
+                message += ` You can now manage your weekly meal selection.`;
             }
 
             return message;

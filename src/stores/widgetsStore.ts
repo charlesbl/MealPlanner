@@ -2,7 +2,8 @@ import { defineStore } from "pinia";
 import { reactive } from "vue";
 
 export enum WidgetType {
-    Calendar = "Calendar",
+    MealDeck = "MealDeck",
+    WeekView = "WeekView",
     MealList = "MealList",
     Meal = "Meal",
 }

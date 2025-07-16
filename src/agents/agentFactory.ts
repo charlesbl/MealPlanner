@@ -3,22 +3,24 @@
  *
  * Assembles and exports a configured LangChain AgentExecutor that combines:
  * - A language model (LLM) with tool-calling capabilities
- * - Meal management tools (create, read, update, delete, search)
+ * - Meal deck and week management tools (create, read, update, delete)
+ * - Widget display tools for chat-first interface
  * - System prompts for meal planning conversations
  * - Chat history and conversation flow management
  *
  * This factory creates the core AI agent that powers the meal planner's
- * conversational interface. It handles tool selection and execution but
- * does NOT manage chat state, UI interactions, or data persistence -
- * those responsibilities belong to the chat service and storage layers.
+ * conversational interface with deck-based meal management.
  */
 
 import { llm } from "@/config/llmConfig";
 import { AddOrUpdateMealTool } from "@/services/tools/addOrUpdateMealTool";
 import { DeleteMealTool } from "@/services/tools/deleteMealTool";
 import { ReadMealsTool } from "@/services/tools/readMealsTool";
-import { SearchMealsByDateTool } from "@/services/tools/searchMealsByDateTool";
 import { ShowWidgetTool } from "@/services/tools/showWidgetTool";
+import { AddMealToWeekTool } from "@/services/tools/addMealToWeekTool";
+import { RemoveMealFromWeekTool } from "@/services/tools/removeMealFromWeekTool";
+import { GenerateWeekSelectionTool } from "@/services/tools/generateWeekSelectionTool";
+import { ReadWeekSelectionTool } from "@/services/tools/readWeekSelectionTool";
 import {
     ChatPromptTemplate,
     MessagesPlaceholder,
@@ -35,10 +37,18 @@ const fullAgentPrompt = ChatPromptTemplate.fromMessages([
 ]);
 
 const tools: StructuredTool[] = [
+    // Core meal management
     ReadMealsTool,
     AddOrUpdateMealTool,
     DeleteMealTool,
-    SearchMealsByDateTool,
+    
+    // Week selection management
+    AddMealToWeekTool,
+    RemoveMealFromWeekTool,
+    GenerateWeekSelectionTool,
+    ReadWeekSelectionTool,
+    
+    // UI widgets
     ShowWidgetTool,
 ];
 

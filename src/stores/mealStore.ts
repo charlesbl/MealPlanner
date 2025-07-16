@@ -15,22 +15,12 @@ export interface Meal {
     name: string;
     description: string;
     mealType: MealType;
-    date: Date;
     createdAt: Date;
 }
 
-// Define the structure for date-based meal assignments
-export interface DateMeal {
-    id: string;
-    mealId: string;
-    date: string; // YYYY-MM-DD format
-    createdAt: Date;
-}
-
-// Update the meals state to include date assignments
+// Update the meals state - simplified without dates
 export interface MealsState {
     meals: Meal[];
-    dateMeals: DateMeal[]; // New field for date-based assignments
 }
 
 // Helper function to validate the loaded meals data
@@ -44,6 +34,7 @@ function isValidMealsState(data: any): data is MealsState {
         console.warn("Invalid meals data: meals is not an array.");
         return false;
     }
+    
     for (const meal of data.meals) {
         if (
             typeof meal !== "object" ||
@@ -52,7 +43,6 @@ function isValidMealsState(data: any): data is MealsState {
             typeof meal.name !== "string" ||
             typeof meal.description !== "string" ||
             !Object.values(MealType).includes(meal.mealType) ||
-            !meal.date ||
             !meal.createdAt
         ) {
             console.warn("Invalid meals data: invalid meal structure.", meal);
@@ -73,27 +63,37 @@ function loadMealsFromLocalStorage(): MealsState {
         } catch (e) {
             console.error("Error parsing meals from localStorage", e);
             localStorage.removeItem("meals");
-            return { meals: [], dateMeals: [] };
-        } // Convert createdAt and date strings back to Date objects
+            return { meals: [] };
+        }
+        
+        // Convert createdAt strings back to Date objects and handle migration from old format
         if (parsedMeals.meals) {
             parsedMeals.meals = parsedMeals.meals.map((meal: any) => ({
-                ...meal,
-                date: new Date(meal.date),
+                id: meal.id,
+                name: meal.name,
+                description: meal.description,
+                mealType: meal.mealType,
                 createdAt: new Date(meal.createdAt),
+                // Ignore the old 'date' field during migration
             }));
         }
 
-        if (isValidMealsState(parsedMeals)) {
-            return parsedMeals;
+        // Ensure we have the correct structure (handle old format)
+        const migratedData = {
+            meals: parsedMeals.meals || []
+        };
+
+        if (isValidMealsState(migratedData)) {
+            return migratedData;
         } else {
             console.warn(
                 "Stored meals data failed validation. Discarding invalid data."
             );
             localStorage.removeItem("meals");
-            return { meals: [], dateMeals: [] };
+            return { meals: [] };
         }
     }
-    return { meals: [], dateMeals: [] };
+    return { meals: [] };
 }
 
 // Helper function to generate unique ID
@@ -119,8 +119,7 @@ export const useMealStore = defineStore("mealStore", () => {
     function addMeal(
         name: string,
         description: string,
-        mealType: MealType,
-        date: Date = new Date()
+        mealType: MealType
     ): string {
         const id = generateId();
         const newMeal: Meal = {
@@ -128,18 +127,18 @@ export const useMealStore = defineStore("mealStore", () => {
             name: name.trim(),
             description: description.trim(),
             mealType,
-            date,
             createdAt: new Date(),
         };
         state.meals.push(newMeal);
         return id;
     }
+    
     // Action to update an existing meal
     function updateMeal(
         id: string,
         updates: Partial<Omit<Meal, "id" | "createdAt">>
     ): boolean {
-        const mealIndex = state.meals.findIndex((meal) => meal.id === id);
+        const mealIndex = state.meals.findIndex((meal: Meal) => meal.id === id);
         if (mealIndex === -1) {
             return false;
         }
@@ -154,16 +153,13 @@ export const useMealStore = defineStore("mealStore", () => {
         if (updates.mealType !== undefined) {
             state.meals[mealIndex].mealType = updates.mealType;
         }
-        if (updates.date !== undefined) {
-            state.meals[mealIndex].date = updates.date;
-        }
 
         return true;
     }
 
     // Action to delete a meal
     function deleteMeal(id: string): boolean {
-        const mealIndex = state.meals.findIndex((meal) => meal.id === id);
+        const mealIndex = state.meals.findIndex((meal: Meal) => meal.id === id);
         if (mealIndex === -1) {
             return false;
         }
@@ -173,75 +169,18 @@ export const useMealStore = defineStore("mealStore", () => {
 
     // Action to get a meal by ID
     function getMealById(id: string): Meal | undefined {
-        return state.meals.find((meal) => meal.id === id);
+        return state.meals.find((meal: Meal) => meal.id === id);
     }
 
     // Action to get meals by type
     function getMealsByType(mealType: MealType): Meal[] {
-        return state.meals.filter((meal) => meal.mealType === mealType);
+        return state.meals.filter((meal: Meal) => meal.mealType === mealType);
     }
 
     // Action to get all meals sorted by creation date (newest first)
     function getAllMeals(): Meal[] {
         return [...state.meals].sort(
             (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-        );
-    } // Action to get meals by date
-    function getMealsByDate(date: Date): Meal[];
-    function getMealsByDate(dateString: string): Meal[];
-    function getMealsByDate(dateInput: Date | string): Meal[] {
-        const targetDate =
-            typeof dateInput === "string"
-                ? new Date(dateInput)
-                : new Date(
-                      dateInput.getFullYear(),
-                      dateInput.getMonth(),
-                      dateInput.getDate()
-                  );
-
-        const normalizedTargetDate = new Date(
-            targetDate.getFullYear(),
-            targetDate.getMonth(),
-            targetDate.getDate()
-        );
-
-        return state.meals.filter((meal) => {
-            const mealDate = new Date(
-                meal.date.getFullYear(),
-                meal.date.getMonth(),
-                meal.date.getDate()
-            );
-            return mealDate.getTime() === normalizedTargetDate.getTime();
-        });
-    }
-
-    // Action to get meals within a date range
-    function getMealsByDateRange(startDate: Date, endDate: Date): Meal[] {
-        return state.meals
-            .filter((meal) => {
-                const mealDate = new Date(
-                    meal.date.getFullYear(),
-                    meal.date.getMonth(),
-                    meal.date.getDate()
-                );
-                const start = new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth(),
-                    startDate.getDate()
-                );
-                const end = new Date(
-                    endDate.getFullYear(),
-                    endDate.getMonth(),
-                    endDate.getDate()
-                );
-                return mealDate >= start && mealDate <= end;
-            })
-            .sort((a, b) => a.date.getTime() - b.date.getTime());
-    }
-    // Action to get all meals sorted by date (oldest first)
-    function getAllMealsSortedByDate(): Meal[] {
-        return [...state.meals].sort(
-            (a, b) => a.date.getTime() - b.date.getTime()
         );
     }
     // --- Getters ---
@@ -258,9 +197,6 @@ export const useMealStore = defineStore("mealStore", () => {
         getMealById,
         getMealsByType,
         getAllMeals,
-        getMealsByDate,
-        getMealsByDateRange,
-        getAllMealsSortedByDate,
 
         // Getters
         mealCount,

@@ -5,11 +5,14 @@ import { computed, ref } from "vue";
 
 interface Props {
     meal: Meal;
+    isInWeek?: boolean;
 }
 
 interface Emits {
     (e: "edit", meal: Meal): void;
     (e: "delete", meal: Meal): void;
+    (e: "add-to-week", meal: Meal): void;
+    (e: "remove-from-week", meal: Meal): void;
 }
 
 const props = defineProps<Props>();
@@ -90,6 +93,22 @@ function getMealTypeColor(mealType: string): string {
                 >
                     🗑️
                 </button>
+                <button
+                    v-if="!props.isInWeek"
+                    @click="emit('add-to-week', props.meal)"
+                    class="action-btn week-btn add-week-btn"
+                    title="Add to week"
+                >
+                    ➕
+                </button>
+                <button
+                    v-else
+                    @click="emit('remove-from-week', props.meal)"
+                    class="action-btn week-btn remove-week-btn"
+                    title="Remove from week"
+                >
+                    ➖
+                </button>
             </div>
         </div>
         <div class="meal-content">
@@ -104,9 +123,12 @@ function getMealTypeColor(mealType: string): string {
                 {{ showFullDescription ? "Show less" : "Show more" }}
             </button>
             <div class="meal-date">
-                <span class="date-label"
-                    >📅 {{ formatDate(props.meal.date) }}</span
-                >
+                <span class="date-label">
+                    📅 Créé le {{ formatDate(props.meal.createdAt) }}
+                </span>
+                <span v-if="props.isInWeek" class="week-indicator">
+                    ⭐ Dans ma semaine
+                </span>
             </div>
         </div>
 
@@ -183,6 +205,29 @@ function getMealTypeColor(mealType: string): string {
 
 .delete-btn:hover {
     background-color: #ffebee;
+}
+
+.week-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+}
+
+.add-week-btn:hover {
+    background-color: #e8f5e8;
+}
+
+.remove-week-btn:hover {
+    background-color: #fff3cd;
 }
 
 .meal-content {
@@ -319,6 +364,13 @@ function getMealTypeColor(mealType: string): string {
     font-size: 0.9rem;
     color: #2196f3;
     font-weight: 500;
+}
+
+.week-indicator {
+    font-size: 0.8rem;
+    color: #ff9800;
+    font-weight: 600;
+    margin-left: 10px;
 }
 
 .meal-footer {

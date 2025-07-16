@@ -16,10 +16,8 @@
 
                 <div class="meal-details">
                     <div class="detail-item">
-                        <span class="detail-label">📅 Date:</span>
-                        <span class="detail-value">{{
-                            formatDate(meal.date)
-                        }}</span>
+                        <span class="detail-label">🍽️ Type:</span>
+                        <span class="detail-value">{{ meal.mealType }}</span>
                     </div>
 
                     <div class="detail-item">
@@ -91,15 +89,6 @@ const meal = computed(() => {
 });
 
 // Methods
-function formatDate(date: Date): string {
-    return date.toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-    });
-}
-
 function formatDateTime(date: Date): string {
     return date.toLocaleDateString("en-US", {
         month: "short",
@@ -129,8 +118,7 @@ function duplicateMeal() {
     const newMealId = mealStore.addMeal(
         duplicatedName,
         meal.value.description,
-        meal.value.mealType,
-        new Date()
+        meal.value.mealType
     );
 
     console.log("Duplicated meal with ID:", newMealId);

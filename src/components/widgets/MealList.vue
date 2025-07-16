@@ -42,8 +42,8 @@
                 <p class="meal-description">{{ meal.description }}</p>
 
                 <div class="meal-meta">
-                    <span class="meal-date">
-                        📅 {{ formatDate(meal.date) }}
+                    <span class="meal-type">
+                        🍽️ {{ meal.mealType }}
                     </span>
                     <span class="meal-created">
                         Created: {{ formatDateTime(meal.createdAt) }}
@@ -132,15 +132,8 @@ const filteredMeals = computed(() => {
     }
 
     // Filter by date
-    if (selectedDate.value) {
-        meals = meals.filter((meal) => {
-            const mealDate = meal.date.toISOString().split("T")[0];
-            return mealDate === selectedDate.value;
-        });
-    }
-
-    // Sort by date (newest first)
-    meals = meals.sort((a, b) => b.date.getTime() - a.date.getTime());
+    // Sort by creation date (newest first)
+    meals = meals.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     // Pagination
     if (props.showPagination) {
@@ -163,26 +156,10 @@ const totalPages = computed(() => {
         );
     }
 
-    if (selectedDate.value) {
-        totalMeals = totalMeals.filter((meal) => {
-            const mealDate = meal.date.toISOString().split("T")[0];
-            return mealDate === selectedDate.value;
-        });
-    }
-
     return Math.ceil(totalMeals.length / props.limit);
 });
 
 // Methods
-function formatDate(date: Date): string {
-    return date.toLocaleDateString("en-US", {
-        weekday: "short",
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    });
-}
-
 function formatDateTime(date: Date): string {
     return date.toLocaleDateString("en-US", {
         month: "short",

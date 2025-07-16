@@ -10,7 +10,7 @@ const readMealsSchema = z.object({
 
 export const ReadMealsTool = new DynamicStructuredTool({
   name: "read_meals",
-  description: `Reads all meals or filters by meal type. Valid meal types are: ${Object.values(MealType).join(', ')}. Returns meals sorted by creation date (newest first).`,
+  description: `Reads all meals from the deck or filters by meal type. Valid meal types are: ${Object.values(MealType).join(', ')}. Returns meals sorted by creation date (newest first). Meals are stored without specific dates and can be reused in weekly selections.`,
   schema: readMealsSchema,
   func: async (input: z.infer<typeof readMealsSchema>): Promise<string> => {
     const mealStore = useMealStore();
@@ -25,19 +25,19 @@ export const ReadMealsTool = new DynamicStructuredTool({
       
       if (meals.length === 0) {
         const filterText = input.mealType ? ` for ${input.mealType}` : '';
-        return `No meals found${filterText}.`;
+        return `No meals found${filterText} in your deck.`;
       }
       
       // Format output for better readability
-      let output = `Found ${meals.length} meal${meals.length > 1 ? 's' : ''}`;
+      let output = `Found ${meals.length} meal${meals.length > 1 ? 's' : ''} in your deck`;
       if (input.mealType) {
         output += ` (${input.mealType})`;
       }
       output += ':\n\n';
-        meals.forEach((meal, index) => {
+      
+      meals.forEach((meal, index) => {
         output += `${index + 1}. **${meal.name}** (${meal.mealType})\n`;
         output += `   ID: ${meal.id}\n`;
-        output += `   Date: ${meal.date.toLocaleDateString()}\n`;
         if (meal.description) {
           output += `   Description: ${meal.description}\n`;
         }

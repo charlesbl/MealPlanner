@@ -20,7 +20,6 @@ const formData = ref({
   name: "",
   description: "",
   mealType: MealType.Breakfast,
-  date: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
 });
 
 const isEditing = ref(false);
@@ -41,7 +40,6 @@ watch(
         name: newMeal.name,
         description: newMeal.description,
         mealType: newMeal.mealType,
-        date: newMeal.date.toISOString().split('T')[0],
       };
     } else {
       isEditing.value = false;
@@ -57,7 +55,6 @@ function resetForm() {
     name: "",
     description: "",
     mealType: MealType.Breakfast,
-    date: new Date().toISOString().split('T')[0],
   };
   errors.value = {
     name: "",
@@ -101,15 +98,13 @@ function handleSubmit() {
       name: formData.value.name,
       description: formData.value.description,
       mealType: formData.value.mealType,
-      date: new Date(formData.value.date),
     });
   } else {
     // Add new meal
     mealStore.addMeal(
       formData.value.name,
       formData.value.description,
-      formData.value.mealType,
-      new Date(formData.value.date)
+      formData.value.mealType
     );
   }
 
@@ -162,16 +157,6 @@ onMounted(() => {
               {{ type }}
             </option>
           </select>
-        </div>
-
-        <div class="form-group">
-          <label for="date" class="form-label">Date</label>
-          <input
-            id="date"
-            v-model="formData.date"
-            type="date"
-            class="form-input"
-          />
         </div>
 
         <div class="form-group">

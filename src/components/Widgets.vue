@@ -36,7 +36,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useWidgetsStore, WidgetType } from "../stores/widgetsStore";
-import Calendar from "./widgets/Calendar.vue";
+import MealDeck from "./widgets/MealDeck.vue";
+import WeekView from "./widgets/WeekView.vue";
 import Meal from "./widgets/Meal.vue";
 import MealList from "./widgets/MealList.vue";
 
@@ -48,8 +49,10 @@ const visibleWidgets = computed(() => widgetsStore.getVisibleWidgets());
 // Methods
 function getWidgetComponent(type: WidgetType) {
     switch (type) {
-        case WidgetType.Calendar:
-            return Calendar;
+        case WidgetType.MealDeck:
+            return MealDeck;
+        case WidgetType.WeekView:
+            return WeekView;
         case WidgetType.MealList:
             return MealList;
         case WidgetType.Meal:
@@ -61,12 +64,14 @@ function getWidgetComponent(type: WidgetType) {
 
 function getWidgetTitle(widget: any): string {
     switch (widget.type) {
-        case WidgetType.Calendar:
-            return "Meal Calendar";
+        case WidgetType.MealDeck:
+            return "Mon Deck de Repas";
+        case WidgetType.WeekView:
+            return "Ma Sélection de la Semaine";
         case WidgetType.MealList:
-            return widget.props?.title || "Meal List";
+            return widget.props?.title || "Liste des Repas";
         case WidgetType.Meal:
-            return widget.props?.meal?.name || "Meal Details";
+            return widget.props?.meal?.name || "Détails du Repas";
         default:
             return "Widget";
     }
