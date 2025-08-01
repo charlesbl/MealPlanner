@@ -1,10 +1,13 @@
-import { createApp } from 'vue'
-import { createPinia } from 'pinia' // Import Pinia
-import './style.css'
-import App from './App.vue'
+import { createPinia } from "pinia"; // Import Pinia
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./style.css";
 
-const pinia = createPinia() // Create Pinia instance
-const app = createApp(App)
+if ("virtualKeyboard" in navigator) {
+    navigator.virtualKeyboard.overlaysContent = true;
+}
+const pinia = createPinia(); // Create Pinia instance
+const app = createApp(App);
 
-app.use(pinia) // Use Pinia
-app.mount('#app')
+app.use(pinia); // Use Pinia
+app.mount("#app");

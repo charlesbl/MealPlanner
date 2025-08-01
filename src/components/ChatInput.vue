@@ -41,7 +41,6 @@ const handleKeydown = (event: KeyboardEvent) => {
 <style scoped>
 .input-area-wrapper {
     width: 100%;
-    height: 65px;
 }
 .input-area {
     display: flex;

@@ -1,18 +1,48 @@
 <script lang="ts" setup>
+import { onMounted, onUnmounted, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
+
+const chatInputRef = ref<InstanceType<typeof ChatInput>>();
+const inputAreaHeight = ref(10); // Default height
+
+const updateInputAreaHeight = () => {
+    if (chatInputRef.value?.$el) {
+        const height = chatInputRef.value.$el.offsetHeight;
+        inputAreaHeight.value = height;
+    }
+};
 
 const handleSendMessage = (message: string) => {
     console.log("Message sent:", message);
     // TODO: Implement message sending logic
 };
+
+onMounted(() => {
+    // Update height after component is mounted
+    updateInputAreaHeight();
+
+    // Watch for window resize events that might affect the input area
+    window.addEventListener("resize", updateInputAreaHeight);
+});
+
+onUnmounted(() => {
+    window.removeEventListener("resize", updateInputAreaHeight);
+});
 </script>
 
 <template>
     <div class="chat-container">
-        <div class="messages">
-            <div v-for="value in 5" :key="value">message {{ value }}</div>
+        <div
+            class="messages"
+            :style="{ paddingBottom: `${inputAreaHeight}px` }"
+        >
+            <div v-for="value in 50" :key="value">message {{ value }}</div>
         </div>
-        <ChatInput class="chat-input" @send-message="handleSendMessage" />
+        <ChatInput
+            ref="chatInputRef"
+            class="chat-input"
+            @send-message="handleSendMessage"
+        />
     </div>
 </template>
 
@@ -25,12 +55,16 @@ const handleSendMessage = (message: string) => {
     justify-content: space-between;
 }
 .messages {
+    height: 100dvh;
     overflow-y: auto;
-    padding-bottom: 80px; /* Adjust based on ChatInput height */
+    background-color: lightgreen;
 }
 .chat-input {
-    position: absolute;
+    height: 0;
+    overflow: visible;
+    position: relative;
     left: 0;
-    bottom: 16px;
+    /* TODO change position it if the keyboard is open */
+    bottom: 500px;
 }
 </style>
