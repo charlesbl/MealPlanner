@@ -2,15 +2,10 @@
 
 <template>
     <div class="chat-container">
-        <div>
-            <div>message 1</div>
-            <div>message 2</div>
-            <div>message 3</div>
-            <div>message 4</div>
-            <div>message 5</div>
-            <div>message 6</div>
+        <div class="messages">
+            <div v-for="value in 50">message {{ value }}</div>
         </div>
-        <div>
+        <div class="input-area">
             <input type="text" placeholder="Type a message..." />
             <button>Send</button>
         </div>
@@ -20,5 +15,15 @@
 <style scoped>
 .chat-container {
     background-color: green;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.messages {
+    overflow-y: auto;
+}
+.input-area {
+    display: flex;
+    justify-content: space-between;
 }
 </style>
