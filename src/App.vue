@@ -17,6 +17,7 @@ import Week from "./components/pages/Week.vue";
     display: grid;
     grid-template-columns: repeat(3, 100vw);
     height: 100dvh;
+    overflow: hidden;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
@@ -29,5 +30,6 @@ import Week from "./components/pages/Week.vue";
     scroll-snap-align: start;
     scroll-snap-stop: always;
     overflow-y: auto;
+    overflow: hidden;
 }
 </style>
