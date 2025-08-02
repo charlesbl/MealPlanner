@@ -3,9 +3,6 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import "./style.css";
 
-if ("virtualKeyboard" in navigator) {
-    navigator.virtualKeyboard.overlaysContent = true;
-}
 const pinia = createPinia(); // Create Pinia instance
 const app = createApp(App);
 

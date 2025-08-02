@@ -8,10 +8,8 @@ const emit = defineEmits<{
 }>();
 
 const sendMessage = () => {
-    if (message.value.trim()) {
-        emit("sendMessage", message.value.trim());
-        message.value = "";
-    }
+    emit("sendMessage", message.value.trim());
+    message.value = "";
 };
 
 const handleKeydown = (event: KeyboardEvent) => {
@@ -31,9 +29,7 @@ const handleKeydown = (event: KeyboardEvent) => {
                 placeholder="Type a message..."
                 @keydown="handleKeydown"
             />
-            <button @click="sendMessage" :disabled="!message.trim()">
-                Send
-            </button>
+            <button @click="sendMessage">Send</button>
         </div>
     </div>
 </template>

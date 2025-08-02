@@ -3,7 +3,20 @@ import { onMounted, onUnmounted, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 
 const chatInputRef = ref<InstanceType<typeof ChatInput>>();
-const inputAreaHeight = ref(10); // Default height
+const inputAreaHeight = ref(0);
+const currentHeight = ref(window.visualViewport?.height || window.innerHeight);
+const messagesCount = ref(50);
+
+const handleSendMessage = (message: string) => {
+    console.log("Message sent:", message);
+    // TODO: Implement message sending logic
+    messagesCount.value += 1; // Increment message count for demonstration
+};
+
+const handleViewportChange = () => {
+    updateCurrentHeight();
+    updateInputAreaHeight();
+};
 
 const updateInputAreaHeight = () => {
     if (chatInputRef.value?.$el) {
@@ -12,31 +25,49 @@ const updateInputAreaHeight = () => {
     }
 };
 
-const handleSendMessage = (message: string) => {
-    console.log("Message sent:", message);
-    // TODO: Implement message sending logic
+const updateCurrentHeight = () => {
+    if (window.visualViewport) {
+        currentHeight.value = window.visualViewport.height;
+    } else {
+        currentHeight.value = window.innerHeight;
+    }
 };
 
 onMounted(() => {
-    // Update height after component is mounted
     updateInputAreaHeight();
 
-    // Watch for window resize events that might affect the input area
-    window.addEventListener("resize", updateInputAreaHeight);
+    window.addEventListener("resize", handleViewportChange);
+
+    if ("visualViewport" in window && window.visualViewport) {
+        window.visualViewport.addEventListener("resize", handleViewportChange);
+        window.visualViewport.addEventListener("scroll", handleViewportChange);
+    }
 });
 
 onUnmounted(() => {
-    window.removeEventListener("resize", updateInputAreaHeight);
+    window.removeEventListener("resize", handleViewportChange);
+
+    if ("visualViewport" in window && window.visualViewport) {
+        window.visualViewport.removeEventListener(
+            "resize",
+            handleViewportChange
+        );
+        window.visualViewport.removeEventListener(
+            "scroll",
+            handleViewportChange
+        );
+    }
 });
 </script>
 
 <template>
     <div class="chat-container">
-        <div
-            class="messages"
-            :style="{ paddingBottom: `${inputAreaHeight}px` }"
-        >
-            <div v-for="value in 50" :key="value">message {{ value }}</div>
+        <div class="messages">
+            {{ inputAreaHeight }}
+            {{ currentHeight }}
+            <div v-for="value in messagesCount" :key="value">
+                message {{ value }}
+            </div>
         </div>
         <ChatInput
             ref="chatInputRef"
@@ -49,22 +80,15 @@ onUnmounted(() => {
 <style scoped>
 .chat-container {
     background-color: green;
-    height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
+
 .messages {
-    height: 100dvh;
+    height: v-bind(currentHeight - inputAreaHeight + "px");
     overflow-y: auto;
     background-color: lightgreen;
-}
-.chat-input {
-    height: 0;
-    overflow: visible;
-    position: relative;
-    left: 0;
-    /* TODO change position it if the keyboard is open */
-    bottom: 500px;
+    transition: height 0.3s ease-in-out;
 }
 </style>
