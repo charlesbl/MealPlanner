@@ -16,7 +16,7 @@ import Week from "./components/pages/Week.vue";
 .app-container {
     display: grid;
     grid-template-columns: repeat(3, 100vw);
-    height: 100vh;
+    height: 100dvh;
     overflow: hidden;
     overflow-x: auto;
     scroll-snap-type: x mandatory;

@@ -32,7 +32,7 @@ const handleSendMessage = (message: string) => {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    height: 100dvh;
+    height: 100%;
 }
 
 .messages {
