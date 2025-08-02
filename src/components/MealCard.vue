@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Meal } from "../stores/mealStore";
+import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 interface Props {
     meal: Meal;
@@ -32,7 +33,9 @@ function formatDate(date: Date): string {
                 formatMealTypes(meal.mealTypes)
             }}</span>
         </div>
-        <p class="meal-description">{{ meal.description }}</p>
+        <p class="meal-description">
+            <MarkdownRenderer>{{ meal.description }}</MarkdownRenderer>
+        </p>
         <div class="meal-footer">
             <span class="meal-date">{{ formatDate(meal.createdAt) }}</span>
         </div>
