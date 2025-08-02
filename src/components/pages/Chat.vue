@@ -1,9 +1,5 @@
 <script lang="ts" setup>
 import { sendMessageToBotStream } from "@/services/chatService";
-import type {
-    ChainEndEventData,
-    ChatModelStreamEventData,
-} from "@/services/streamEventHandlers";
 import { loadChatHistory, saveChatHistory } from "@/storage/chatHistoryStorage";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { nextTick, onMounted, ref, watch } from "vue";
@@ -104,19 +100,31 @@ const handleSendMessage = async (message: string) => {
         for await (const event of stream) {
             if (event.type === "chat_model_stream") {
                 // Update the bot message content
-                const streamEvent = event as ChatModelStreamEventData;
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += streamEvent.chunk;
+                    lastMessage.content += event.chunk;
                     await scrollToBottom();
                 }
             } else if (event.type === "chain_end") {
                 // Final message received, stop streaming indicator
-                const chainEvent = event as ChainEndEventData;
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content = chainEvent.finalOutput;
+                    lastMessage.content = event.finalOutput;
                     lastMessage.isStreaming = false;
+                    await scrollToBottom();
+                }
+            } else if (event.type === "tool_call") {
+                // Tool is being called, show indicator
+                const lastMessage = messages.value[messages.value.length - 1];
+                if (lastMessage && !lastMessage.isUser) {
+                    lastMessage.content += `\n🔧 Using ${event.toolName}...`;
+                    await scrollToBottom();
+                }
+            } else if (event.type === "tool_end") {
+                // Tool execution completed
+                const lastMessage = messages.value[messages.value.length - 1];
+                if (lastMessage && !lastMessage.isUser) {
+                    lastMessage.content += `\n✅ ${event.toolName} completed.`;
                     await scrollToBottom();
                 }
             }

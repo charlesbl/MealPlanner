@@ -7,34 +7,36 @@
 
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 
-export interface StreamEventData {
-    type:
-        | "chat_model_stream"
-        | "chain_end"
-        | "tool_call"
-        | "tool_end"
-        | "useless_event";
-}
-
-export interface ChatModelStreamEventData extends StreamEventData {
+export interface ChatModelStreamEventData {
     type: "chat_model_stream";
     chunk: string;
 }
-export interface ChainEndEventData extends StreamEventData {
+
+export interface ChainEndEventData {
     type: "chain_end";
     finalOutput: string;
 }
-export interface ToolCallEventData extends StreamEventData {
+
+export interface ToolCallEventData {
     type: "tool_call";
     toolName: string;
 }
-export interface ToolEndEventData extends StreamEventData {
+
+export interface ToolEndEventData {
     type: "tool_end";
     toolName: string;
 }
-export interface UselessEventData extends StreamEventData {
+
+export interface UselessEventData {
     type: "useless_event";
 }
+
+export type StreamEventData =
+    | ChatModelStreamEventData
+    | ChainEndEventData
+    | ToolCallEventData
+    | ToolEndEventData
+    | UselessEventData;
 
 export class StreamEventHandlerImpl {
     handleChatModelStreamEvent(
