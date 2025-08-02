@@ -1,6 +1,14 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 
+interface Props {
+    disabled?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+    disabled: false,
+});
+
 const message = ref("");
 
 const emit = defineEmits<{
@@ -8,6 +16,8 @@ const emit = defineEmits<{
 }>();
 
 const sendMessage = () => {
+    if (props.disabled || !message.value.trim()) return;
+
     emit("sendMessage", message.value.trim());
     message.value = "";
 };
@@ -27,9 +37,15 @@ const handleKeydown = (event: KeyboardEvent) => {
                 v-model="message"
                 type="text"
                 placeholder="Type a message..."
+                :disabled="disabled"
                 @keydown="handleKeydown"
             />
-            <button @click="sendMessage">Send</button>
+            <button
+                :disabled="disabled || !message.trim()"
+                @click="sendMessage"
+            >
+                Send
+            </button>
         </div>
     </div>
 </template>
@@ -58,6 +74,13 @@ const handleKeydown = (event: KeyboardEvent) => {
 .input-area-wrapper input:focus {
     border-color: #007bff;
     box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.input-area-wrapper input:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .input-area-wrapper button {

@@ -13,14 +13,13 @@
  */
 
 import { llm } from "@/config/llmConfig";
+import { AddMealToWeekTool } from "@/services/tools/addMealToWeekTool";
 import { AddOrUpdateMealTool } from "@/services/tools/addOrUpdateMealTool";
 import { DeleteMealTool } from "@/services/tools/deleteMealTool";
 import { ReadMealsTool } from "@/services/tools/readMealsTool";
-import { ShowWidgetTool } from "@/services/tools/showWidgetTool";
-import { AddMealToWeekTool } from "@/services/tools/addMealToWeekTool";
-import { RemoveMealFromWeekTool } from "@/services/tools/removeMealFromWeekTool";
-import { GenerateWeekSelectionTool } from "@/services/tools/generateWeekSelectionTool";
 import { ReadWeekSelectionTool } from "@/services/tools/readWeekSelectionTool";
+import { RemoveMealFromWeekTool } from "@/services/tools/removeMealFromWeekTool";
+import { ShowWidgetTool } from "@/services/tools/showWidgetTool";
 import {
     ChatPromptTemplate,
     MessagesPlaceholder,
@@ -41,13 +40,12 @@ const tools: StructuredTool[] = [
     ReadMealsTool,
     AddOrUpdateMealTool,
     DeleteMealTool,
-    
+
     // Week selection management
     AddMealToWeekTool,
     RemoveMealFromWeekTool,
-    GenerateWeekSelectionTool,
     ReadWeekSelectionTool,
-    
+
     // UI widgets
     ShowWidgetTool,
 ];
