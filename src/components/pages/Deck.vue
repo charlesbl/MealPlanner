@@ -16,6 +16,9 @@ import MealCard from "../MealCard.vue";
 
 <style scoped>
 .deck-container {
-    background-color: blue;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    height: 100%;
+    padding: 16px;
 }
 </style>

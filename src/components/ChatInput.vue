@@ -58,35 +58,40 @@ const handleKeydown = (event: KeyboardEvent) => {
     display: flex;
     gap: 8px;
     padding: 8px;
-    /* background-color: #f8f9fa; */
 }
 
 .input-area-wrapper input {
     flex: 1;
     padding: 12px 16px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border-dark);
     border-radius: 24px;
     font-size: 16px;
     outline: none;
     transition: border-color 0.2s ease;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.input-area-wrapper input::placeholder {
+    color: var(--text-placeholder);
 }
 
 .input-area-wrapper input:focus {
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 2px rgba(77, 171, 247, 0.25);
 }
 
 .input-area-wrapper input:disabled {
-    background-color: #f8f9fa;
-    color: #6c757d;
+    background-color: var(--bg-accent);
+    color: var(--text-muted);
     cursor: not-allowed;
     opacity: 0.6;
 }
 
 .input-area-wrapper button {
     padding: 12px 20px;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--accent-blue);
+    color: var(--bg-primary);
     border: none;
     border-radius: 24px;
     font-size: 16px;
@@ -97,7 +102,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 .input-area-wrapper button:hover:not(:disabled) {
-    background-color: #0056b3;
+    background-color: var(--accent-blue-hover);
 }
 
 .input-area-wrapper button:active:not(:disabled) {
@@ -105,7 +110,7 @@ const handleKeydown = (event: KeyboardEvent) => {
 }
 
 .input-area-wrapper button:disabled {
-    background-color: #6c757d;
+    background-color: var(--text-muted);
     cursor: not-allowed;
     opacity: 0.6;
 }

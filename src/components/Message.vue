@@ -71,14 +71,14 @@ const renderedContent = computed(() => {
 }
 
 .user-message .message-text {
-    background-color: #007bff;
-    color: white;
+    background-color: var(--accent-blue);
+    color: var(--bg-primary);
     border-bottom-right-radius: 6px;
 }
 
 .bot-message .message-text {
-    background-color: #f1f3f4;
-    color: #333;
+    background-color: var(--chat-bot-bg);
+    color: var(--text-primary);
     border-bottom-left-radius: 6px;
 }
 
@@ -135,7 +135,7 @@ const renderedContent = computed(() => {
 }
 
 .bot-message .message-markdown :deep(code) {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: var(--code-bg);
     padding: 0.125em 0.25em;
     border-radius: 3px;
     font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
@@ -143,7 +143,7 @@ const renderedContent = computed(() => {
 }
 
 .bot-message .message-markdown :deep(pre) {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--code-bg-block);
     padding: 0.75em;
     border-radius: 6px;
     overflow-x: auto;
@@ -156,10 +156,10 @@ const renderedContent = computed(() => {
 }
 
 .bot-message .message-markdown :deep(blockquote) {
-    border-left: 3px solid #ddd;
+    border-left: 3px solid var(--border-dark);
     margin: 0.5em 0;
     padding-left: 1em;
-    color: #666;
+    color: var(--text-tertiary);
 }
 
 .bot-message .message-markdown :deep(strong),
@@ -173,12 +173,12 @@ const renderedContent = computed(() => {
 }
 
 .bot-message .message-markdown :deep(a) {
-    color: #007bff;
+    color: var(--accent-blue);
     text-decoration: underline;
 }
 
 .bot-message .message-markdown :deep(a:hover) {
-    color: #0056b3;
+    color: var(--accent-blue-hover);
 }
 
 @keyframes blink {

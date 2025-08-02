@@ -179,22 +179,22 @@ const handleSendMessage = async (message: string) => {
     flex-direction: column;
     justify-content: space-between;
     height: 100%;
-    background-color: #ffffff;
+    background-color: var(--bg-primary);
 }
 
 .chat-header {
     display: flex;
     justify-content: flex-end;
     padding: 12px 16px;
-    border-bottom: 1px solid #e1e5e9;
-    background-color: #ffffff;
+    border-bottom: 1px solid var(--border-medium);
+    background-color: var(--bg-primary);
     flex-shrink: 0;
 }
 
 .clear-button {
     padding: 6px 12px;
-    background-color: #dc3545;
-    color: white;
+    background-color: var(--accent-red);
+    color: var(--bg-primary);
     border: none;
     border-radius: 4px;
     font-size: 14px;
@@ -203,7 +203,7 @@ const handleSendMessage = async (message: string) => {
 }
 
 .clear-button:hover {
-    background-color: #c82333;
+    background-color: var(--accent-red-hover);
 }
 
 .clear-button:active {
@@ -214,7 +214,7 @@ const handleSendMessage = async (message: string) => {
     overflow-y: auto;
     flex-grow: 1;
     padding: 16px 0;
-    background-color: #fafafa;
+    background-color: var(--bg-secondary);
     min-height: 0;
 }
 
@@ -222,7 +222,7 @@ const handleSendMessage = async (message: string) => {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #666;
+    color: var(--text-tertiary);
     text-align: center;
     padding: 20px;
 }
@@ -234,7 +234,7 @@ const handleSendMessage = async (message: string) => {
 
 .chat-input {
     flex-shrink: 0;
-    border-top: 1px solid #e1e5e9;
-    background-color: #ffffff;
+    border-top: 1px solid var(--border-medium);
+    background-color: var(--bg-primary);
 }
 </style>

@@ -3,9 +3,11 @@ import { onMounted, ref } from "vue";
 import Chat from "./components/pages/Chat.vue";
 import Deck from "./components/pages/Deck.vue";
 import Week from "./components/pages/Week.vue";
+import { useDarkMode } from "./composables/useDarkMode";
+
+useDarkMode();
 
 const appContainer = ref<HTMLElement>();
-
 onMounted(() => {
     // Scroll to the Chat page (middle page) on app load without animation
     if (appContainer.value) {
@@ -41,7 +43,7 @@ onMounted(() => {
     scroll-behavior: auto; /* Will be set to smooth after initial positioning */
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    background-color: darkblue;
+    background-color: var(--bg-secondary);
     opacity: 0; /* Hide initially to prevent flash */
     transition: opacity 0.1s ease-in;
 }
