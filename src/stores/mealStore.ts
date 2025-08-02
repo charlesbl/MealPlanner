@@ -42,7 +42,9 @@ function isValidMealsState(data: any): data is MealsState {
             typeof meal.id !== "string" ||
             typeof meal.name !== "string" ||
             typeof meal.description !== "string" ||
-            !Object.values(MealType).includes(meal.mealType) ||
+            !Array.isArray(meal.mealTypes) ||
+            meal.mealTypes.length === 0 ||
+            !meal.mealTypes.every((type: any) => Object.values(MealType).includes(type)) ||
             !meal.createdAt
         ) {
             console.warn("Invalid meals data: invalid meal structure.", meal);
@@ -72,7 +74,7 @@ function loadMealsFromLocalStorage(): MealsState {
                 id: meal.id,
                 name: meal.name,
                 description: meal.description,
-                mealType: meal.mealType,
+                mealTypes: meal.mealTypes || (meal.mealType ? [meal.mealType] : []),
                 createdAt: new Date(meal.createdAt),
                 // Ignore the old 'date' field during migration
             }));

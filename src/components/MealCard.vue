@@ -9,10 +9,6 @@ interface Props {
 defineProps<Props>();
 
 function formatMealTypes(mealTypes: string[]): string {
-    // TODO delete this
-    if (typeof mealTypes === "undefined") {
-        return "";
-    }
     return mealTypes.join(", ");
 }
 
@@ -127,19 +123,26 @@ function formatDate(date: Date): string {
     word-wrap: break-word;
     word-break: break-word;
     max-width: 100%;
-    max-height: 4.5em; /* Hauteur approximative pour 3 lignes */
+    max-height: 5em;
     position: relative;
 }
 
-/* Effet de fade-out pour le texte tronqué */
 .description-content::after {
     content: "";
     position: absolute;
     bottom: 0;
+    left: 0;
     right: 0;
-    width: 40px;
-    height: 1.5em;
-    background: linear-gradient(to right, transparent, var(--bg-secondary));
+    height: 3em;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        color-mix(in srgb, var(--bg-secondary) 10%, transparent) 20%,
+        color-mix(in srgb, var(--bg-secondary) 30%, transparent) 40%,
+        color-mix(in srgb, var(--bg-secondary) 60%, transparent) 60%,
+        color-mix(in srgb, var(--bg-secondary) 90%, transparent) 80%,
+        var(--bg-secondary) 100%
+    );
     pointer-events: none;
     opacity: 1;
     transition: opacity 0.3s ease;

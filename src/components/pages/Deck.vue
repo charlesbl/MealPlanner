@@ -6,7 +6,6 @@ import MealCard from "../MealCard.vue";
 const mealStore = useMealStore();
 
 const allMeals = computed(() => mealStore.getAllMeals());
-console.log("All meals:", allMeals);
 </script>
 
 <template>

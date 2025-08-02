@@ -18,6 +18,7 @@ export const AddMealToWeekTool = new DynamicStructuredTool({
     func: async (
         input: z.infer<typeof addMealToWeekSchema>
     ): Promise<string> => {
+        console.log("Adding meal to week:", input);
         const weekStore = useWeekStore();
         const mealStore = useMealStore();
 
@@ -25,11 +26,17 @@ export const AddMealToWeekTool = new DynamicStructuredTool({
             // Verify the meal exists
             const meal = mealStore.getMealById(input.mealId);
             if (!meal) {
+                console.warn(
+                    `No meal found with ID '${input.mealId}'. Please check the meal ID and try again.`
+                );
                 return `Error: No meal found with ID '${input.mealId}'. Please check the meal ID and try again.`;
             }
 
             // Check if meal is already in the week
             if (weekStore.isMealInWeek(input.mealId)) {
+                console.warn(
+                    `Meal '${meal.name}' (${meal.mealTypes}) is already in your weekly selection.`
+                );
                 return `'${meal.name}' (${meal.mealTypes}) is already in your weekly selection.`;
             }
 

@@ -7,7 +7,6 @@ const slots = useSlots();
 const textContent = computed(() => {
     if (slots.default) {
         const slotNodes = slots.default();
-        console.log("Slot nodes:", slotNodes);
         return slotNodes
             .map((node) =>
                 typeof node.children === "string" ? node.children : ""
