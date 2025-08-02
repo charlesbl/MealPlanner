@@ -42,7 +42,7 @@ const handleKeydown = (event: KeyboardEvent) => {
     display: flex;
     gap: 8px;
     padding: 8px;
-    background-color: #f8f9fa;
+    /* background-color: #f8f9fa; */
 }
 
 .input-area-wrapper input {
