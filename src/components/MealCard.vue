@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { getCurrentInstance } from "vue";
 import type { Meal } from "../stores/mealStore";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 
@@ -6,7 +7,12 @@ interface Props {
     meal: Meal;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const instance = getCurrentInstance();
+const uniqueId = `toggle-${props.meal.id}-${
+    instance?.uid || Math.random().toString(36).substr(2, 9)
+}`;
 
 function formatMealTypes(mealTypes: string[]): string {
     return mealTypes.join(", ");
@@ -24,12 +30,8 @@ function formatDate(date: Date): string {
 <template>
     <div class="meal-card">
         <div class="meal-description">
-            <input
-                type="checkbox"
-                :id="`toggle-${meal.id}`"
-                class="toggle-checkbox"
-            />
-            <label :for="`toggle-${meal.id}`" class="meal-card-clickable">
+            <input type="checkbox" :id="uniqueId" class="toggle-checkbox" />
+            <label :for="uniqueId" class="meal-card-clickable">
                 <div class="meal-header">
                     <h3 class="meal-name">{{ meal.name }}</h3>
                     <span class="meal-types">{{

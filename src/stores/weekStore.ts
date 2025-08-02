@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive, watch } from "vue";
-import { useMealStore, type Meal, MealType } from "./mealStore";
+import { MealType, useMealStore, type Meal } from "./mealStore";
 
 // Define the selected meal for the week
 export interface WeekMeal {
@@ -37,7 +37,10 @@ function isValidWeekState(data: any): data is WeekState {
             !weekMeal.addedAt ||
             typeof weekMeal.order !== "number"
         ) {
-            console.warn("Invalid week data: invalid weekMeal structure.", weekMeal);
+            console.warn(
+                "Invalid week data: invalid weekMeal structure.",
+                weekMeal
+            );
             return false;
         }
     }
@@ -60,10 +63,12 @@ function loadWeekFromLocalStorage(): WeekState {
 
         // Convert addedAt strings back to Date objects
         if (parsedWeek.selectedMeals) {
-            parsedWeek.selectedMeals = parsedWeek.selectedMeals.map((weekMeal: any) => ({
-                ...weekMeal,
-                addedAt: new Date(weekMeal.addedAt),
-            }));
+            parsedWeek.selectedMeals = parsedWeek.selectedMeals.map(
+                (weekMeal: any) => ({
+                    ...weekMeal,
+                    addedAt: new Date(weekMeal.addedAt),
+                })
+            );
         }
 
         if (parsedWeek.weekStartDate) {
@@ -73,7 +78,9 @@ function loadWeekFromLocalStorage(): WeekState {
         if (isValidWeekState(parsedWeek)) {
             return parsedWeek;
         } else {
-            console.warn("Stored week data failed validation. Discarding invalid data.");
+            console.warn(
+                "Stored week data failed validation. Discarding invalid data."
+            );
             localStorage.removeItem("weekSelection");
             return { selectedMeals: [] };
         }
@@ -100,11 +107,11 @@ export const useWeekStore = defineStore("weekStore", () => {
     );
 
     // --- Actions ---
-    
+
     // Add a meal to the week selection
     function addMealToWeek(mealId: string): string {
         // Check if meal is already in the week
-        const existing = state.selectedMeals.find(wm => wm.mealId === mealId);
+        const existing = state.selectedMeals.find((wm) => wm.mealId === mealId);
         if (existing) {
             return existing.id; // Already added, return existing ID
         }
@@ -116,42 +123,46 @@ export const useWeekStore = defineStore("weekStore", () => {
             addedAt: new Date(),
             order: state.selectedMeals.length,
         };
-        
+
         state.selectedMeals.push(weekMeal);
         return id;
     }
 
     // Remove a meal from the week selection
     function removeMealFromWeek(mealId: string): boolean {
-        const index = state.selectedMeals.findIndex(wm => wm.mealId === mealId);
+        const index = state.selectedMeals.findIndex(
+            (wm) => wm.mealId === mealId
+        );
         if (index === -1) {
             return false;
         }
-        
+
         state.selectedMeals.splice(index, 1);
-        
+
         // Reorder remaining meals
         state.selectedMeals.forEach((wm, idx) => {
             wm.order = idx;
         });
-        
+
         return true;
     }
 
     // Remove a meal by week meal ID
     function removeWeekMealById(weekMealId: string): boolean {
-        const index = state.selectedMeals.findIndex(wm => wm.id === weekMealId);
+        const index = state.selectedMeals.findIndex(
+            (wm) => wm.id === weekMealId
+        );
         if (index === -1) {
             return false;
         }
-        
+
         state.selectedMeals.splice(index, 1);
-        
+
         // Reorder remaining meals
         state.selectedMeals.forEach((wm, idx) => {
             wm.order = idx;
         });
-        
+
         return true;
     }
 
@@ -162,26 +173,32 @@ export const useWeekStore = defineStore("weekStore", () => {
 
     // Check if a meal is selected for the week
     function isMealInWeek(mealId: string): boolean {
-        return state.selectedMeals.some(wm => wm.mealId === mealId);
+        return state.selectedMeals.some((wm) => wm.mealId === mealId);
     }
 
     // Get selected meals with full meal data
-    function getSelectedMealsWithData(): (Meal & { weekMealId: string; order: number })[] {
+    function getSelectedMealsWithData(): (Meal & {
+        weekMealId: string;
+        order: number;
+    })[] {
         const mealStore = useMealStore();
-        
+
         return state.selectedMeals
-            .map(weekMeal => {
+            .map((weekMeal) => {
                 const meal = mealStore.getMealById(weekMeal.mealId);
                 if (meal) {
                     return {
                         ...meal,
                         weekMealId: weekMeal.id,
-                        order: weekMeal.order
+                        order: weekMeal.order,
                     };
                 }
                 return null;
             })
-            .filter((meal): meal is (Meal & { weekMealId: string; order: number }) => meal !== null)
+            .filter(
+                (meal): meal is Meal & { weekMealId: string; order: number } =>
+                    meal !== null
+            )
             .sort((a, b) => a.order - b.order);
     }
 
@@ -192,7 +209,7 @@ export const useWeekStore = defineStore("weekStore", () => {
     ): void {
         const mealStore = useMealStore();
         const allMeals = mealStore.getAllMeals();
-        
+
         if (allMeals.length === 0) {
             console.warn("No meals available for week generation");
             return;
@@ -205,9 +222,15 @@ export const useWeekStore = defineStore("weekStore", () => {
 
         if (mealTypeDistribution) {
             // Generate based on distribution
-            for (const [mealType, count] of Object.entries(mealTypeDistribution)) {
-                const mealsOfType = allMeals.filter(m => m.mealType === mealType);
-                const shuffled = [...mealsOfType].sort(() => Math.random() - 0.5);
+            for (const [mealType, count] of Object.entries(
+                mealTypeDistribution
+            )) {
+                const mealsOfType = allMeals.filter(
+                    (m) => m.mealTypes.includes(mealType as MealType)
+                );
+                const shuffled = [...mealsOfType].sort(
+                    () => Math.random() - 0.5
+                );
                 const selected = shuffled.slice(0, count);
                 selectedMeals.push(...selected);
             }
@@ -218,7 +241,7 @@ export const useWeekStore = defineStore("weekStore", () => {
         }
 
         // Add selected meals to the week
-        selectedMeals.forEach(meal => {
+        selectedMeals.forEach((meal) => {
             addMealToWeek(meal.id);
         });
     }
@@ -227,15 +250,17 @@ export const useWeekStore = defineStore("weekStore", () => {
     function reorderWeekMeals(weekMealIds: string[]): boolean {
         try {
             // Validate that all IDs exist
-            const allIds = state.selectedMeals.map(wm => wm.id);
-            if (!weekMealIds.every(id => allIds.includes(id)) || 
-                weekMealIds.length !== allIds.length) {
+            const allIds = state.selectedMeals.map((wm) => wm.id);
+            if (
+                !weekMealIds.every((id) => allIds.includes(id)) ||
+                weekMealIds.length !== allIds.length
+            ) {
                 return false;
             }
 
             // Reorder
             weekMealIds.forEach((id, index) => {
-                const weekMeal = state.selectedMeals.find(wm => wm.id === id);
+                const weekMeal = state.selectedMeals.find((wm) => wm.id === id);
                 if (weekMeal) {
                     weekMeal.order = index;
                 }
@@ -243,7 +268,7 @@ export const useWeekStore = defineStore("weekStore", () => {
 
             // Sort by new order
             state.selectedMeals.sort((a, b) => a.order - b.order);
-            
+
             return true;
         } catch (error) {
             console.error("Error reordering week meals:", error);
@@ -253,18 +278,22 @@ export const useWeekStore = defineStore("weekStore", () => {
 
     // --- Getters ---
     const selectedMealCount = () => state.selectedMeals.length;
-    
+
     const selectedMealsByType = () => {
         const mealsWithData = getSelectedMealsWithData();
-        const byType: Partial<Record<MealType, (Meal & { weekMealId: string; order: number })[]>> = {};
-        
-        mealsWithData.forEach(meal => {
-            if (!byType[meal.mealType]) {
-                byType[meal.mealType] = [];
-            }
-            byType[meal.mealType]!.push(meal);
+        const byType: Partial<
+            Record<MealType, (Meal & { weekMealId: string; order: number })[]>
+        > = {};
+
+        mealsWithData.forEach((meal) => {
+            meal.mealTypes.forEach((mealType) => {
+                if (!byType[mealType]) {
+                    byType[mealType] = [];
+                }
+                byType[mealType]!.push(meal);
+            });
         });
-        
+
         return byType;
     };
 
