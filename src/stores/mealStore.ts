@@ -14,7 +14,7 @@ export interface Meal {
     id: string;
     name: string;
     description: string;
-    mealType: MealType;
+    mealTypes: MealType[];
     createdAt: Date;
 }
 
@@ -34,7 +34,7 @@ function isValidMealsState(data: any): data is MealsState {
         console.warn("Invalid meals data: meals is not an array.");
         return false;
     }
-    
+
     for (const meal of data.meals) {
         if (
             typeof meal !== "object" ||
@@ -65,7 +65,7 @@ function loadMealsFromLocalStorage(): MealsState {
             localStorage.removeItem("meals");
             return { meals: [] };
         }
-        
+
         // Convert createdAt strings back to Date objects and handle migration from old format
         if (parsedMeals.meals) {
             parsedMeals.meals = parsedMeals.meals.map((meal: any) => ({
@@ -80,7 +80,7 @@ function loadMealsFromLocalStorage(): MealsState {
 
         // Ensure we have the correct structure (handle old format)
         const migratedData = {
-            meals: parsedMeals.meals || []
+            meals: parsedMeals.meals || [],
         };
 
         if (isValidMealsState(migratedData)) {
@@ -119,20 +119,20 @@ export const useMealStore = defineStore("mealStore", () => {
     function addMeal(
         name: string,
         description: string,
-        mealType: MealType
+        mealTypes: MealType[]
     ): string {
         const id = generateId();
         const newMeal: Meal = {
             id,
             name: name.trim(),
             description: description.trim(),
-            mealType,
+            mealTypes,
             createdAt: new Date(),
         };
         state.meals.push(newMeal);
         return id;
     }
-    
+
     // Action to update an existing meal
     function updateMeal(
         id: string,
@@ -150,8 +150,8 @@ export const useMealStore = defineStore("mealStore", () => {
         if (updates.description !== undefined) {
             state.meals[mealIndex].description = updates.description.trim();
         }
-        if (updates.mealType !== undefined) {
-            state.meals[mealIndex].mealType = updates.mealType;
+        if (updates.mealTypes !== undefined) {
+            state.meals[mealIndex].mealTypes = updates.mealTypes;
         }
 
         return true;
@@ -174,7 +174,9 @@ export const useMealStore = defineStore("mealStore", () => {
 
     // Action to get meals by type
     function getMealsByType(mealType: MealType): Meal[] {
-        return state.meals.filter((meal: Meal) => meal.mealType === mealType);
+        return state.meals.filter((meal: Meal) =>
+            meal.mealTypes.includes(mealType)
+        );
     }
 
     // Action to get all meals sorted by creation date (newest first)
