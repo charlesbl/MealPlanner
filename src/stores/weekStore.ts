@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive, watch } from "vue";
-import { MealType, useMealStore, type Meal } from "./mealStore";
+import { useMealStore, type Meal } from "./mealStore";
 
 // Define the selected meal for the week
 export interface WeekMeal {
@@ -13,7 +13,6 @@ export interface WeekMeal {
 // Define the week state
 export interface WeekState {
     selectedMeals: WeekMeal[];
-    weekStartDate?: Date; // Optional: track which week this selection is for
 }
 
 // Helper function to validate the loaded week data
@@ -202,105 +201,12 @@ export const useWeekStore = defineStore("weekStore", () => {
             .sort((a, b) => a.order - b.order);
     }
 
-    // Generate automatic week selection
-    function generateWeekSelection(
-        numberOfMeals: number,
-        mealTypeDistribution?: Partial<Record<MealType, number>>
-    ): void {
-        const mealStore = useMealStore();
-        const allMeals = mealStore.getAllMeals();
-
-        if (allMeals.length === 0) {
-            console.warn("No meals available for week generation");
-            return;
-        }
-
-        // Clear current selection
-        clearWeek();
-
-        let selectedMeals: Meal[] = [];
-
-        if (mealTypeDistribution) {
-            // Generate based on distribution
-            for (const [mealType, count] of Object.entries(
-                mealTypeDistribution
-            )) {
-                const mealsOfType = allMeals.filter(
-                    (m) => m.mealTypes.includes(mealType as MealType)
-                );
-                const shuffled = [...mealsOfType].sort(
-                    () => Math.random() - 0.5
-                );
-                const selected = shuffled.slice(0, count);
-                selectedMeals.push(...selected);
-            }
-        } else {
-            // Random selection
-            const shuffled = [...allMeals].sort(() => Math.random() - 0.5);
-            selectedMeals = shuffled.slice(0, numberOfMeals);
-        }
-
-        // Add selected meals to the week
-        selectedMeals.forEach((meal) => {
-            addMealToWeek(meal.id);
-        });
-    }
-
-    // Reorder meals in the week
-    function reorderWeekMeals(weekMealIds: string[]): boolean {
-        try {
-            // Validate that all IDs exist
-            const allIds = state.selectedMeals.map((wm) => wm.id);
-            if (
-                !weekMealIds.every((id) => allIds.includes(id)) ||
-                weekMealIds.length !== allIds.length
-            ) {
-                return false;
-            }
-
-            // Reorder
-            weekMealIds.forEach((id, index) => {
-                const weekMeal = state.selectedMeals.find((wm) => wm.id === id);
-                if (weekMeal) {
-                    weekMeal.order = index;
-                }
-            });
-
-            // Sort by new order
-            state.selectedMeals.sort((a, b) => a.order - b.order);
-
-            return true;
-        } catch (error) {
-            console.error("Error reordering week meals:", error);
-            return false;
-        }
-    }
-
     // --- Getters ---
     const selectedMealCount = () => state.selectedMeals.length;
-
-    const selectedMealsByType = () => {
-        const mealsWithData = getSelectedMealsWithData();
-        const byType: Partial<
-            Record<MealType, (Meal & { weekMealId: string; order: number })[]>
-        > = {};
-
-        mealsWithData.forEach((meal) => {
-            meal.mealTypes.forEach((mealType) => {
-                if (!byType[mealType]) {
-                    byType[mealType] = [];
-                }
-                byType[mealType]!.push(meal);
-            });
-        });
-
-        return byType;
-    };
 
     return {
         // State
         selectedMeals: state.selectedMeals,
-        weekStartDate: state.weekStartDate,
 
         // Actions
         addMealToWeek,
@@ -309,11 +215,8 @@ export const useWeekStore = defineStore("weekStore", () => {
         clearWeek,
         isMealInWeek,
         getSelectedMealsWithData,
-        generateWeekSelection,
-        reorderWeekMeals,
 
         // Getters
         selectedMealCount,
-        selectedMealsByType,
     };
 });

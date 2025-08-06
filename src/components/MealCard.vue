@@ -4,8 +4,12 @@ import type { Meal } from "../stores/mealStore";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 interface Props {
-    meal: Meal;
+    meal: Meal & { weekMealId?: string };
 }
+
+const emit = defineEmits<{
+    delete: [mealId: string, weekMealId?: string];
+}>();
 
 const props = defineProps<Props>();
 
@@ -25,6 +29,13 @@ function formatDate(date: Date): string {
         year: "numeric",
     }).format(date);
 }
+
+function handleDelete(event: Event) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    emit("delete", props.meal.id, props.meal.weekMealId);
+}
 </script>
 
 <template>
@@ -34,9 +45,18 @@ function formatDate(date: Date): string {
             <label :for="uniqueId" class="meal-card-clickable">
                 <div class="meal-header">
                     <h3 class="meal-name">{{ meal.name }}</h3>
-                    <span class="meal-types">{{
-                        formatMealTypes(meal.mealTypes)
-                    }}</span>
+                    <div class="meal-header-actions">
+                        <span class="meal-types">{{
+                            formatMealTypes(meal.mealTypes)
+                        }}</span>
+                        <button
+                            @click="handleDelete"
+                            class="delete-button"
+                            type="button"
+                        >
+                            <span class="delete-icon">🗑️</span>
+                        </button>
+                    </div>
                 </div>
                 <div class="description-content">
                     <MarkdownRenderer>{{ meal.description }}</MarkdownRenderer>
@@ -109,6 +129,13 @@ function formatDate(date: Date): string {
     min-width: 0;
 }
 
+.meal-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
 .meal-types {
     font-size: 0.8rem;
     color: var(--text-secondary, #666);
@@ -116,6 +143,39 @@ function formatDate(date: Date): string {
     padding: 4px 8px;
     border-radius: 12px;
     white-space: nowrap;
+}
+
+.delete-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-width: 24px;
+    height: 24px;
+}
+
+.delete-button:hover {
+    background-color: var(--danger-bg, rgba(220, 53, 69, 0.1));
+    transform: scale(1.1);
+}
+
+.delete-button:active {
+    transform: scale(0.95);
+}
+
+.delete-icon {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+
+.delete-button:hover .delete-icon {
+    opacity: 1;
 }
 
 .description-content {
@@ -209,7 +269,7 @@ function formatDate(date: Date): string {
 
 /* État étendu : afficher tout le contenu */
 .toggle-checkbox:checked ~ .meal-card-clickable .description-content {
-    max-height: 500px; /* Hauteur maximale généreuse pour l'animation */
+    max-height: none;
 }
 
 /* Masquer le gradient en mode étendu */
@@ -231,10 +291,25 @@ function formatDate(date: Date): string {
     .meal-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 12px;
+    }
+
+    .meal-header-actions {
+        align-self: stretch;
+        justify-content: space-between;
     }
 
     .meal-types {
-        align-self: flex-start;
+        flex: 1;
+    }
+
+    .delete-button {
+        min-width: 32px;
+        height: 32px;
+    }
+
+    .delete-icon {
+        font-size: 1rem;
     }
 }
 </style>

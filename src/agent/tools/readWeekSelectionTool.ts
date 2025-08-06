@@ -1,16 +1,9 @@
-import { MealType } from "@/stores/mealStore";
 import { useWeekStore } from "@/stores/weekStore";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 
 // Schema for reading week selection
 const readWeekSelectionSchema = z.object({
-    groupByType: z
-        .boolean()
-        .optional()
-        .describe(
-            "Whether to group meals by type in the output (default: false)"
-        ),
     showDetails: z
         .boolean()
         .optional()
@@ -37,57 +30,22 @@ export const ReadWeekSelectionTool = new DynamicStructuredTool({
             }
 
             const showDetails = input.showDetails !== false; // Default to true
-            const groupByType = input.groupByType || false;
 
             let output = `Your weekly selection contains ${
                 selectedMeals.length
             } meal${selectedMeals.length > 1 ? "s" : ""}:\n\n`;
 
-            if (groupByType) {
-                // Group by meal type
-                const mealsByType = weekStore.selectedMealsByType();
-                const typeOrder = [
-                    MealType.Breakfast,
-                    MealType.Lunch,
-                    MealType.Dinner,
-                    MealType.Snacks,
-                ];
-
-                typeOrder.forEach((mealType) => {
-                    const mealsOfType = mealsByType[mealType];
-                    if (mealsOfType && mealsOfType.length > 0) {
-                        output += `**${mealType} (${mealsOfType.length}):**\n`;
-                        mealsOfType.forEach((meal, index) => {
-                            output += `${index + 1}. ${meal.name}`;
-                            if (showDetails && meal.description) {
-                                const truncatedDesc =
-                                    meal.description.length > 100
-                                        ? meal.description.substring(0, 100) +
-                                          "..."
-                                        : meal.description;
-                                output += ` - ${truncatedDesc}`;
-                            }
-                            output += `\n`;
-                        });
-                        output += `\n`;
-                    }
-                });
-            } else {
-                // List in order
-                selectedMeals.forEach((meal, index) => {
-                    output += `${index + 1}. **${meal.name}** (${
-                        meal.mealTypes
-                    })`;
-                    if (showDetails && meal.description) {
-                        const truncatedDesc =
-                            meal.description.length > 100
-                                ? meal.description.substring(0, 100) + "..."
-                                : meal.description;
-                        output += `\n   ${truncatedDesc}`;
-                    }
-                    output += `\n\n`;
-                });
-            }
+            selectedMeals.forEach((meal, index) => {
+                output += `${index + 1}. **${meal.name}** (${meal.mealTypes})`;
+                if (showDetails && meal.description) {
+                    const truncatedDesc =
+                        meal.description.length > 100
+                            ? meal.description.substring(0, 100) + "..."
+                            : meal.description;
+                    output += `\n   ${truncatedDesc}`;
+                }
+                output += `\n\n`;
+            });
 
             return output;
         } catch (error: any) {

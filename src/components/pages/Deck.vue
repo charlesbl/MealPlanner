@@ -6,6 +6,13 @@ import MealCard from "../MealCard.vue";
 const mealStore = useMealStore();
 
 const allMeals = computed(() => mealStore.getAllMeals());
+
+function handleDeleteMeal(mealId: string) {
+    const success = mealStore.deleteMeal(mealId);
+    if (!success) {
+        console.error("Failed to delete meal");
+    }
+}
 </script>
 
 <template>
@@ -16,7 +23,12 @@ const allMeals = computed(() => mealStore.getAllMeals());
         </div>
 
         <div class="meals-list" v-if="allMeals.length > 0">
-            <MealCard v-for="meal in allMeals" :key="meal.id" :meal="meal" />
+            <MealCard
+                v-for="meal in allMeals"
+                :key="meal.id"
+                :meal="meal"
+                @delete="handleDeleteMeal"
+            />
         </div>
 
         <div class="empty-state" v-else>

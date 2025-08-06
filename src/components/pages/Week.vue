@@ -1,31 +1,21 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { MealType } from "../../stores/mealStore";
 import { useWeekStore } from "../../stores/weekStore";
 import MealCard from "../MealCard.vue";
 
 const weekStore = useWeekStore();
 
 const selectedMeals = computed(() => weekStore.getSelectedMealsWithData());
-const mealsByType = computed(() => weekStore.selectedMealsByType());
 
-// Define meal types in a preferred order
-const mealTypeOrder = [
-    MealType.Breakfast,
-    MealType.Lunch,
-    MealType.Dinner,
-    MealType.Snacks,
-];
+function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
+    const success = weekMealId
+        ? weekStore.removeWeekMealById(weekMealId)
+        : weekStore.removeMealFromWeek(mealId);
 
-const getMealTypeLabel = (mealType: MealType): string => {
-    const labels = {
-        [MealType.Breakfast]: "Petit-déjeuner",
-        [MealType.Lunch]: "Déjeuner",
-        [MealType.Dinner]: "Dîner",
-        [MealType.Snacks]: "Collations",
-    };
-    return labels[mealType] || mealType;
-};
+    if (!success) {
+        console.error("Failed to remove meal from week");
+    }
+}
 </script>
 
 <template>
@@ -38,22 +28,13 @@ const getMealTypeLabel = (mealType: MealType): string => {
         </div>
 
         <div class="week-content" v-if="selectedMeals.length > 0">
-            <div
-                v-for="mealType in mealTypeOrder"
-                :key="mealType"
-                v-show="mealsByType[mealType] && mealsByType[mealType]!.length > 0"
-                class="meal-type-section"
-            >
-                <h2 class="meal-type-title">
-                    {{ getMealTypeLabel(mealType) }}
-                </h2>
-                <div class="meals-list">
-                    <MealCard
-                        v-for="meal in mealsByType[mealType]"
-                        :key="meal.weekMealId"
-                        :meal="meal"
-                    />
-                </div>
+            <div class="meals-list">
+                <MealCard
+                    v-for="meal in selectedMeals"
+                    :key="meal.weekMealId"
+                    :meal="meal"
+                    @delete="handleRemoveMealFromWeek"
+                />
             </div>
         </div>
 
@@ -94,29 +75,12 @@ const getMealTypeLabel = (mealType: MealType): string => {
 .week-content {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-}
-
-.meal-type-section {
-    background-color: var(--bg-secondary, #f8f9fa);
-    border-radius: 12px;
-    padding: 16px;
-    border: 1px solid var(--border-light, #e0e0e0);
-}
-
-.meal-type-title {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--border-accent, #e0e0e0);
 }
 
 .meals-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
 }
 
 .empty-state {
@@ -145,16 +109,8 @@ const getMealTypeLabel = (mealType: MealType): string => {
         font-size: 2rem;
     }
 
-    .meal-type-section {
-        padding: 20px;
-    }
-
-    .meal-type-title {
-        font-size: 1.2rem;
-    }
-
     .meals-list {
-        gap: 12px;
+        gap: 16px;
     }
 }
 
@@ -166,12 +122,8 @@ const getMealTypeLabel = (mealType: MealType): string => {
         margin: 0 auto;
     }
 
-    .week-content {
-        gap: 32px;
-    }
-
-    .meal-type-section {
-        padding: 24px;
+    .meals-list {
+        gap: 20px;
     }
 }
 </style>

@@ -7,7 +7,7 @@
     "dev": "vite --host",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "tsc --noEmit --project tsconfig.app.json"
   },
   "dependencies": {
     "@langchain/core": "^0.3.55",
