@@ -20,10 +20,18 @@ export const llm = new ChatOpenAI({
         baseURL: OPENROUTER_BASE_URL,
     },
     apiKey: OPENROUTER_API_KEY,
+    modelName: "z-ai/glm-4.5",
     // modelName: "google/gemini-2.5-pro-preview",
-    modelName: "google/gemini-2.5-flash",
+    // modelName: "google/gemini-2.5-flash",
     // modelName: "meta-llama/llama-4-maverick",
     temperature: 0.7,
+    maxTokens: 16384,
+    modelKwargs: {
+        provider: {
+            order: ["chutes/fp8", "z-ai/fp8"],
+            allow_fallbacks: false,
+        },
+    },
 });
 
 export function isApiKeyConfigured(): boolean {

@@ -4,7 +4,6 @@
  * Assembles and exports a configured LangChain AgentExecutor that combines:
  * - A language model (LLM) with tool-calling capabilities
  * - Meal deck and week management tools (create, read, update, delete)
- * - Widget display tools for chat-first interface
  * - System prompts for meal planning conversations
  * - Chat history and conversation flow management
  *
@@ -12,21 +11,20 @@
  * conversational interface with deck-based meal management.
  */
 
+import { AddMealToWeekTool } from "@/agent/tools/addMealToWeekTool";
+import { AddOrUpdateMealTool } from "@/agent/tools/addOrUpdateMealTool";
+import { DeleteMealTool } from "@/agent/tools/deleteMealTool";
+import { ReadMealsTool } from "@/agent/tools/readMealsTool";
+import { ReadWeekSelectionTool } from "@/agent/tools/readWeekSelectionTool";
+import { RemoveMealFromWeekTool } from "@/agent/tools/removeMealFromWeekTool";
 import { llm } from "@/config/llmConfig";
-import { AddMealToWeekTool } from "@/services/tools/addMealToWeekTool";
-import { AddOrUpdateMealTool } from "@/services/tools/addOrUpdateMealTool";
-import { DeleteMealTool } from "@/services/tools/deleteMealTool";
-import { ReadMealsTool } from "@/services/tools/readMealsTool";
-import { ReadWeekSelectionTool } from "@/services/tools/readWeekSelectionTool";
-import { RemoveMealFromWeekTool } from "@/services/tools/removeMealFromWeekTool";
-import { ShowWidgetTool } from "@/services/tools/showWidgetTool";
 import {
     ChatPromptTemplate,
     MessagesPlaceholder,
 } from "@langchain/core/prompts";
 import { AgentExecutor, createToolCallingAgent } from "langchain/agents";
 import type { StructuredTool } from "langchain/tools";
-import { systemPromptString } from "../services/prompt";
+import { systemPromptString } from "./prompt";
 
 const fullAgentPrompt = ChatPromptTemplate.fromMessages([
     ["system", systemPromptString],
@@ -45,9 +43,6 @@ const tools: StructuredTool[] = [
     AddMealToWeekTool,
     RemoveMealFromWeekTool,
     ReadWeekSelectionTool,
-
-    // UI widgets
-    ShowWidgetTool,
 ];
 
 const llmWithTools = llm.bindTools(tools);

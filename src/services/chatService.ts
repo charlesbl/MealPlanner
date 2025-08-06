@@ -17,6 +17,7 @@
  * - Process individual stream events (delegates to event handlers)
  */
 
+import { agentExecutor } from "@/agent/agentFactory";
 import {
     streamEventHandler,
     type ChainEndEventData,
@@ -24,8 +25,7 @@ import {
 } from "@/services/streamEventHandlers";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { agentExecutor } from "../agents/agentFactory";
-import { chatHistoryManager } from "../chat/chatHistoryManager";
+import { chatHistoryManager } from "../agent/chatHistoryManager";
 import { isApiKeyConfigured } from "../config/llmConfig";
 
 const HISTORY_MAX_LENGTH = 10;

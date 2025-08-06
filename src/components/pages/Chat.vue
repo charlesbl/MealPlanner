@@ -5,6 +5,7 @@ import { AIMessage, HumanMessage } from "@langchain/core/messages";
 import { nextTick, onMounted, ref, watch } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
+import Settings from "./Settings.vue";
 
 interface ChatMessage {
     id: string;
@@ -16,6 +17,7 @@ interface ChatMessage {
 const messages = ref<ChatMessage[]>([]);
 const isProcessing = ref(false);
 const messagesContainer = ref<HTMLElement>();
+const showSettings = ref(false);
 
 onMounted(() => {
     loadChatHistoryFromStorage();
@@ -60,6 +62,14 @@ const saveChatHistoryToStorage = (chatMessages: ChatMessage[]) => {
 
 const clearChatHistory = () => {
     messages.value = [];
+};
+
+const toggleSettings = () => {
+    showSettings.value = !showSettings.value;
+};
+
+const closeSettings = () => {
+    showSettings.value = false;
 };
 
 const scrollToBottom = async () => {
@@ -147,11 +157,24 @@ const handleSendMessage = async (message: string) => {
 
 <template>
     <div class="chat-container">
+        <!-- Page de paramètres (overlay) -->
+        <div v-if="showSettings" class="settings-overlay">
+            <Settings @close="closeSettings" />
+        </div>
+
+        <!-- Interface de chat normale -->
         <div class="chat-header" v-if="messages.length > 0">
             <button @click="clearChatHistory" class="clear-button">
                 Clear Chat
             </button>
+            <button @click="toggleSettings" class="settings-button">⚙️</button>
         </div>
+
+        <!-- Header pour les paramètres quand il n'y a pas de messages -->
+        <div v-else class="chat-header-empty">
+            <button @click="toggleSettings" class="settings-button">⚙️</button>
+        </div>
+
         <div ref="messagesContainer" class="messages">
             <Message
                 v-for="message in messages"
@@ -180,11 +203,33 @@ const handleSendMessage = async (message: string) => {
     justify-content: space-between;
     height: 100%;
     background-color: var(--bg-primary);
+    position: relative;
+}
+
+.settings-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background-color: var(--bg-primary);
 }
 
 .chat-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-medium);
+    background-color: var(--bg-primary);
+    flex-shrink: 0;
+}
+
+.chat-header-empty {
+    display: flex;
     justify-content: flex-end;
+    align-items: center;
     padding: 12px 16px;
     border-bottom: 1px solid var(--border-medium);
     background-color: var(--bg-primary);
@@ -208,6 +253,33 @@ const handleSendMessage = async (message: string) => {
 
 .clear-button:active {
     transform: scale(0.98);
+}
+
+.settings-button {
+    padding: 8px;
+    background: none;
+    border: 1px solid var(--border-medium);
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+}
+
+.settings-button:hover {
+    background-color: var(--bg-hover);
+    border-color: var(--border-dark);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+}
+
+.settings-button:active {
+    transform: translateY(0);
 }
 
 .messages {
