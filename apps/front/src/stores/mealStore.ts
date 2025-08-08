@@ -1,27 +1,11 @@
+import {
+    generateId,
+    MealType,
+    type Meal,
+    type MealsState,
+} from "@mealplanner/shared";
 import { defineStore } from "pinia";
 import { reactive, watch } from "vue";
-
-// Define the meal types
-export enum MealType {
-    Breakfast = "Breakfast",
-    Lunch = "Lunch",
-    Dinner = "Dinner",
-    Snacks = "Snacks",
-}
-
-// Define the Meal interface
-export interface Meal {
-    id: string;
-    name: string;
-    description: string;
-    mealTypes: MealType[];
-    createdAt: Date;
-}
-
-// Update the meals state - simplified without dates
-export interface MealsState {
-    meals: Meal[];
-}
 
 // Helper function to validate the loaded meals data
 function isValidMealsState(data: any): data is MealsState {
@@ -44,7 +28,9 @@ function isValidMealsState(data: any): data is MealsState {
             typeof meal.description !== "string" ||
             !Array.isArray(meal.mealTypes) ||
             meal.mealTypes.length === 0 ||
-            !meal.mealTypes.every((type: any) => Object.values(MealType).includes(type)) ||
+            !meal.mealTypes.every((type: any) =>
+                Object.values(MealType).includes(type)
+            ) ||
             !meal.createdAt
         ) {
             console.warn("Invalid meals data: invalid meal structure.", meal);
@@ -74,7 +60,8 @@ function loadMealsFromLocalStorage(): MealsState {
                 id: meal.id,
                 name: meal.name,
                 description: meal.description,
-                mealTypes: meal.mealTypes || (meal.mealType ? [meal.mealType] : []),
+                mealTypes:
+                    meal.mealTypes || (meal.mealType ? [meal.mealType] : []),
                 createdAt: new Date(meal.createdAt),
                 // Ignore the old 'date' field during migration
             }));
@@ -96,11 +83,6 @@ function loadMealsFromLocalStorage(): MealsState {
         }
     }
     return { meals: [] };
-}
-
-// Helper function to generate unique ID
-function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 export const useMealStore = defineStore("mealStore", () => {

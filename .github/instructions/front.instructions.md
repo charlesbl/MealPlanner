@@ -1,5 +1,5 @@
 ---
-applyTo: "**"
+applyTo: "front/**"
 ---
 
 This app is designed with a mobile-first approach, ensuring that the user interface is optimized for smaller screens before scaling up to larger devices. This means that all features and functionalities are accessible and user-friendly on mobile devices.

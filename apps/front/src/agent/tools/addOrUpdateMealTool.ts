@@ -1,4 +1,5 @@
-import { MealType, useMealStore } from "@/stores/mealStore";
+import { useMealStore } from "@/stores/mealStore";
+import { MealType } from "@mealplanner/shared";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 

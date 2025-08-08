@@ -1,4 +1,4 @@
-import { MealType } from "@/stores/mealStore";
+import { MealType } from "@mealplanner/shared";
 
 // Configuration constants
 const DEFAULT_SERVING_SIZE = 1; // Number of people meals should serve

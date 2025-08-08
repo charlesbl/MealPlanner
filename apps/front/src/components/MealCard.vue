@@ -1,6 +1,6 @@
 <script lang="ts" setup>
+import type { Meal } from "@mealplanner/shared";
 import { getCurrentInstance } from "vue";
-import type { Meal } from "../stores/mealStore";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 interface Props {

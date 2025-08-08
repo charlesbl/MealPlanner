@@ -1,19 +1,12 @@
+import {
+    type Meal,
+    type WeekMeal,
+    type WeekState,
+    generateId,
+} from "@mealplanner/shared";
 import { defineStore } from "pinia";
 import { reactive, watch } from "vue";
-import { useMealStore, type Meal } from "./mealStore";
-
-// Define the selected meal for the week
-export interface WeekMeal {
-    id: string;
-    mealId: string;
-    addedAt: Date;
-    order: number; // For custom ordering
-}
-
-// Define the week state
-export interface WeekState {
-    selectedMeals: WeekMeal[];
-}
+import { useMealStore } from "./mealStore";
 
 // Helper function to validate the loaded week data
 function isValidWeekState(data: any): data is WeekState {
@@ -85,11 +78,6 @@ function loadWeekFromLocalStorage(): WeekState {
         }
     }
     return { selectedMeals: [] };
-}
-
-// Helper function to generate unique ID
-function generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 export const useWeekStore = defineStore("weekStore", () => {
