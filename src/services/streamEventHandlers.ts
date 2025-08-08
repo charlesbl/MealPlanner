@@ -39,12 +39,39 @@ export type StreamEventData =
     | UselessEventData;
 
 export class StreamEventHandlerImpl {
+    private extractTextContent(content: unknown): string {
+        if (typeof content === "string") return content;
+        if (Array.isArray(content)) {
+            // Try to pull text from array content parts
+            return content
+                .map((part: any) => {
+                    if (typeof part === "string") return part;
+                    if (part && typeof part.text === "string") return part.text;
+                    if (part && typeof part.content === "string")
+                        return part.content;
+                    if (
+                        part &&
+                        typeof part?.type === "string" &&
+                        typeof part?.value === "string"
+                    )
+                        return part.value;
+                    return "";
+                })
+                .join("");
+        }
+        // Best-effort fallback
+        try {
+            return JSON.stringify(content);
+        } catch {
+            return "";
+        }
+    }
     handleChatModelStreamEvent(
         event: StreamEvent
     ): ChatModelStreamEventData | UselessEventData {
-        if (event.data?.chunk?.content) {
-            const chunk = event.data.chunk.content;
-            if (typeof chunk === "string" && chunk.length > 0) {
+        if (event.data?.chunk?.content !== undefined) {
+            const chunk = this.extractTextContent(event.data.chunk.content);
+            if (chunk.length > 0) {
                 return {
                     type: "chat_model_stream",
                     chunk,
@@ -59,13 +86,20 @@ export class StreamEventHandlerImpl {
     handleChainEndEvent(
         event: StreamEvent
     ): ChainEndEventData | UselessEventData {
-        if (event.name === "AgentExecutor" && event.data?.output) {
-            const finalOutput = event.data.output;
-            if (typeof finalOutput === "string") {
-                return {
-                    type: "chain_end",
-                    finalOutput: finalOutput,
-                };
+        // Accept legacy AgentExecutor or LangGraph graph end/state outputs
+        const output = (event as any)?.data?.output;
+        if (output !== undefined) {
+            if (typeof output === "string") {
+                return { type: "chain_end", finalOutput: output };
+            }
+            // LangGraph often returns state with messages array
+            const maybeMessages = (output as any)?.messages;
+            if (Array.isArray(maybeMessages) && maybeMessages.length > 0) {
+                const last = maybeMessages[maybeMessages.length - 1];
+                const content = this.extractTextContent(last?.content);
+                if (content.length > 0) {
+                    return { type: "chain_end", finalOutput: content };
+                }
             }
         }
         return {
@@ -75,18 +109,14 @@ export class StreamEventHandlerImpl {
     handleToolCallEvent(
         event: StreamEvent
     ): ToolCallEventData | UselessEventData {
-        return {
-            type: "tool_call",
-            toolName: event.name,
-        };
+        const toolName = (event as any)?.data?.name || event.name;
+        return { type: "tool_call", toolName };
     }
     handleToolEndEvent(
         event: StreamEvent
     ): ToolEndEventData | UselessEventData {
-        return {
-            type: "tool_end",
-            toolName: event.name,
-        };
+        const toolName = (event as any)?.data?.name || event.name;
+        return { type: "tool_end", toolName };
     }
 
     handleUselessEvent(event: StreamEvent): UselessEventData {
