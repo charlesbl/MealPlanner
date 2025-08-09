@@ -1,6 +1,7 @@
 import { HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
+import { requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
 import express, { Request, Response } from "express";
@@ -35,7 +36,7 @@ const llm = new ChatOpenAI({
 const agent = createAgent(llm);
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
-app.post("/chat", async (req: Request, res: Response) => {
+app.post("/chat", requireAuth(), async (req: Request, res: Response) => {
     try {
         const userMessage: string = (req.body?.message ?? "").toString();
         const thread_id: string | undefined = req.body?.thread_id;

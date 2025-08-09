@@ -21,6 +21,7 @@
  * - Output: stream of backend events (tokens, chain end, tool calls, etc.)
  */
 import { createParser, type EventSourceMessage } from "eventsource-parser";
+import { getToken } from "./authService";
 
 export interface ChatModelStreamEventData {
     type: "chat_model_stream";
@@ -54,9 +55,15 @@ export async function* sendMessageToBotStream(
 ): AsyncGenerator<StreamEventData, void, unknown> {
     const controller = new AbortController();
 
+    const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+    };
+    const token = getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const resp = await fetch(getAgentUrl(), {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         signal: controller.signal,
         body: JSON.stringify({ message, thread_id: threadId }),
     });

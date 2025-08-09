@@ -1,15 +1,6 @@
 // Simple auth service for JWT-based auth
 
-export interface AuthUser {
-    id: string;
-    name: string;
-    email: string;
-}
-
-export interface AuthResponse {
-    token: string;
-    user: AuthUser;
-}
+import type { AuthResponse, AuthUser } from "@mealplanner/shared";
 
 function getApiBase(): string {
     const base = import.meta.env.VITE_API_URL || "http://localhost:3001";

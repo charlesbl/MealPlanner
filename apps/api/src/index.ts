@@ -1,8 +1,9 @@
+import { JwtUserPayload } from "@mealplanner/shared";
+import { requireAuth, signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import cors from "cors";
 import dotenv from "dotenv";
-import express, { NextFunction, Request, Response } from "express";
-import jwt, { type Secret } from "jsonwebtoken";
+import express, { Request, Response } from "express";
 import "reflect-metadata";
 import { Repository } from "typeorm";
 import { AppDataSource } from "./data-source.js";
@@ -19,44 +20,6 @@ async function bootstrap() {
     app.use(express.json());
 
     const usersRepo: Repository<User> = AppDataSource.getRepository(User);
-
-    // Simple JWT utilities
-    const JWT_SECRET: Secret = process.env.JWT_SECRET || "dev-secret-change";
-    const TOKEN_EXPIRES_IN = Number(
-        process.env.JWT_EXPIRES_IN || 60 * 60 * 24 * 7
-    ); // seconds
-
-    function signToken(user: User) {
-        return jwt.sign(
-            { sub: user.id, email: user.email, name: user.name },
-            JWT_SECRET,
-            { expiresIn: TOKEN_EXPIRES_IN }
-        );
-    }
-
-    function authMiddleware(
-        req: Request & { user?: User },
-        res: Response,
-        next: NextFunction
-    ) {
-        const header = req.headers.authorization;
-        if (!header || !header.startsWith("Bearer ")) {
-            return res.status(401).json({ error: "Missing token" });
-        }
-        const token = header.slice("Bearer ".length);
-        try {
-            const payload = jwt.verify(token, JWT_SECRET) as any;
-            // attach a minimal user-like object; we can refetch if needed
-            req.user = {
-                id: payload.sub,
-                email: payload.email,
-                name: payload.name,
-            } as User;
-            next();
-        } catch (e) {
-            return res.status(401).json({ error: "Invalid token" });
-        }
-    }
 
     // Auth routes
     app.post("/auth/register", async (req: Request, res: Response) => {
@@ -77,7 +40,11 @@ async function bootstrap() {
                 passwordHash,
             });
             await usersRepo.save(user);
-            const token = signToken(user);
+            const token = signToken({
+                sub: user.id,
+                email: user.email,
+                name: user.name,
+            });
             return res.status(201).json({
                 token,
                 user: { id: user.id, name: user.name, email: user.email },
@@ -107,7 +74,11 @@ async function bootstrap() {
             );
             if (!ok)
                 return res.status(401).json({ error: "Invalid credentials" });
-            const token = signToken(user);
+            const token = signToken({
+                sub: user.id,
+                email: user.email,
+                name: user.name,
+            });
             return res.json({
                 token,
                 user: { id: user.id, name: user.name, email: user.email },
@@ -120,13 +91,13 @@ async function bootstrap() {
 
     app.get(
         "/auth/me",
-        authMiddleware,
-        async (req: Request & { user?: User }, res: Response) => {
+        requireAuth(),
+        async (req: Request & { user?: JwtUserPayload }, res: Response) => {
             try {
-                if (!req.user?.id)
+                if (!req.user?.sub)
                     return res.status(401).json({ error: "Unauthorized" });
                 const user = await usersRepo.findOne({
-                    where: { id: req.user.id },
+                    where: { id: req.user.sub },
                 });
                 if (!user)
                     return res.status(404).json({ error: "User not found" });

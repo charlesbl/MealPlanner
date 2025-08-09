@@ -22,6 +22,9 @@ importers:
       '@mealplanner/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@mealplanner/shared-back':
+        specifier: workspace:*
+        version: link:../../packages/shared-back
       cors:
         specifier: ^2.8.5
         version: 2.8.5
@@ -53,6 +56,9 @@ importers:
       '@mealplanner/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@mealplanner/shared-back':
+        specifier: workspace:*
+        version: link:../../packages/shared-back
       bcryptjs:
         specifier: ^3.0.2
         version: 3.0.2
@@ -65,9 +71,6 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
-      jsonwebtoken:
-        specifier: ^9.0.2
-        version: 9.0.2
       pg:
         specifier: ^8.16.3
         version: 8.16.3
@@ -84,9 +87,6 @@ importers:
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.3
-      '@types/jsonwebtoken':
-        specifier: ^9.0.10
-        version: 9.0.10
       '@types/node':
         specifier: ^24.2.1
         version: 24.2.1
@@ -139,6 +139,28 @@ importers:
 
   packages/shared:
     devDependencies:
+      typescript:
+        specifier: ~5.9.2
+        version: 5.9.2
+
+  packages/shared-back:
+    dependencies:
+      '@mealplanner/shared':
+        specifier: workspace:*
+        version: link:../shared
+      jsonwebtoken:
+        specifier: ^9.0.2
+        version: 9.0.2
+    devDependencies:
+      '@types/express':
+        specifier: ^5.0.3
+        version: 5.0.3
+      '@types/jsonwebtoken':
+        specifier: ^9.0.6
+        version: 9.0.10
+      '@types/node':
+        specifier: ^24.2.1
+        version: 24.2.1
       typescript:
         specifier: ~5.9.2
         version: 5.9.2
