@@ -2,6 +2,9 @@ import { JwtUserPayload } from "@mealplanner/shared";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
+export type AuthRequestPayload = { user?: JwtUserPayload };
+export type AuthRequest = Request & AuthRequestPayload;
+
 export function getJwtSecret(): Secret {
     return (
         (process.env.JWT_SECRET as Secret) || ("dev-secret-change" as Secret)
@@ -25,13 +28,13 @@ export function signToken(
     return jwt.sign(payload, secret, signOpts);
 }
 
-export function requireAuth(options?: { secret?: Secret }) {
-    const secret = options?.secret ?? getJwtSecret();
+export function requireAuth() {
     return function (
         req: Request & { user?: JwtUserPayload },
         res: Response,
         next: NextFunction
     ) {
+        const secret = getJwtSecret();
         const header = req.headers.authorization;
         if (!header || !header.startsWith("Bearer ")) {
             return res.status(401).json({ error: "Missing token" });
