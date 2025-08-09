@@ -1,3 +1,4 @@
+import type { AuthUser } from "@mealplanner/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import {
@@ -7,17 +8,19 @@ import {
     clearToken,
     getToken,
     saveToken,
-    type AuthUser,
 } from "../services/authService";
 
 export const useAuthStore = defineStore("auth", () => {
     const user = ref<AuthUser | null>(null);
     const token = ref<string | null>(getToken());
-    const loading = ref(false);
+    const loading = ref(!!token.value);
     const error = ref<string | null>(null);
 
     async function init() {
-        if (!token.value) return;
+        if (!token.value) {
+            loading.value = false;
+            return;
+        }
         try {
             loading.value = true;
             user.value = await authMe(token.value);

@@ -1,37 +1,26 @@
 <script lang="ts" setup>
+import { useAuthStore } from "@/stores/authStore";
 import { ref } from "vue";
 
 const emit = defineEmits<{
     close: [];
 }>();
 
-const isConfirmingDelete = ref(false);
+const isConfirming = ref(false);
+const auth = useAuthStore();
 
-const handleDeleteAllData = () => {
-    if (!isConfirmingDelete.value) {
-        isConfirmingDelete.value = true;
-        // Auto-cancel confirmation after 3 seconds
-        setTimeout(() => {
-            isConfirmingDelete.value = false;
-        }, 3000);
+const handleLogout = () => {
+    if (!isConfirming.value) {
+        isConfirming.value = true;
+        setTimeout(() => (isConfirming.value = false), 3000);
         return;
     }
-
-    // Clear all localStorage data
-    localStorage.clear();
-
-    // Reset confirmation state
-    isConfirmingDelete.value = false;
-
-    // Close settings page
+    auth.logout();
     emit("close");
-
-    // Reload the page to reset application state
-    window.location.reload();
 };
 
 const handleClose = () => {
-    isConfirmingDelete.value = false;
+    isConfirming.value = false;
     emit("close");
 };
 </script>
@@ -45,26 +34,23 @@ const handleClose = () => {
 
         <div class="settings-content">
             <div class="settings-section">
-                <h3>Données</h3>
+                <h3>Compte</h3>
                 <div class="setting-item">
                     <div class="setting-description">
-                        <h4>Supprimer toutes les données</h4>
+                        <h4>Déconnexion</h4>
                         <p>
-                            Efface tous les messages, repas et plannings
-                            sauvegardés.
+                            Fermer votre session et revenir à l'écran de
+                            connexion.
                         </p>
                     </div>
                     <button
-                        @click="handleDeleteAllData"
-                        :class="[
-                            'delete-button',
-                            { confirm: isConfirmingDelete },
-                        ]"
+                        @click="handleLogout"
+                        :class="['logout-button', { confirm: isConfirming }]"
                     >
                         {{
-                            isConfirmingDelete
-                                ? "Confirmer la suppression"
-                                : "Supprimer toutes les données"
+                            isConfirming
+                                ? "Cliquer pour confirmer"
+                                : "Se déconnecter"
                         }}
                     </button>
                 </div>
@@ -161,7 +147,7 @@ const handleClose = () => {
     line-height: 1.4;
 }
 
-.delete-button {
+.logout-button {
     padding: 12px 16px;
     background-color: var(--accent-red);
     color: var(--bg-primary);
@@ -173,17 +159,14 @@ const handleClose = () => {
     transition: all 0.2s ease;
     align-self: flex-start;
 }
-
-.delete-button:hover {
+.logout-button:hover {
     background-color: var(--accent-red-hover);
     transform: translateY(-1px);
 }
-
-.delete-button:active {
+.logout-button:active {
     transform: translateY(0);
 }
-
-.delete-button.confirm {
+.logout-button.confirm {
     background-color: #dc2626;
     animation: pulse 0.5s ease-in-out;
 }
@@ -208,7 +191,7 @@ const handleClose = () => {
         align-items: flex-start;
     }
 
-    .delete-button {
+    .logout-button {
         align-self: center;
     }
 }
