@@ -1,11 +1,10 @@
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
+import { Deps } from "./index.js";
 import { buildApiRouter } from "./routes.js";
 
-export type CreateAppDeps = Parameters<typeof buildApiRouter>[0];
-
-export function createApp(deps: CreateAppDeps): Express {
+export function createApp(deps: Deps): Express {
     const app = express();
     app.use(cors());
     app.use(express.json());

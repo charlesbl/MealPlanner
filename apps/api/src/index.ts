@@ -7,6 +7,10 @@ import { User } from "./modules/user/user.entity.js";
 
 dotenv.config();
 
+export type Deps = {
+    usersRepo: Repository<User>;
+};
+
 const PORT = Number(process.env.PORT || 3001);
 
 async function bootstrap() {

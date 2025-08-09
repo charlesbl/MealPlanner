@@ -36,7 +36,7 @@ const llm = new ChatOpenAI({
 const agent = createAgent(llm);
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
-app.post("/chat", requireAuth(), async (req: Request, res: Response) => {
+app.post("/chat", requireAuth, async (req: Request, res: Response) => {
     try {
         const userMessage: string = (req.body?.message ?? "").toString();
         const thread_id: string | undefined = req.body?.thread_id;

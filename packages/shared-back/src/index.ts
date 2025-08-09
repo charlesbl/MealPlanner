@@ -28,24 +28,22 @@ export function signToken(
     return jwt.sign(payload, secret, signOpts);
 }
 
-export function requireAuth() {
-    return function (
-        req: Request & { user?: JwtUserPayload },
-        res: Response,
-        next: NextFunction
-    ) {
-        const secret = getJwtSecret();
-        const header = req.headers.authorization;
-        if (!header || !header.startsWith("Bearer ")) {
-            return res.status(401).json({ error: "Missing token" });
-        }
-        const token = header.slice("Bearer ".length);
-        try {
-            const payload = verifyToken(token, secret);
-            req.user = payload;
-            next();
-        } catch {
-            return res.status(401).json({ error: "Invalid token" });
-        }
-    };
+export function requireAuth(
+    req: Request & { user?: JwtUserPayload },
+    res: Response,
+    next: NextFunction
+) {
+    const secret = getJwtSecret();
+    const header = req.headers.authorization;
+    if (!header || !header.startsWith("Bearer ")) {
+        return res.status(401).json({ error: "Missing token" });
+    }
+    const token = header.slice("Bearer ".length);
+    try {
+        const payload = verifyToken(token, secret);
+        req.user = payload;
+        next();
+    } catch {
+        return res.status(401).json({ error: "Invalid token" });
+    }
 }
