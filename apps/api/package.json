@@ -8,7 +8,7 @@
         "build": "tsc -p tsconfig.json",
         "start": "node dist/index.js",
         "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
-        "migration:generate": "pnpm typeorm migration:generate src/migrations/InitUser",
+        "migration:generate": "typeorm-ts-node-esm -d src/data-source.ts migration:generate",
         "migration:run": "pnpm typeorm migration:run",
         "migration:revert": "pnpm typeorm migration:revert",
         "seed": "tsx src/seed.ts"
