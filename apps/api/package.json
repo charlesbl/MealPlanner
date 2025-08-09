@@ -6,13 +6,26 @@
     "scripts": {
         "dev": "tsx src/index.ts",
         "build": "tsc -p tsconfig.json",
-        "start": "node dist/index.js"
+        "start": "node dist/index.js",
+        "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
+        "migration:generate": "pnpm typeorm migration:generate src/migrations/InitUser",
+        "migration:run": "pnpm typeorm migration:run",
+        "migration:revert": "pnpm typeorm migration:revert",
+        "seed": "tsx src/seed.ts"
     },
     "dependencies": {
-        "@mealplanner/shared": "workspace:*"
+        "@mealplanner/shared": "workspace:*",
+        "dotenv": "^17.2.1",
+        "express": "^5.1.0",
+        "reflect-metadata": "^0.2.2",
+        "typeorm": "^0.3.25",
+        "pg": "^8.16.3"
     },
     "devDependencies": {
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.2.1",
+        "ts-node": "^10.9.2",
         "typescript": "~5.9.2",
-        "tsx": "^4.16.2"
+        "tsx": "^4.20.3"
     }
 }

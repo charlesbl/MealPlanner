@@ -8,6 +8,10 @@
         "dev:agent": "pnpm --filter @mealplanner/agent dev",
         "dev:api": "pnpm --filter @mealplanner/api dev",
         "build": "pnpm -r build",
-        "preview": "pnpm --filter @mealplanner/front preview"
+        "preview": "pnpm --filter @mealplanner/front preview",
+        "db:up": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml up -d",
+        "db:down": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml down",
+        "db:logs": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml logs -f",
+        "db:ps": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml ps"
     }
 }
