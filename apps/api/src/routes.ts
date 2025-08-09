@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { Repository } from "typeorm";
-import User from "../entities/User.js";
-import { authRouterFactory } from "./auth.js";
-import { usersRouterFactory } from "./users.js";
+import { authRouterFactory } from "./modules/auth/auth.routes.js";
+import User from "./modules/user/user.entity.js";
+import { usersRouterFactory } from "./modules/user/user.routes.js";
 
 export type Deps = {
     usersRepo: Repository<User>;

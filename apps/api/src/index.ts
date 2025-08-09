@@ -3,7 +3,7 @@ import "reflect-metadata";
 import { Repository } from "typeorm";
 import { createApp } from "./app.js";
 import { AppDataSource } from "./data-source.js";
-import { User } from "./entities/User.js";
+import { User } from "./modules/user/user.entity.js";
 
 dotenv.config();
 

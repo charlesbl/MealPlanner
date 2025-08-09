@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import "reflect-metadata";
 import { AppDataSource } from "./data-source.js";
-import { User } from "./entities/User.js";
+import { User } from "./modules/user/user.entity.js";
 
 async function run() {
     await AppDataSource.initialize();

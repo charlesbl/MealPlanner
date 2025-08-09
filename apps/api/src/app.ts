@@ -1,7 +1,7 @@
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { buildApiRouter } from "./routes/index.js";
+import { buildApiRouter } from "./routes.js";
 
 export type CreateAppDeps = Parameters<typeof buildApiRouter>[0];
 

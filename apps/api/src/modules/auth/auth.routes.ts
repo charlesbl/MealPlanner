@@ -1,9 +1,9 @@
 import { AuthRequest, requireAuth, signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import { Router } from "express";
-import { loginSchema, registerSchema } from "../schemas/auth.js";
+import { loginSchema, registerSchema } from "./auth.schemas.js";
 
-import type { Deps } from "./index.js";
+import type { Deps } from "../../routes.js";
 
 export function authRouterFactory({ usersRepo }: Deps) {
     const router = Router();

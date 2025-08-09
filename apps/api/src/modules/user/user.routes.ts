@@ -1,7 +1,7 @@
 import { AuthRequest, requireAuth } from "@mealplanner/shared-back";
 import { Router } from "express";
-import { updateUserSchema, userIdParamSchema } from "../schemas/users.js";
-import type { Deps } from "./index.js";
+import type { Deps } from "../../routes.js";
+import { updateUserSchema, userIdParamSchema } from "./user.schemas.js";
 
 export function usersRouterFactory({ usersRepo }: Deps) {
     const router = Router();

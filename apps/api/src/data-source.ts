@@ -3,7 +3,7 @@ import path from "node:path";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { fileURLToPath } from "url";
-import { User } from "./entities/User.js";
+import { User } from "./modules/user/user.entity.js";
 
 dotenv.config();
 
