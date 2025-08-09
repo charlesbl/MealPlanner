@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { sendMessageToBotStream } from "@/services/chatService";
-import { resetThreadId } from "@/storage/threadStore";
+import { getOrCreateThreadId, resetThreadId } from "@/storage/threadStore";
 import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
@@ -65,7 +65,8 @@ const handleSendMessage = async (message: string) => {
     isProcessing.value = true;
 
     try {
-        const stream = sendMessageToBotStream(message);
+        const threadId = getOrCreateThreadId();
+        const stream = sendMessageToBotStream(message, threadId);
 
         for await (const event of stream) {
             if (event.type === "chat_model_stream") {

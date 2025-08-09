@@ -1,2 +1,2 @@
-// TODO: Implement backend service here
-console.log("[backend] Service placeholder running.");
+// TODO: Implement api service here
+console.log("[api] Service placeholder running.");

@@ -1,5 +1,5 @@
 {
-    "name": "@mealplanner/backend",
+    "name": "@mealplanner/api",
     "version": "0.0.0",
     "private": true,
     "type": "module",
@@ -8,9 +8,9 @@
         "build": "tsc -p tsconfig.json",
         "start": "node dist/index.js"
     },
-        "dependencies": {
-            "@mealplanner/shared": "workspace:*"
-        },
+    "dependencies": {
+        "@mealplanner/shared": "workspace:*"
+    },
     "devDependencies": {
         "typescript": "~5.9.2",
         "tsx": "^4.16.2"
