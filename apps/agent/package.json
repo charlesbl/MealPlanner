@@ -9,10 +9,19 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@mealplanner/shared": "workspace:*"
+        "@langchain/core": "^0.3.68",
+        "@langchain/langgraph": "^0.4.3",
+        "@langchain/openai": "^0.6.7",
+        "@mealplanner/shared": "workspace:*",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.1",
+        "express": "^5.1.0",
+        "zod": "^4.0.16"
     },
     "devDependencies": {
-        "typescript": "~5.9.2",
-        "tsx": "^4.16.2"
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "tsx": "^4.20.3",
+        "typescript": "~5.9.2"
     }
 }

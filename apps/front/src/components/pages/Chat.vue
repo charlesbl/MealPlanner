@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import { sendMessageToBotStream } from "@/services/chatService";
-import { loadChatHistory, saveChatHistory } from "@/storage/chatHistoryStorage";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { resetThreadId } from "@/storage/threadStore";
+import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
 import Settings from "./Settings.vue";
@@ -19,49 +18,10 @@ const isProcessing = ref(false);
 const messagesContainer = ref<HTMLElement>();
 const showSettings = ref(false);
 
-onMounted(() => {
-    loadChatHistoryFromStorage();
-});
-
-watch(
-    messages,
-    (newMessages) => {
-        saveChatHistoryToStorage(newMessages);
-    },
-    { deep: true }
-);
-
-const loadChatHistoryFromStorage = async () => {
-    const storedHistory = loadChatHistory();
-    const loadedMessages: ChatMessage[] = storedHistory.map((msg, index) => ({
-        id: `stored-${index}-${Date.now()}`,
-        content:
-            typeof msg.content === "string"
-                ? msg.content
-                : JSON.stringify(msg.content),
-        isUser: msg instanceof HumanMessage,
-        isStreaming: false,
-    }));
-    messages.value = loadedMessages;
-
-    if (loadedMessages.length > 0) {
-        await scrollToBottom();
-    }
-};
-
-const saveChatHistoryToStorage = (chatMessages: ChatMessage[]) => {
-    const baseMessages = chatMessages.map((msg) => {
-        if (msg.isUser) {
-            return new HumanMessage(msg.content);
-        } else {
-            return new AIMessage(msg.content);
-        }
-    });
-    saveChatHistory(baseMessages);
-};
-
 const clearChatHistory = () => {
+    // Reset local UI and server-side memory by rotating the thread id
     messages.value = [];
+    resetThreadId();
 };
 
 const toggleSettings = () => {

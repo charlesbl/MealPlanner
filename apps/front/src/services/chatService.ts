@@ -17,95 +17,129 @@
  * - Process individual stream events (delegates to event handlers)
  */
 
-import { reactAgent } from "@/agent/agentFactory";
-// System prompt is now injected via agent stateModifier in agentFactory
+// Front now streams from backend agent over SSE
 import {
-    streamEventHandler,
-    type ChainEndEventData,
     type StreamEventData,
+    streamEventHandler,
 } from "@/services/streamEventHandlers";
-import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import type { StreamEvent } from "@langchain/core/tracers/log_stream";
-import { chatHistoryManager } from "../agent/chatHistoryManager";
-import { isApiKeyConfigured } from "../config/llmConfig";
-
-const HISTORY_MAX_LENGTH = 10;
+import { getOrCreateThreadId } from "@/storage/threadStore";
 
 export async function* sendMessageToBotStream(
     message: string
 ): AsyncGenerator<StreamEventData, void, unknown> {
-    if (!isApiKeyConfigured()) {
-        throw new Error(
-            "OpenRouter API key is not configured. Please set VITE_OPENROUTER_API_KEY in your .env file."
-        );
+    const controller = new AbortController();
+    const thread_id = getOrCreateThreadId();
+
+    const resp = await fetch(getAgentUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({ message, thread_id }),
+    });
+
+    if (!resp.ok || !resp.body) {
+        throw new Error(`Agent server error: ${resp.status}`);
     }
 
-    // Persist user's message locally for UI continuity (optional, since LangGraph persists via checkpointer)
-    chatHistoryManager.addMessage(new HumanMessage(message));
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    let finalMessage = "";
 
-    // Without a browser-safe checkpointer, pass full conversation history for continuity.
-    const stream = await reactAgent.streamEvents(
-        { messages: chatHistoryManager.getChatHistory() },
-        { version: "v2" }
-    );
-    let lastMessage = ""; // accumulate final assistant response from token stream
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
 
-    for await (const event of stream) {
-        console.log("Received stream event:", event);
-        const handler = eventHandlers.get(event.event);
-        if (handler === undefined) {
-            yield streamEventHandler.logUnhandledEvent(event);
-            continue;
+        // Process SSE lines (support both LF and CRLF)
+        while (true) {
+            const lf2 = buffer.indexOf("\n\n");
+            const crlf2 = buffer.indexOf("\r\n\r\n");
+            if (lf2 === -1 && crlf2 === -1) break;
+            const boundaryIdx =
+                lf2 !== -1 && crlf2 !== -1
+                    ? Math.min(lf2, crlf2)
+                    : lf2 !== -1
+                    ? lf2
+                    : crlf2;
+            const boundaryLen = boundaryIdx === lf2 ? 2 : 4;
+            const packet = buffer.slice(0, boundaryIdx);
+            buffer = buffer.slice(boundaryIdx + boundaryLen);
+            const lines = packet.split(/\r?\n/);
+            let event = "message";
+            let data = "";
+            for (const line of lines) {
+                if (line.startsWith("event:")) event = line.slice(6).trim();
+                else if (line.startsWith("data:")) data += line.slice(5).trim();
+            }
+            if (!data) continue;
+            try {
+                const payload = JSON.parse(data);
+                if (event === "token" && typeof payload.chunk === "string") {
+                    finalMessage += payload.chunk;
+                    yield streamEventHandler.handleChatModelStreamEvent({
+                        event: "on_chat_model_stream",
+                        name: "on_chat_model_stream",
+                        data: { chunk: { content: payload.chunk } },
+                        run_id: "",
+                        tags: [],
+                        metadata: {},
+                        time: new Date(),
+                    } as any);
+                } else if (
+                    event === "done" &&
+                    typeof payload.text === "string"
+                ) {
+                    // Emit as chain_end equivalent for compatibility
+                    yield streamEventHandler.handleChainEndEvent({
+                        event: "on_chain_end",
+                        name: "on_chain_end",
+                        data: { output: payload.text },
+                        run_id: "",
+                        tags: [],
+                        metadata: {},
+                        time: new Date(),
+                    } as any);
+                } else if (
+                    event === "tool_call" &&
+                    typeof payload.name === "string"
+                ) {
+                    yield streamEventHandler.handleToolCallEvent({
+                        event: "on_tool_start",
+                        name: payload.name,
+                        data: { name: payload.name },
+                        run_id: "",
+                        tags: [],
+                        metadata: {},
+                        time: new Date(),
+                    } as any);
+                } else if (
+                    event === "tool_end" &&
+                    typeof payload.name === "string"
+                ) {
+                    yield streamEventHandler.handleToolEndEvent({
+                        event: "on_tool_end",
+                        name: payload.name,
+                        data: { name: payload.name },
+                        run_id: "",
+                        tags: [],
+                        metadata: {},
+                        time: new Date(),
+                    } as any);
+                } else if (event === "error") {
+                    throw new Error(payload.message || "Unknown agent error");
+                }
+            } catch (e) {
+                // ignore malformed lines
+                console.error("Error parsing SSE data:", e);
+            }
         }
-        const eventData = handler(event);
-        // Accumulate final output from streaming tokens. Reset on tool calls to avoid
-        // capturing intermediate reasoning/tool-selection content.
-        if (eventData.type === "tool_call") {
-            lastMessage = "";
-        } else if (eventData.type === "chat_model_stream") {
-            lastMessage += eventData.chunk;
-        } else if (eventData.type === "chain_end") {
-            // Fallback for legacy AgentExecutor; keep for compatibility
-            lastMessage = (eventData as ChainEndEventData).finalOutput;
-        }
-        yield eventData;
     }
 
-    // Update local chat history with the complete response (UI persistence)
-    if (lastMessage.trim().length > 0) {
-        chatHistoryManager.addMessage(new AIMessage(lastMessage));
-    }
-
-    // Keep history length manageable
-    chatHistoryManager.trimHistory(HISTORY_MAX_LENGTH);
+    // No local persistence: history is server-side via thread_id
 }
 
-const eventHandlers = new Map<string, (event: StreamEvent) => StreamEventData>([
-    // LangGraph graph-level events
-    [
-        "on_graph_end",
-        streamEventHandler.handleChainEndEvent.bind(streamEventHandler),
-    ],
-
-    // Chat model token stream
-    [
-        "on_chat_model_stream",
-        streamEventHandler.handleChatModelStreamEvent.bind(streamEventHandler),
-    ],
-
-    // Chain-level (legacy/compat)
-    [
-        "on_chain_end",
-        streamEventHandler.handleChainEndEvent.bind(streamEventHandler),
-    ],
-
-    // Tool calls
-    [
-        "on_tool_start",
-        streamEventHandler.handleToolCallEvent.bind(streamEventHandler),
-    ],
-    [
-        "on_tool_end",
-        streamEventHandler.handleToolEndEvent.bind(streamEventHandler),
-    ],
-]);
+function getAgentUrl(): string {
+    const base = import.meta.env.VITE_AGENT_URL || "http://localhost:8787";
+    return `${base.replace(/\/$/, "")}/chat`;
+}
