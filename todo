@@ -1,3 +1,4 @@
 TODO: add watchers to pnpm run dev agent/ & api/
 TODO: add watchers to pnpm run build shared/ & sahred-back/
 TODO: rename shared/ because is confusing with shared-back/ (shared-all/ ?)
+TODO: agent need to use API to handle meals

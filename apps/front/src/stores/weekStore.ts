@@ -1,9 +1,15 @@
-import { type Meal, type WeekMeal, generateId } from "@mealplanner/shared";
+import { type Meal, generateId } from "@mealplanner/shared";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useMealStore } from "./mealStore";
 
 export const useWeekStore = defineStore("weekStore", () => {
+    type WeekMeal = {
+        id: string;
+        mealId: string;
+        addedAt: Date;
+        order: number;
+    };
     const selectedMeals = ref<WeekMeal[]>([]);
 
     function addMealToWeek(mealId: string): string {

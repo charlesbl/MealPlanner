@@ -15,7 +15,7 @@ const props = defineProps<Props>();
 
 const instance = getCurrentInstance();
 const uniqueId = `toggle-${props.meal.id}-${
-    instance?.uid || Math.random().toString(36).substr(2, 9)
+    instance?.uid || Math.random().toString(36).slice(2, 11)
 }`;
 
 function formatMealTypes(mealTypes: string[]): string {

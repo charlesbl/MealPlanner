@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { APIResponse } from "./common.schemas.js";
+import type { APIResponse } from "./common.schemas.js";
 
 // Shared types
 export enum MealType {

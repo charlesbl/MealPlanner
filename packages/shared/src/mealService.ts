@@ -21,20 +21,29 @@ function getApiBase(): string {
     return (base ?? "http://localhost:3001").replace(/\/$/, "");
 }
 
-export async function fetchMeals(): Promise<Meal[]> {
-    const res = await fetch(`${getApiBase()}/meals`);
+export async function fetchMeals(token: string): Promise<Meal[]> {
+    const res = await fetch(`${getApiBase()}/meals`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
     if (!res.ok) throw new Error(`Fetch meals failed: ${res.status}`);
     const body: MealListResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
+    body.data.forEach((meal) => {
+        meal.createdAt = new Date(meal.createdAt);
+    });
     return body.data;
 }
 
 export async function addMeal(
-    meal: Omit<Meal, "id" | "createdAt">
+    meal: Omit<Meal, "id" | "createdAt">,
+    token: string
 ): Promise<Meal> {
     const res = await fetch(`${getApiBase()}/meals`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(meal),
     });
     if (!res.ok) throw new Error(`Add meal failed: ${res.status}`);
@@ -45,11 +54,15 @@ export async function addMeal(
 
 export async function updateMeal(
     id: string,
-    updates: Partial<Omit<Meal, "id" | "createdAt">>
+    updates: Partial<Omit<Meal, "id" | "createdAt">>,
+    token: string
 ): Promise<Meal> {
     const res = await fetch(`${getApiBase()}/meals/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error(`Update meal failed: ${res.status}`);
@@ -58,9 +71,10 @@ export async function updateMeal(
     return body.data;
 }
 
-export async function deleteMeal(id: string): Promise<void> {
+export async function deleteMeal(id: string, token: string): Promise<void> {
     const res = await fetch(`${getApiBase()}/meals/${id}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Delete meal failed: ${res.status}`);
 }

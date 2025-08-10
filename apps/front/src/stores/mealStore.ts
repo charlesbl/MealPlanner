@@ -1,16 +1,28 @@
 import * as mealService from "@mealplanner/shared";
 import { type Meal } from "@mealplanner/shared";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, watch } from "vue";
+import { useAuthStore } from "./authStore";
 
 export const useMealStore = defineStore("mealStore", () => {
     const meals = ref<Meal[]>([]);
     const error = ref<string | null>(null);
+    const auth = useAuthStore();
+    const fetchMeals = async () => {
+        error.value = null;
+        try {
+            if (!auth.token) throw new Error("Not authenticated");
+            meals.value = await mealService.fetchMeals(auth.token);
+        } catch (e: any) {
+            error.value = e.message || "Failed to fetch meals";
+        }
+    };
 
     async function deleteMeal(id: string) {
         error.value = null;
         try {
-            await mealService.deleteMeal(id);
+            if (!auth.token) throw new Error("Not authenticated");
+            await mealService.deleteMeal(id, auth.token);
             meals.value = meals.value.filter((m) => m.id !== id);
             return true;
         } catch (e: any) {
@@ -24,6 +36,16 @@ export const useMealStore = defineStore("mealStore", () => {
     }
 
     const mealCount = () => meals.value.length;
+
+    // Fetch when authenticated token is available; clear on logout
+    watch(
+        () => auth.token,
+        (token) => {
+            if (token) void fetchMeals();
+            else meals.value = [];
+        },
+        { immediate: true }
+    );
 
     return {
         meals,

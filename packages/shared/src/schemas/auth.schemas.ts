@@ -8,7 +8,7 @@ export type AuthUser = {
     email: string;
 };
 
-type AuthUserWithToken = {
+export type AuthUserWithToken = {
     token: string;
     user: AuthUser;
 };

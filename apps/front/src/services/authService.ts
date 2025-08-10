@@ -1,6 +1,12 @@
 // Simple auth service for JWT-based auth
 
-import type { AuthResponse, AuthUser } from "@mealplanner/shared";
+import type {
+    AuthLoginResponse,
+    AuthMeResponse,
+    AuthRegisterResponse,
+    AuthUser,
+    AuthUserWithToken,
+} from "@mealplanner/shared";
 
 function getApiBase(): string {
     const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
@@ -11,27 +17,31 @@ export async function authRegister(
     name: string,
     email: string,
     password: string
-): Promise<AuthResponse> {
+): Promise<AuthUserWithToken> {
     const res = await fetch(`${getApiBase()}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
     });
     if (!res.ok) throw new Error(`Register failed: ${res.status}`);
-    return res.json();
+    const body: AuthRegisterResponse = await res.json();
+    if (body.status === "error") throw new Error(body.error);
+    return body.data;
 }
 
 export async function authLogin(
     email: string,
     password: string
-): Promise<AuthResponse> {
+): Promise<AuthUserWithToken> {
     const res = await fetch(`${getApiBase()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
     });
     if (!res.ok) throw new Error(`Login failed: ${res.status}`);
-    return res.json();
+    const body: AuthLoginResponse = await res.json();
+    if (body.status === "error") throw new Error(body.error);
+    return body.data;
 }
 
 export async function authMe(token: string): Promise<AuthUser> {
@@ -39,7 +49,9 @@ export async function authMe(token: string): Promise<AuthUser> {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Auth check failed: ${res.status}`);
-    return res.json();
+    const body: AuthMeResponse = await res.json();
+    if (body.status === "error") throw new Error(body.error);
+    return body.data;
 }
 
 export function saveToken(token: string) {

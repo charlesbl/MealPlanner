@@ -25,7 +25,6 @@ function handleDeleteMeal(mealId: string) {
             <h1>Mes Repas</h1>
             <p class="meal-count">{{ sortedMeals.length }} repas enregistrés</p>
         </div>
-
         <div class="meals-list" v-if="sortedMeals.length > 0">
             <MealCard
                 v-for="meal in sortedMeals"
