@@ -1,12 +1,11 @@
 import { requireAuth } from "@mealplanner/shared-back";
 import { Router } from "express";
-import { Deps } from "../../index.js";
 import { authControllerFactory } from "./auth.controller.js";
 
-export function authRouterFactory({ usersRepo }: Deps) {
+export function authRouterFactory() {
     const router = Router();
 
-    const controller = authControllerFactory({ usersRepo });
+    const controller = authControllerFactory();
 
     router.post("/register", controller.register);
     router.post("/login", controller.login);

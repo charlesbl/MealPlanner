@@ -1,4 +1,12 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+    Column,
+    Entity,
+    Index,
+    OneToMany,
+    PrimaryGeneratedColumn,
+} from "typeorm";
+import { MealEntity } from "../meal/meal.entity.js";
+import { UserSelectionEntity } from "../meal/userSelection.entity.js";
 
 @Entity({ name: "users" })
 export class User {
@@ -14,6 +22,12 @@ export class User {
 
     @Column({ name: "password_hash", type: "varchar", length: 255 })
     passwordHash!: string;
+
+    @OneToMany(() => MealEntity, (meal) => meal.user)
+    meals!: MealEntity[];
+
+    @OneToMany(() => UserSelectionEntity, (sel) => sel.user)
+    userSelections!: UserSelectionEntity[];
 }
 
 export default User;

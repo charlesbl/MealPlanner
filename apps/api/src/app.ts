@@ -1,15 +1,14 @@
 import cors from "cors";
 import express, { Express, NextFunction, Request, Response } from "express";
 import { ZodError } from "zod";
-import { Deps } from "./index.js";
 import { buildApiRouter } from "./routes.js";
 
-export function createApp(deps: Deps): Express {
+export function createApp(): Express {
     const app = express();
     app.use(cors());
     app.use(express.json());
 
-    app.use("/", buildApiRouter(deps));
+    app.use("/", buildApiRouter());
 
     // Not found
     app.use((req, res) => {

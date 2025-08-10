@@ -2,10 +2,12 @@ import type { AuthRequest } from "@mealplanner/shared-back";
 import { signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
-import { Deps } from "../../index.js";
+import { AppDataSource } from "../../data-source.js";
+import User from "../user/user.entity.js";
 import { loginSchema, registerSchema } from "./auth.schemas.js";
 
-export function authControllerFactory({ usersRepo }: Deps) {
+export function authControllerFactory() {
+    const usersRepo = AppDataSource.getRepository(User);
     const register = async (
         req: Request,
         res: Response,
