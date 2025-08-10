@@ -90,6 +90,5 @@ watch(
     justify-content: center;
     height: 100dvh;
     background: var(--bg-secondary);
-    padding: 24px;
 }
 </style>

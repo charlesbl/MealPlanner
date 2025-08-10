@@ -2,7 +2,7 @@ import { JwtUserPayload } from "@mealplanner/shared";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
-export type AuthRequestPayload = { user?: JwtUserPayload };
+export type AuthRequestPayload = { user?: JwtUserPayload } & { token?: string };
 export type AuthRequest = Request & AuthRequestPayload;
 
 export function getJwtSecret(): Secret {
@@ -29,7 +29,7 @@ export function signToken(
 }
 
 export function requireAuth(
-    req: Request & { user?: JwtUserPayload },
+    req: AuthRequest,
     res: Response,
     next: NextFunction
 ) {
@@ -42,6 +42,7 @@ export function requireAuth(
     try {
         const payload = verifyToken(token, secret);
         req.user = payload;
+        req.token = token;
         next();
     } catch {
         return res.status(401).json({ error: "Invalid token" });

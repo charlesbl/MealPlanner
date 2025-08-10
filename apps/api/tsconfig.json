@@ -5,5 +5,10 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true
     },
-    "include": ["src"]
+    "include": [
+        "src",
+        "../../packages/shared/src/schemas/user.schemas.ts",
+        "../../packages/shared/src/schemas/meal.schemas.ts",
+        "../../packages/shared/src/schemas/auth.schemas.ts"
+    ]
 }

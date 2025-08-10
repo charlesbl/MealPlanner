@@ -1,32 +1,57 @@
-import { AuthRequest } from "@mealplanner/shared-back";
+import type {
+    MealCreateResponse,
+    MealGetResponse,
+    MealListResponse,
+    MealUpdateResponse,
+} from "@mealplanner/shared";
+import type { AuthRequest } from "@mealplanner/shared-back";
 import { Response } from "express";
+import {
+    createMealSchema,
+    updateMealSchema,
+} from "../../../../../packages/shared/src/schemas/meal.schemas.js";
 import { AppDataSource } from "../../data-source.js";
 import { MealEntity } from "./meal.entity.js";
-import { createMealSchema, updateMealSchema } from "./meal.schemas.js";
 
 export function mealControllerFactory() {
     const mealsRepo = AppDataSource.getRepository(MealEntity);
     return {
-        getAll: async (req: AuthRequest, res: Response) => {
+        getAll: async (req: AuthRequest, res: Response<MealListResponse>) => {
             const userId = req.user?.sub;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+            if (!userId)
+                return res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
             const meals = await mealsRepo.find({
                 where: { user: { id: userId } },
             });
-            res.json(meals);
+            res.json({ status: "success", data: meals });
         },
-        getById: async (req: AuthRequest, res: Response) => {
+        getById: async (req: AuthRequest, res: Response<MealGetResponse>) => {
             const userId = req.user?.sub;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+            if (!userId)
+                return res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
             const meal = await mealsRepo.findOne({
                 where: { id: req.params.id, user: { id: userId } },
             });
-            if (!meal) return res.status(404).json({ error: "Meal not found" });
-            res.json(meal);
+            if (!meal)
+                return res.status(404).json({
+                    status: "error",
+                    error: "Meal not found",
+                });
+            res.json({ status: "success", data: meal });
         },
-        create: async (req: AuthRequest, res: Response) => {
+        create: async (req: AuthRequest, res: Response<MealCreateResponse>) => {
             const userId = req.user?.sub;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+            if (!userId)
+                return res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
             try {
                 const data = createMealSchema.parse(req.body);
                 const meal = mealsRepo.create({
@@ -34,35 +59,64 @@ export function mealControllerFactory() {
                     user: { id: userId },
                 });
                 await mealsRepo.save(meal);
-                res.status(201).json(meal);
+                res.status(201).json({ status: "success", data: meal });
             } catch (err) {
-                res.status(400).json({ error: "Invalid data", details: err });
+                res.status(400).json({
+                    status: "error",
+                    error: (err && typeof err === "object" && "message" in err
+                        ? (err as any).message
+                        : typeof err === "string"
+                        ? err
+                        : "Invalid data") as string,
+                });
             }
         },
-        update: async (req: AuthRequest, res: Response) => {
+        update: async (req: AuthRequest, res: Response<MealUpdateResponse>) => {
             const userId = req.user?.sub;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+            if (!userId)
+                return res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
             try {
                 const meal = await mealsRepo.findOne({
                     where: { id: req.params.id, user: { id: userId } },
                 });
                 if (!meal)
-                    return res.status(404).json({ error: "Meal not found" });
+                    return res.status(404).json({
+                        status: "error",
+                        error: "Meal not found",
+                    });
                 const updates = updateMealSchema.parse(req.body);
                 Object.assign(meal, updates);
                 await mealsRepo.save(meal);
-                res.json(meal);
+                res.json({ status: "success", data: meal });
             } catch (err) {
-                res.status(400).json({ error: "Invalid data", details: err });
+                res.status(400).json({
+                    status: "error",
+                    error: (err && typeof err === "object" && "message" in err
+                        ? (err as any).message
+                        : typeof err === "string"
+                        ? err
+                        : "Invalid data") as string,
+                });
             }
         },
         delete: async (req: AuthRequest, res: Response) => {
             const userId = req.user?.sub;
-            if (!userId) return res.status(401).json({ error: "Unauthorized" });
+            if (!userId)
+                return res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
             const meal = await mealsRepo.findOne({
                 where: { id: req.params.id, user: { id: userId } },
             });
-            if (!meal) return res.status(404).json({ error: "Meal not found" });
+            if (!meal)
+                return res.status(404).json({
+                    status: "error",
+                    error: "Meal not found",
+                });
             await mealsRepo.remove(meal);
             res.status(204).send();
         },

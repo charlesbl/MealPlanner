@@ -6,7 +6,7 @@ import {
     OneToMany,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { User } from "../user/user.entity.js";
+import type { UserEntity } from "../user/user.entity.js";
 import { UserSelectionEntity } from "./userSelection.entity.js";
 
 @Entity({ name: "meals" })
@@ -26,10 +26,12 @@ export class MealEntity {
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt!: Date;
 
-    @ManyToOne(() => User, (user) => user.meals, { onDelete: "CASCADE" })
-    user!: User;
+    @ManyToOne("UserEntity", (user: UserEntity) => user.meals, {
+        onDelete: "CASCADE",
+    })
+    user!: UserEntity;
 
-    @OneToMany(() => UserSelectionEntity, (sel) => sel.meal)
+    @OneToMany("UserSelectionEntity", (sel: UserSelectionEntity) => sel.meal)
     userSelections!: UserSelectionEntity[];
 }
 

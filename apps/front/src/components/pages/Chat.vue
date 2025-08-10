@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { sendMessageToBotStream } from "@/services/chatService";
-import { getOrCreateThreadId, resetThreadId } from "@/storage/threadStore";
+import { getOrCreateThreadId, resetThreadId } from "@/stores/threadStore";
 import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";

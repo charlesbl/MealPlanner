@@ -66,6 +66,7 @@ async function onSubmit(e: Event) {
     border: 1px solid var(--border-light);
     border-radius: 12px;
     padding: 24px;
+    margin: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 h1 {

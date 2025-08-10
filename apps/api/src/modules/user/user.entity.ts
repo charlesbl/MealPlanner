@@ -9,7 +9,7 @@ import { MealEntity } from "../meal/meal.entity.js";
 import { UserSelectionEntity } from "../meal/userSelection.entity.js";
 
 @Entity({ name: "users" })
-export class User {
+export class UserEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
@@ -30,4 +30,4 @@ export class User {
     userSelections!: UserSelectionEntity[];
 }
 
-export default User;
+export default UserEntity;

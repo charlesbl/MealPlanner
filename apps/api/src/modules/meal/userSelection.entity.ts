@@ -1,18 +1,18 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "../user/user.entity.js";
-import { MealEntity } from "./meal.entity.js";
+import type { UserEntity } from "../user/user.entity.js";
+import type { MealEntity } from "./meal.entity.js";
 
 @Entity({ name: "user_selection" })
 export class UserSelectionEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @ManyToOne(() => User, (user) => user.userSelections, {
+    @ManyToOne("UserEntity", (user: UserEntity) => user.userSelections, {
         onDelete: "CASCADE",
     })
-    user!: User;
+    user!: UserEntity;
 
-    @ManyToOne(() => MealEntity, (meal) => meal.userSelections, {
+    @ManyToOne("MealEntity", (meal: MealEntity) => meal.userSelections, {
         onDelete: "CASCADE",
     })
     meal!: MealEntity;

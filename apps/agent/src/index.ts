@@ -1,10 +1,10 @@
 import { HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
-import { requireAuth } from "@mealplanner/shared-back";
+import { AuthRequest, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
-import express, { Request, Response } from "express";
+import express, { Response } from "express";
 import { createAgent } from "./agent.js";
 
 //dotenv
@@ -36,10 +36,15 @@ const llm = new ChatOpenAI({
 const agent = createAgent(llm);
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
-app.post("/chat", requireAuth, async (req: Request, res: Response) => {
+app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
     try {
         const userMessage: string = (req.body?.message ?? "").toString();
         const thread_id: string | undefined = req.body?.thread_id;
+        const token = req.token;
+        const user = req.user;
+        console.log(
+            `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
+        );
 
         if (!userMessage) {
             res.status(400).json({ error: "message is required" });

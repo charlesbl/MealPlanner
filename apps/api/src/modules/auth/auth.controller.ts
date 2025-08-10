@@ -1,23 +1,34 @@
+import {
+    AuthLoginResponse,
+    AuthMeResponse,
+    AuthRegisterResponse,
+} from "@mealplanner/shared";
 import type { AuthRequest } from "@mealplanner/shared-back";
 import { signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
+import {
+    loginSchema,
+    registerSchema,
+} from "../../../../../packages/shared/src/schemas/auth.schemas.js";
 import { AppDataSource } from "../../data-source.js";
-import User from "../user/user.entity.js";
-import { loginSchema, registerSchema } from "./auth.schemas.js";
+import UserEntity from "../user/user.entity.js";
 
 export function authControllerFactory() {
-    const usersRepo = AppDataSource.getRepository(User);
+    const usersRepo = AppDataSource.getRepository(UserEntity);
     const register = async (
         req: Request,
-        res: Response,
+        res: Response<AuthRegisterResponse>,
         next: NextFunction
     ) => {
         try {
             const { name, email, password } = registerSchema.parse(req.body);
             const existing = await usersRepo.findOne({ where: { email } });
             if (existing) {
-                res.status(409).json({ error: "Email already in use" });
+                res.status(409).json({
+                    status: "error",
+                    error: "Email already in use",
+                });
                 return;
             }
             const passwordHash = await bcrypt.hash(password, 10);
@@ -29,8 +40,11 @@ export function authControllerFactory() {
                 name: user.name,
             });
             res.status(201).json({
-                token,
-                user: { id: user.id, name: user.name, email: user.email },
+                status: "success",
+                data: {
+                    token,
+                    user: { id: user.id, name: user.name, email: user.email },
+                },
             });
             return;
         } catch (err) {
@@ -38,17 +52,24 @@ export function authControllerFactory() {
         }
     };
 
-    const login = async (req: Request, res: Response, next: NextFunction) => {
+    const login = async (
+        req: Request,
+        res: Response<AuthLoginResponse>,
+        next: NextFunction
+    ) => {
         try {
             const { email, password } = loginSchema.parse(req.body);
             const user = await usersRepo.findOne({ where: { email } });
             if (!user) {
-                res.status(401).json({ error: "Invalid credentials" });
+                res.status(401).json();
                 return;
             }
             const ok = await bcrypt.compare(password, user.passwordHash);
             if (!ok) {
-                res.status(401).json({ error: "Invalid credentials" });
+                res.status(401).json({
+                    status: "error",
+                    error: "Invalid credentials",
+                });
                 return;
             }
             const token = signToken({
@@ -57,8 +78,11 @@ export function authControllerFactory() {
                 name: user.name,
             });
             res.json({
-                token,
-                user: { id: user.id, name: user.name, email: user.email },
+                status: "success",
+                data: {
+                    token,
+                    user: { id: user.id, name: user.name, email: user.email },
+                },
             });
             return;
         } catch (err) {
@@ -66,21 +90,34 @@ export function authControllerFactory() {
         }
     };
 
-    const me = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    const me = async (
+        req: AuthRequest,
+        res: Response<AuthMeResponse>,
+        next: NextFunction
+    ) => {
         try {
             const authReq = req;
             if (!authReq.user?.sub) {
-                res.status(401).json({ error: "Unauthorized" });
+                res.status(401).json({
+                    status: "error",
+                    error: "Unauthorized",
+                });
                 return;
             }
             const user = await usersRepo.findOne({
                 where: { id: authReq.user.sub },
             });
             if (!user) {
-                res.status(404).json({ error: "User not found" });
+                res.status(404).json({
+                    status: "error",
+                    error: "User not found",
+                });
                 return;
             }
-            res.json({ id: user.id, name: user.name, email: user.email });
+            res.json({
+                status: "success",
+                data: { id: user.id, name: user.name, email: user.email },
+            });
             return;
         } catch (err) {
             next(err);

@@ -5,7 +5,11 @@ import MealCard from "../MealCard.vue";
 
 const mealStore = useMealStore();
 
-const allMeals = computed(() => mealStore.getAllMeals());
+const sortedMeals = computed(() =>
+    mealStore.meals.sort(
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    )
+);
 
 function handleDeleteMeal(mealId: string) {
     const success = mealStore.deleteMeal(mealId);
@@ -19,12 +23,12 @@ function handleDeleteMeal(mealId: string) {
     <div class="deck-container">
         <div class="deck-header">
             <h1>Mes Repas</h1>
-            <p class="meal-count">{{ allMeals.length }} repas enregistrés</p>
+            <p class="meal-count">{{ sortedMeals.length }} repas enregistrés</p>
         </div>
 
-        <div class="meals-list" v-if="allMeals.length > 0">
+        <div class="meals-list" v-if="sortedMeals.length > 0">
             <MealCard
-                v-for="meal in allMeals"
+                v-for="meal in sortedMeals"
                 :key="meal.id"
                 :meal="meal"
                 @delete="handleDeleteMeal"
