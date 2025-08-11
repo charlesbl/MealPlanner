@@ -9,14 +9,16 @@
         "start": "node dist/index.js"
     },
     "dependencies": {
-        "@langchain/core": "^0.3.68",
-        "@langchain/langgraph": "^0.4.3",
+        "@langchain/core": "^0.3.69",
+        "@langchain/langgraph": "^0.4.4",
+        "@langchain/langgraph-checkpoint": "^0.1.0",
         "@langchain/openai": "^0.6.7",
         "@mealplanner/shared": "workspace:*",
         "@mealplanner/shared-back": "workspace:*",
         "cors": "^2.8.5",
         "dotenv": "^17.2.1",
         "express": "^5.1.0",
+        "uuid": "^11.1.0",
         "zod": "^4.0.17"
     },
     "devDependencies": {

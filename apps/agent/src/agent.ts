@@ -1,8 +1,9 @@
-import { MemorySaver } from "@langchain/langgraph";
+// import { MemorySaver } from "@langchain/langgraph"; // conservé en commentaire pour référence
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { systemPromptString } from "./prompt.js";
 
+import { ApiCheckpointSaver } from "./checkpoint/ApiCheckpointSaver.js";
 import { getAddMealToWeekTool } from "./tools/addMealToWeekTool.js";
 import { getAddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
 import { getDeleteMealTool } from "./tools/deleteMealTool.js";
@@ -19,10 +20,12 @@ export function createAgent(llm: ChatOpenAI, token: string) {
         getRemoveMealFromWeekTool(token),
         getReadWeekSelectionTool(token),
     ];
+    // Utilisation d'un checkpointer custom qui sera ensuite branché sur l'API
+    const checkpointer = new ApiCheckpointSaver();
     return createReactAgent({
         llm,
         tools,
-        checkpointer: new MemorySaver(),
+        checkpointer,
         prompt: systemPromptString,
     });
 }
