@@ -33,7 +33,6 @@ const llm = new ChatOpenAI({
     modelName: "z-ai/glm-4.5",
     temperature: 0.7,
 });
-const agent = createAgent(llm);
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
 app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
@@ -45,6 +44,11 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
         console.log(
             `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
         );
+
+        if (!token) {
+            res.status(401).json({ error: "Unauthorized: Missing token" });
+            return;
+        }
 
         if (!userMessage) {
             res.status(400).json({ error: "message is required" });
@@ -63,6 +67,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
             res.write(`data: ${JSON.stringify(data)}\n\n`);
         };
 
+        const agent = createAgent(llm, token);
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },
             { version: "v2", configurable: thread_id ? { thread_id } : {} }

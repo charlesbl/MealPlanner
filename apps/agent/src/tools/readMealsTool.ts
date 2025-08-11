@@ -1,12 +1,12 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { MealType } from "@mealplanner/shared";
 import { z } from "zod";
-import { mealStore } from "../state.js";
+import * as mealService from "../../../../packages/shared/src/mealService.js";
+import type { Meal } from "../../../../packages/shared/src/schemas/meal.schemas.js";
 
-// Schema for reading meals with optional filtering
 const readMealsSchema = z.object({
     mealType: z
-        .nativeEnum(MealType)
+        .enum(MealType)
         .optional()
         .describe(
             `Optional meal type filter (${Object.values(MealType).join(" | ")})`
@@ -19,55 +19,61 @@ const readMealsSchema = z.object({
         ),
 });
 
-export const ReadMealsTool = new DynamicStructuredTool({
-    name: "read_meals",
-    description: `Reads all meals from the deck or filters by meal type. Valid meal types are: ${Object.values(
-        MealType
-    ).join(
-        ", "
-    )}. Returns meals sorted by creation date (newest first). Meals are stored without specific dates and can be reused in weekly selections.`,
-    schema: readMealsSchema,
-    func: async (input: z.infer<typeof readMealsSchema>): Promise<string> => {
-        try {
-            let meals = input.mealType
-                ? mealStore.getMealsByType(input.mealType)
-                : mealStore.getAllMeals();
+const mealTypeDescription = Object.values(MealType).join(", ");
 
-            if (input.limit && input.limit > 0) {
-                meals = meals.slice(0, input.limit);
-            }
+export const getReadMealsTool = (token: string) => {
+    return new DynamicStructuredTool({
+        name: "read_meals",
+        description: `Reads all meals from the deck or filters by meal type. Valid meal types are: ${mealTypeDescription}. Returns meals sorted by creation date (newest first). Meals are stored without specific dates and can be reused in weekly selections`,
+        schema: readMealsSchema,
+        func: async (
+            input: z.infer<typeof readMealsSchema>
+        ): Promise<string> => {
+            try {
+                const meals = await mealService.fetchMeals(token);
 
-            if (meals.length === 0) {
-                const filterText = input.mealType
-                    ? ` for ${input.mealType}`
-                    : "";
-                return `No meals found${filterText} in your deck.`;
-            }
+                let filteredMeals = input.mealType
+                    ? meals.filter((m: Meal) =>
+                          m.mealTypes.includes(input.mealType!)
+                      )
+                    : meals;
 
-            // Format output for better readability
-            let output = `Found ${meals.length} meal${
-                meals.length > 1 ? "s" : ""
-            } in your deck`;
-            if (input.mealType) {
-                output += ` (${input.mealType})`;
-            }
-            output += ":\n\n";
-
-            meals.forEach((meal, index) => {
-                output += `${index + 1}. **${meal.name}** (${
-                    meal.mealTypes
-                })\n`;
-                output += `   ID: ${meal.id}\n`;
-                if (meal.description) {
-                    output += `   Description: ${meal.description}\n`;
+                if (input.limit && input.limit > 0) {
+                    filteredMeals = filteredMeals.slice(0, input.limit);
                 }
-                output += `   Added: ${meal.createdAt.toLocaleDateString()}\n\n`;
-            });
 
-            return output;
-        } catch (error: any) {
-            console.error("Error in readMealsTool:", error);
-            return `Error reading meals: ${error.message}`;
-        }
-    },
-});
+                if (filteredMeals.length === 0) {
+                    const filterText = input.mealType
+                        ? ` for ${input.mealType}`
+                        : "";
+                    return `No meals found${filterText} in your deck.`;
+                }
+
+                // Format output for better readability
+                let output = `Found ${filteredMeals.length} meal${
+                    filteredMeals.length > 1 ? "s" : ""
+                } in your deck`;
+                if (input.mealType) {
+                    output += ` (${input.mealType})`;
+                }
+                output += ":\n\n";
+
+                filteredMeals.forEach((meal: Meal, index: number) => {
+                    output += `${index + 1}. **${meal.name}** (${
+                        meal.mealTypes
+                    })\n`;
+                    output += `   ID: ${meal.id}\n`;
+                    if (meal.description) {
+                        output += `   Description: ${meal.description}\n`;
+                    }
+                    output += `   Added: ${meal.createdAt.toLocaleDateString()}\n\n`;
+                });
+
+                return output;
+            } catch (error: any) {
+                console.error("Error in readMealsTool:", error);
+                return `Error reading meals: ${error.message}`;
+            }
+        },
+    });
+};

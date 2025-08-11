@@ -7,6 +7,8 @@
         "dev:front": "pnpm --filter @mealplanner/front dev",
         "dev:agent": "pnpm --filter @mealplanner/agent dev",
         "dev:api": "pnpm --filter @mealplanner/api dev",
+        "dev": "pnpm -r --parallel run dev",
+        "dev:stack": "pnpm db:up && pnpm dev",
         "build": "pnpm -r run build",
         "preview": "pnpm --filter @mealplanner/front preview",
         "db:up": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml up -d",

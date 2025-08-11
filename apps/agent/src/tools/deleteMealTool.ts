@@ -1,31 +1,26 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
-import { mealStore } from "../state.js";
+import * as mealService from "../../../../packages/shared/src/mealService.js";
 
 const deleteMealSchema = z.object({
     mealId: z.string().describe("The ID of the meal to delete"),
 });
 
-export const DeleteMealTool = new DynamicStructuredTool({
-    name: "delete_meal",
-    description: "Deletes a meal by its ID.",
-    schema: deleteMealSchema,
-    func: async (input: z.infer<typeof deleteMealSchema>): Promise<string> => {
-        try {
-            const mealToDelete = mealStore.getMealById(input.mealId);
-            if (!mealToDelete) {
-                return `Error: Could not find meal with ID '${input.mealId}' to delete.`;
+export const getDeleteMealTool = (token: string) => {
+    return new DynamicStructuredTool({
+        name: "delete_meal",
+        description: "Deletes a meal by its ID.",
+        schema: deleteMealSchema,
+        func: async (
+            input: z.infer<typeof deleteMealSchema>
+        ): Promise<string> => {
+            try {
+                await mealService.deleteMeal(input.mealId, token);
+                return `Successfully deleted meal with ID: '${input.mealId}'.`;
+            } catch (error: any) {
+                console.error("Error in deleteMealTool:", error);
+                return `Error deleting meal: ${error.message}`;
             }
-
-            const success = mealStore.deleteMeal(input.mealId);
-            if (success) {
-                return `Successfully deleted meal: '${mealToDelete.name}' (${mealToDelete.mealTypes}).`;
-            } else {
-                return `Error: Could not delete meal with ID '${input.mealId}'.`;
-            }
-        } catch (error: any) {
-            console.error("Error in deleteMealTool:", error);
-            return `Error deleting meal: ${error.message}`;
-        }
-    },
-});
+        },
+    });
+};

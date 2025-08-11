@@ -2,23 +2,23 @@ import { MemorySaver } from "@langchain/langgraph";
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
 import { systemPromptString } from "./prompt.js";
-import { AddMealToWeekTool } from "./tools/addMealToWeekTool.js";
-import { AddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
-import { DeleteMealTool } from "./tools/deleteMealTool.js";
-import { ReadMealsTool } from "./tools/readMealsTool.js";
-import { ReadWeekSelectionTool } from "./tools/readWeekSelectionTool.js";
-import { RemoveMealFromWeekTool } from "./tools/removeMealFromWeekTool.js";
 
-const tools = [
-    ReadMealsTool,
-    AddOrUpdateMealTool,
-    DeleteMealTool,
-    AddMealToWeekTool,
-    RemoveMealFromWeekTool,
-    ReadWeekSelectionTool,
-];
+import { getAddMealToWeekTool } from "./tools/addMealToWeekTool.js";
+import { getAddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
+import { getDeleteMealTool } from "./tools/deleteMealTool.js";
+import { getReadMealsTool } from "./tools/readMealsTool.js";
+import { getReadWeekSelectionTool } from "./tools/readWeekSelectionTool.js";
+import { getRemoveMealFromWeekTool } from "./tools/removeMealFromWeekTool.js";
 
-export function createAgent(llm: ChatOpenAI) {
+export function createAgent(llm: ChatOpenAI, token: string) {
+    const tools = [
+        getReadMealsTool(token),
+        getAddOrUpdateMealTool(token),
+        getDeleteMealTool(token),
+        getAddMealToWeekTool(token),
+        getRemoveMealFromWeekTool(token),
+        getReadWeekSelectionTool(token),
+    ];
     return createReactAgent({
         llm,
         tools,

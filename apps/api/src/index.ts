@@ -9,9 +9,7 @@ const PORT = Number(process.env.PORT || 3001);
 
 async function bootstrap() {
     await AppDataSource.initialize();
-
     const app = createApp();
-
     app.listen(PORT, () => {
         console.log(`[api] listening on http://localhost:${PORT}`);
     });
