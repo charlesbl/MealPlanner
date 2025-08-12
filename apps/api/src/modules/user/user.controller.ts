@@ -10,7 +10,7 @@ import UserEntity from "./user.entity.js";
 
 export function userControllerFactory() {
     const usersRepo = AppDataSource.getRepository(UserEntity);
-    // TODO: Implement it in frontend
+    // TODO: Implement user update info in frontend
     const update = async (
         req: AuthRequest,
         res: Response<UserUpdateResponse>,

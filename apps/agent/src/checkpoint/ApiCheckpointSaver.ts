@@ -18,11 +18,10 @@ import { v4 as uuidv4 } from "uuid";
  * afin de préparer l'intégration. On ajoutera ensuite les appels HTTP
  * (create thread, save checkpoint, list, etc.).
  */
-// TODO this is not working yet
+// TODO Call api to save checkpoints/messages to db
+const checkpoints: Map<string, CheckpointTuple[]> = new Map();
+const pendingWrites: Map<string, PendingWrite[]> = new Map();
 export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
-    private checkpoints: Map<string, CheckpointTuple[]> = new Map();
-    private pendingWrites: Map<string, PendingWrite[]> = new Map();
-
     constructor() {
         super();
     }
@@ -53,18 +52,18 @@ export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
             },
             checkpoint,
             metadata,
-            pendingWrites: (this.pendingWrites.get(threadId) || []).map(
+            pendingWrites: (pendingWrites.get(threadId) || []).map(
                 (pw) => ["task", ...pw] as any
             ),
         };
-        const arr = this.checkpoints.get(threadId) || [];
+        const arr = checkpoints.get(threadId) || [];
         const idx = arr.findIndex(
             (c) => c.config?.configurable?.checkpoint_id === id
         );
         if (idx >= 0) arr[idx] = tuple;
         else arr.push(tuple);
-        this.checkpoints.set(threadId, arr);
-        this.pendingWrites.delete(threadId);
+        checkpoints.set(threadId, arr);
+        pendingWrites.delete(threadId);
         return tuple.config;
     }
 
@@ -75,9 +74,9 @@ export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
     ): Promise<void> {
         const threadId = config?.configurable?.thread_id;
         if (!threadId || !writes?.length) return;
-        const current = this.pendingWrites.get(threadId) || [];
+        const current = pendingWrites.get(threadId) || [];
         current.push(...writes);
-        this.pendingWrites.set(threadId, current);
+        pendingWrites.set(threadId, current);
     }
 
     async getTuple(
@@ -86,7 +85,7 @@ export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
         const threadId = config?.configurable?.thread_id;
         if (!threadId) return undefined;
         const checkpointId = config?.configurable?.checkpoint_id;
-        const arr = this.checkpoints.get(threadId) || [];
+        const arr = checkpoints.get(threadId) || [];
         if (!checkpointId) return arr[arr.length - 1];
         return arr.find(
             (c) => c.config?.configurable?.checkpoint_id === checkpointId
@@ -99,14 +98,14 @@ export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
     ): AsyncGenerator<CheckpointTuple> {
         const threadId = config?.configurable?.thread_id;
         if (!threadId) return;
-        const arr = this.checkpoints.get(threadId) || [];
+        const arr = checkpoints.get(threadId) || [];
         for (const tuple of [...arr].reverse()) {
             yield tuple;
         }
     }
 
     async deleteThread(threadId: string): Promise<void> {
-        this.checkpoints.delete(threadId);
-        this.pendingWrites.delete(threadId);
+        checkpoints.delete(threadId);
+        pendingWrites.delete(threadId);
     }
 }
