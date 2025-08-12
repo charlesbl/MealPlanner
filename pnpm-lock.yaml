@@ -24,7 +24,7 @@ importers:
         version: 0.6.7(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))
       '@mealplanner/shared-all':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/shared-all
       '@mealplanner/shared-back':
         specifier: workspace:*
         version: link:../../packages/shared-back
@@ -61,7 +61,7 @@ importers:
     dependencies:
       '@mealplanner/shared-all':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/shared-all
       '@mealplanner/shared-back':
         specifier: workspace:*
         version: link:../../packages/shared-back
@@ -113,7 +113,7 @@ importers:
     dependencies:
       '@mealplanner/shared-all':
         specifier: workspace:*
-        version: link:../../packages/shared
+        version: link:../../packages/shared-all
       eventsource-parser:
         specifier: ^3.0.3
         version: 3.0.3
@@ -146,7 +146,7 @@ importers:
         specifier: ^3.0.5
         version: 3.0.5(typescript@5.9.2)
 
-  packages/shared:
+  packages/shared-all:
     dependencies:
       zod:
         specifier: ^4.0.17
@@ -160,7 +160,7 @@ importers:
     dependencies:
       '@mealplanner/shared-all':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../shared-all
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
