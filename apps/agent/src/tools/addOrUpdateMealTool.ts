@@ -1,7 +1,7 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { MealType } from "@mealplanner/shared";
+import * as mealService from "@mealplanner/shared-all";
+import { MealType } from "@mealplanner/shared-all";
 import { z } from "zod";
-import * as mealService from "../../../../packages/shared/src/mealService.js";
 import { AgentTool } from "./types.js";
 
 const addOrUpdateMealSchema = z.object({

@@ -6,7 +6,7 @@ import type {
     AuthRegisterResponse,
     AuthUser,
     AuthUserWithToken,
-} from "@mealplanner/shared";
+} from "@mealplanner/shared-all";
 
 function getApiBase(): string {
     const base = import.meta.env.VITE_API_URL || "http://localhost:3001";

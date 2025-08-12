@@ -1,8 +1,8 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { MealType, ToolUpdateEventType } from "@mealplanner/shared";
+import type { Meal } from "@mealplanner/shared-all";
+import * as mealService from "@mealplanner/shared-all";
+import { MealType } from "@mealplanner/shared-all";
 import { z } from "zod";
-import * as mealService from "../../../../packages/shared/src/mealService.js";
-import type { Meal } from "../../../../packages/shared/src/schemas/meal.schemas.js";
 import { AgentTool } from "./types.js";
 
 const readMealsSchema = z.object({
@@ -22,7 +22,9 @@ const readMealsSchema = z.object({
 
 const mealTypeDescription = Object.values(MealType).join(", ");
 
-export const getReadMealsTool = (token: string): AgentTool<typeof readMealsSchema> => {
+export const getReadMealsTool = (
+    token: string
+): AgentTool<typeof readMealsSchema> => {
     return {
         schema: readMealsSchema,
         tool: new DynamicStructuredTool({
@@ -30,7 +32,11 @@ export const getReadMealsTool = (token: string): AgentTool<typeof readMealsSchem
             description: `Reads all meals from the deck or filters by meal type. Valid meal types are: ${mealTypeDescription}. Returns meals sorted by creation date (newest first). Meals are stored without specific dates and can be reused in weekly selections`,
             schema: readMealsSchema,
             func: async (input): Promise<string> => {
-                console.log(`Executing readMealsTool with input: ${JSON.stringify(input)}`);
+                console.log(
+                    `Executing readMealsTool with input: ${JSON.stringify(
+                        input
+                    )}`
+                );
                 try {
                     console.log(`Fetching meals with token: ${token}`);
                     const meals = await mealService.fetchMeals(token);
@@ -50,7 +56,7 @@ export const getReadMealsTool = (token: string): AgentTool<typeof readMealsSchem
                         const filterText = input.mealType
                             ? ` for ${input.mealType}`
                             : "";
-                            console.log(`No meals found${filterText} in the deck.`);
+                        console.log(`No meals found${filterText} in the deck.`);
                         return `No meals found${filterText} in your deck.`;
                     }
 
@@ -74,7 +80,11 @@ export const getReadMealsTool = (token: string): AgentTool<typeof readMealsSchem
                         output += `   Added: ${meal.createdAt.toLocaleDateString()}\n\n`;
                     });
 
-                    console.log(`Read meals tool executed with input: ${JSON.stringify(input)}`);
+                    console.log(
+                        `Read meals tool executed with input: ${JSON.stringify(
+                            input
+                        )}`
+                    );
                     return output;
                 } catch (error: any) {
                     console.error("Error in readMealsTool:", error);

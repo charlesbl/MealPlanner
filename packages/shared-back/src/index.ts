@@ -1,4 +1,4 @@
-import { JwtUserPayload } from "@mealplanner/shared";
+import { JwtUserPayload } from "@mealplanner/shared-all";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 

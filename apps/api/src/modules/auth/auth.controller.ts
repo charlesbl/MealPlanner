@@ -2,15 +2,13 @@ import {
     AuthLoginResponse,
     AuthMeResponse,
     AuthRegisterResponse,
-} from "@mealplanner/shared";
+    loginSchema,
+    registerSchema,
+} from "@mealplanner/shared-all";
 import type { AuthRequest } from "@mealplanner/shared-back";
 import { signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
-import {
-    loginSchema,
-    registerSchema,
-} from "../../../../../packages/shared/src/schemas/auth.schemas.js";
 import { AppDataSource } from "../../data-source.js";
 import UserEntity from "../user/user.entity.js";
 

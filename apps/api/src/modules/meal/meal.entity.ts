@@ -1,4 +1,4 @@
-import { MealType } from "@mealplanner/shared";
+import { MealType } from "@mealplanner/shared-all";
 import {
     Column,
     Entity,

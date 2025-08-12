@@ -1,4 +1,4 @@
-import type { AuthUser } from "@mealplanner/shared";
+import type { AuthUser } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import {

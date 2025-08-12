@@ -15,7 +15,7 @@
         "build": "tsc -p tsconfig.json"
     },
     "dependencies": {
-        "@mealplanner/shared": "workspace:*",
+        "@mealplanner/shared-all": "workspace:*",
         "jsonwebtoken": "^9.0.2"
     },
     "devDependencies": {

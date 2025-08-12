@@ -1,5 +1,5 @@
-import * as mealService from "@mealplanner/shared";
-import { type Meal } from "@mealplanner/shared";
+import * as mealService from "@mealplanner/shared-all";
+import { type Meal } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { useAuthStore } from "./authStore";

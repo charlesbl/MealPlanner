@@ -3,13 +3,10 @@ import type {
     MealGetResponse,
     MealListResponse,
     MealUpdateResponse,
-} from "@mealplanner/shared";
+} from "@mealplanner/shared-all";
+import { createMealSchema, updateMealSchema } from "@mealplanner/shared-all";
 import type { AuthRequest } from "@mealplanner/shared-back";
 import { Response } from "express";
-import {
-    createMealSchema,
-    updateMealSchema,
-} from "../../../../../packages/shared/src/schemas/meal.schemas.js";
 import { AppDataSource } from "../../data-source.js";
 import { MealEntity } from "./meal.entity.js";
 

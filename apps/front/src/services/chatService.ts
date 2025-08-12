@@ -20,10 +20,9 @@
  * - Input: message (string)
  * - Output: stream of backend events (tokens, chain end, tool calls, etc.)
  */
+import type { StreamEventData } from "@mealplanner/shared-all";
 import { createParser, type EventSourceMessage } from "eventsource-parser";
 import { getToken } from "./authService";
-import type { StreamEventData } from "@mealplanner/shared";
-
 
 export async function* sendMessageToBotStream(
     message: string,
@@ -56,7 +55,8 @@ export async function* sendMessageToBotStream(
 
     const parser = createParser({
         onEvent: (evt: EventSourceMessage) => {
-            if (evt.data === undefined) throw new Error("Event data is undefined");
+            if (evt.data === undefined)
+                throw new Error("Event data is undefined");
             try {
                 const parsedEvent = JSON.parse(evt.data) as StreamEventData;
                 pending.push(parsedEvent);

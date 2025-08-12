@@ -1,4 +1,4 @@
-import type { ToolUpdateEvent } from "@mealplanner/shared";
+import type { ToolUpdateEvent } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { useMealStore } from "./mealStore";
 

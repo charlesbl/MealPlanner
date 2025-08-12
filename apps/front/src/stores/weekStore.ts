@@ -1,4 +1,4 @@
-import { type Meal, generateId } from "@mealplanner/shared";
+import { type Meal, generateId } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import { useMealStore } from "./mealStore";

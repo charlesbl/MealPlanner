@@ -10,7 +10,7 @@
         "typecheck": "tsc --noEmit --project tsconfig.json"
     },
     "dependencies": {
-        "@mealplanner/shared": "workspace:*",
+        "@mealplanner/shared-all": "workspace:*",
         "eventsource-parser": "^3.0.3",
         "marked": "^16.1.2",
         "pinia": "^3.0.3",

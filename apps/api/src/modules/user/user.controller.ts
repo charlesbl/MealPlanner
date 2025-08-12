@@ -1,10 +1,10 @@
-import type { AuthRequest } from "@mealplanner/shared-back";
-import type { NextFunction, Response } from "express";
 import {
     updateUserSchema,
     userIdParamSchema,
     type UserUpdateResponse,
-} from "../../../../../packages/shared/src/schemas/user.schemas.js";
+} from "@mealplanner/shared-all";
+import type { AuthRequest } from "@mealplanner/shared-back";
+import type { NextFunction, Response } from "express";
 import { AppDataSource } from "../../data-source.js";
 import UserEntity from "./user.entity.js";
 

@@ -1,12 +1,13 @@
 import { HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
+import { StreamEventData } from "@mealplanner/shared-all";
 import { AuthRequest, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
 import express, { Response } from "express";
+import { ZodObject } from "zod";
 import { createAgent } from "./agent.js";
-import { StreamEventData, ToolUpdateEvent } from "@mealplanner/shared";
 import { getAddMealToWeekTool } from "./tools/addMealToWeekTool.js";
 import { getAddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
 import { getDeleteMealTool } from "./tools/deleteMealTool.js";
@@ -14,7 +15,6 @@ import { getReadMealsTool } from "./tools/readMealsTool.js";
 import { getReadWeekSelectionTool } from "./tools/readWeekSelectionTool.js";
 import { getRemoveMealFromWeekTool } from "./tools/removeMealFromWeekTool.js";
 import { AgentTool } from "./tools/types.js";
-import { ZodAny, ZodObject } from "zod";
 
 //dotenv
 config();
@@ -122,25 +122,36 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     throw new Error(`Unknown tool started: ${toolName}`);
 
                 const inputString = e.data.input?.input;
-                if(!isValidToolIO(inputString)) 
+                if (!isValidToolIO(inputString))
                     throw new Error(
-                        `Tool input is not a string: ${JSON.stringify(inputString)}`
+                        `Tool input is not a string: ${JSON.stringify(
+                            inputString
+                        )}`
                     );
-                const input = tool.schema.safeParse(inputString === undefined ? undefined : JSON.parse(inputString));
-                if(input.success === false) {
+                const input = tool.schema.safeParse(
+                    inputString === undefined
+                        ? undefined
+                        : JSON.parse(inputString)
+                );
+                if (input.success === false) {
                     throw new Error(
-                        `Tool input does not match schema: ${JSON.stringify(input.error)}`
+                        `Tool input does not match schema: ${JSON.stringify(
+                            input.error
+                        )}`
                     );
                 }
-                console.log(`Tool started: ${toolName} with input: ${JSON.stringify(input)}`);
+                console.log(
+                    `Tool started: ${toolName} with input: ${JSON.stringify(
+                        input
+                    )}`
+                );
 
                 send({
                     type: "toolStart",
                     toolData: {
                         name: toolName,
-                        updateEvent: tool.getToolUpdateEventOnToolStart?.(
-                            input
-                        ),
+                        updateEvent:
+                            tool.getToolUpdateEventOnToolStart?.(input),
                     },
                 });
             }
@@ -151,14 +162,22 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     throw new Error(`Unknown tool started: ${toolName}`);
 
                 const inputString = e.data.input?.input;
-                if(!isValidToolIO(inputString)) 
+                if (!isValidToolIO(inputString))
                     throw new Error(
-                        `Tool input is not a string: ${JSON.stringify(inputString)}`
+                        `Tool input is not a string: ${JSON.stringify(
+                            inputString
+                        )}`
                     );
-                const input = tool.schema.safeParse(inputString === undefined ? undefined : JSON.parse(inputString));
-                if(input.success === false) {
+                const input = tool.schema.safeParse(
+                    inputString === undefined
+                        ? undefined
+                        : JSON.parse(inputString)
+                );
+                if (input.success === false) {
                     throw new Error(
-                        `Tool input does not match schema: ${JSON.stringify(input.error)}`
+                        `Tool input does not match schema: ${JSON.stringify(
+                            input.error
+                        )}`
                     );
                 }
 
@@ -169,7 +188,9 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     );
                 }
                 console.log(
-                    `Tool ended: ${toolName} with input: ${JSON.stringify(input)} and output: ${output}`
+                    `Tool ended: ${toolName} with input: ${JSON.stringify(
+                        input
+                    )} and output: ${output}`
                 );
                 send({
                     type: "toolEnd",
@@ -233,7 +254,6 @@ const isValidToolIO = (input: any): input is string | undefined => {
         (typeof input === "string" && input.trim().length > 0)
     );
 };
-
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8787;
 app.listen(PORT, () => {

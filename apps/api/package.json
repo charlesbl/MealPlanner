@@ -14,7 +14,7 @@
         "seed": "tsx src/seed.ts"
     },
     "dependencies": {
-        "@mealplanner/shared": "workspace:*",
+        "@mealplanner/shared-all": "workspace:*",
         "@mealplanner/shared-back": "workspace:*",
         "bcryptjs": "^3.0.2",
         "cors": "^2.8.5",
