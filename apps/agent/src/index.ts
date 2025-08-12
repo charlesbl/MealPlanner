@@ -6,6 +6,15 @@ import cors from "cors";
 import { config } from "dotenv";
 import express, { Response } from "express";
 import { createAgent } from "./agent.js";
+import { StreamEventData, ToolUpdateEvent } from "@mealplanner/shared";
+import { getAddMealToWeekTool } from "./tools/addMealToWeekTool.js";
+import { getAddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
+import { getDeleteMealTool } from "./tools/deleteMealTool.js";
+import { getReadMealsTool } from "./tools/readMealsTool.js";
+import { getReadWeekSelectionTool } from "./tools/readWeekSelectionTool.js";
+import { getRemoveMealFromWeekTool } from "./tools/removeMealFromWeekTool.js";
+import { AgentTool } from "./tools/types.js";
+import { ZodAny, ZodObject } from "zod";
 
 //dotenv
 config();
@@ -62,12 +71,22 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
             "X-Accel-Buffering": "no",
         });
 
-        const send = (event: string, data: unknown) => {
-            res.write(`event: ${event}\n`);
-            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        const send = (event: StreamEventData) => {
+            res.write(`data: ${JSON.stringify(event)}\n\n`);
         };
 
-        const agent = createAgent(llm, token);
+        const tools: AgentTool<ZodObject>[] = [
+            getReadMealsTool(token),
+            getAddOrUpdateMealTool(token),
+            getDeleteMealTool(token),
+            getAddMealToWeekTool(token),
+            getRemoveMealFromWeekTool(token),
+            getReadWeekSelectionTool(token),
+        ];
+        const agent = createAgent(
+            llm,
+            tools.map(({ tool }) => tool)
+        );
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },
             { version: "v2", configurable: thread_id ? { thread_id } : {} }
@@ -92,17 +111,76 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     : "";
                 if (text) {
                     final += text;
-                    send("token", { chunk: text });
+                    send({ type: "stream", chunk: text });
                 }
             }
             // Tool lifecycle events
             if (e.event === "on_tool_start") {
-                const toolName = (e as any)?.data?.name || e.name || "tool";
-                send("tool_call", { name: toolName });
+                const toolName = e.name;
+                const tool = tools.find((t) => t.tool.name === toolName);
+                if (tool === undefined)
+                    throw new Error(`Unknown tool started: ${toolName}`);
+
+                const inputString = e.data.input?.input;
+                if(!isValidToolIO(inputString)) 
+                    throw new Error(
+                        `Tool input is not a string: ${JSON.stringify(inputString)}`
+                    );
+                const input = tool.schema.safeParse(inputString === undefined ? undefined : JSON.parse(inputString));
+                if(input.success === false) {
+                    throw new Error(
+                        `Tool input does not match schema: ${JSON.stringify(input.error)}`
+                    );
+                }
+                console.log(`Tool started: ${toolName} with input: ${JSON.stringify(input)}`);
+
+                send({
+                    type: "toolStart",
+                    toolData: {
+                        name: toolName,
+                        updateEvent: tool.getToolUpdateEventOnToolStart?.(
+                            input
+                        ),
+                    },
+                });
             }
             if (e.event === "on_tool_end") {
-                const toolName = (e as any)?.data?.name || e.name || "tool";
-                send("tool_end", { name: toolName });
+                const toolName = e.name;
+                const tool = tools.find((t) => t.tool.name === toolName);
+                if (tool === undefined)
+                    throw new Error(`Unknown tool started: ${toolName}`);
+
+                const inputString = e.data.input?.input;
+                if(!isValidToolIO(inputString)) 
+                    throw new Error(
+                        `Tool input is not a string: ${JSON.stringify(inputString)}`
+                    );
+                const input = tool.schema.safeParse(inputString === undefined ? undefined : JSON.parse(inputString));
+                if(input.success === false) {
+                    throw new Error(
+                        `Tool input does not match schema: ${JSON.stringify(input.error)}`
+                    );
+                }
+
+                const output = e.data.output?.kwargs?.content;
+                if (!isValidToolIO(output)) {
+                    throw new Error(
+                        `Tool output is not a string: ${JSON.stringify(output)}`
+                    );
+                }
+                console.log(
+                    `Tool ended: ${toolName} with input: ${JSON.stringify(input)} and output: ${output}`
+                );
+                send({
+                    type: "toolEnd",
+                    toolData: {
+                        name: toolName,
+                        updateEvent: tool.getToolUpdateEventOnToolEnd?.(
+                            input,
+                            output
+                        ),
+                    },
+                });
             }
             // Final output from graph end/state
             if (e.event === "on_graph_end" || e.event === "on_chain_end") {
@@ -128,7 +206,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
             }
         }
 
-        send("done", { text: final });
+        send({ type: "end", finalOutput: final });
         res.end();
     } catch (err: any) {
         // Send error as SSE then close
@@ -148,6 +226,14 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
         res.end();
     }
 });
+
+const isValidToolIO = (input: any): input is string | undefined => {
+    return (
+        input === undefined ||
+        (typeof input === "string" && input.trim().length > 0)
+    );
+};
+
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 8787;
 app.listen(PORT, () => {

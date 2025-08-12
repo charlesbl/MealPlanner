@@ -8,7 +8,8 @@ export const useMealStore = defineStore("mealStore", () => {
     const meals = ref<Meal[]>([]);
     const error = ref<string | null>(null);
     const auth = useAuthStore();
-    const fetchMeals = async () => {
+
+    const updateMeals = async () => {
         error.value = null;
         try {
             if (!auth.token) throw new Error("Not authenticated");
@@ -18,7 +19,11 @@ export const useMealStore = defineStore("mealStore", () => {
         }
     };
 
-    async function deleteMeal(id: string) {
+    const updateDeletedMeal = async (id: string) => {
+        meals.value = meals.value.filter((meal) => meal.id !== id);
+    };
+
+    const deleteMeal = async (id: string) => {
         error.value = null;
         try {
             if (!auth.token) throw new Error("Not authenticated");
@@ -29,11 +34,11 @@ export const useMealStore = defineStore("mealStore", () => {
             error.value = e.message || "Failed to delete meal";
             return false;
         }
-    }
+    };
 
-    function getMealById(id: string): Meal | undefined {
+    const getMealById = (id: string): Meal | undefined => {
         return meals.value.find((m) => m.id === id);
-    }
+    };
 
     const mealCount = () => meals.value.length;
 
@@ -41,7 +46,7 @@ export const useMealStore = defineStore("mealStore", () => {
     watch(
         () => auth.token,
         (token) => {
-            if (token) void fetchMeals();
+            if (token) void updateMeals();
             else meals.value = [];
         },
         { immediate: true }
@@ -50,6 +55,8 @@ export const useMealStore = defineStore("mealStore", () => {
     return {
         meals,
         error,
+        updateMeals,
+        updateDeletedMeal,
         deleteMeal,
         getMealById,
         mealCount,

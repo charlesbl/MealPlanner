@@ -22,32 +22,8 @@
  */
 import { createParser, type EventSourceMessage } from "eventsource-parser";
 import { getToken } from "./authService";
+import type { StreamEventData } from "@mealplanner/shared";
 
-export interface ChatModelStreamEventData {
-    type: "chat_model_stream";
-    chunk: string;
-}
-
-export interface ChainEndEventData {
-    type: "chain_end";
-    finalOutput: string;
-}
-
-export interface ToolCallEventData {
-    type: "tool_call";
-    toolName: string;
-}
-
-export interface ToolEndEventData {
-    type: "tool_end";
-    toolName: string;
-}
-
-export type StreamEventData =
-    | ChatModelStreamEventData
-    | ChainEndEventData
-    | ToolCallEventData
-    | ToolEndEventData;
 
 export async function* sendMessageToBotStream(
     message: string,
@@ -80,42 +56,10 @@ export async function* sendMessageToBotStream(
 
     const parser = createParser({
         onEvent: (evt: EventSourceMessage) => {
-            if (evt.event === undefined && !evt.data) return;
-            const event = evt.event || "message";
-            const data = evt.data;
-            if (!data) return;
+            if (evt.data === undefined) throw new Error("Event data is undefined");
             try {
-                const payload = JSON.parse(data);
-                if (event === "token" && typeof payload.chunk === "string") {
-                    pending.push({
-                        type: "chat_model_stream",
-                        chunk: payload.chunk,
-                    });
-                } else if (
-                    event === "done" &&
-                    typeof payload.text === "string"
-                ) {
-                    pending.push({
-                        type: "chain_end",
-                        finalOutput: payload.text,
-                    });
-                } else if (
-                    event === "tool_call" &&
-                    typeof payload.name === "string"
-                ) {
-                    pending.push({ type: "tool_call", toolName: payload.name });
-                } else if (
-                    event === "tool_end" &&
-                    typeof payload.name === "string"
-                ) {
-                    pending.push({ type: "tool_end", toolName: payload.name });
-                } else if (event === "error") {
-                    throw new Error(payload.message || "Unknown agent error");
-                } else {
-                    throw new Error(
-                        `Unexpected event type: ${event} with data: ${data}`
-                    );
-                }
+                const parsedEvent = JSON.parse(evt.data) as StreamEventData;
+                pending.push(parsedEvent);
             } catch (e) {
                 console.error("Error parsing SSE data:", e);
             }

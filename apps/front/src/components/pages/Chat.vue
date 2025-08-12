@@ -5,6 +5,7 @@ import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
 import Settings from "./Settings.vue";
+import { useToolDataUpdateStore } from "@/stores/toolDataUpdateStore";
 
 interface ChatMessage {
     id: string;
@@ -12,6 +13,8 @@ interface ChatMessage {
     isUser: boolean;
     isStreaming?: boolean;
 }
+
+const toolDataUpdateStore = useToolDataUpdateStore();
 
 const messages = ref<ChatMessage[]>([]);
 const isProcessing = ref(false);
@@ -69,33 +72,48 @@ const handleSendMessage = async (message: string) => {
         const stream = sendMessageToBotStream(message, threadId);
 
         for await (const event of stream) {
-            if (event.type === "chat_model_stream") {
+            if (event.type === "stream") {
                 // Update the bot message content
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     lastMessage.content += event.chunk;
                     await scrollToBottom();
                 }
-            } else if (event.type === "chain_end") {
+            } else if (event.type === "end") {
                 // Final message received, stop streaming indicator
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content = event.finalOutput;
+                    // TODO ne pas remplacer tous le message mais vérifier si il manque pas des chunks et fix le message final en gardant tous les chunks, y compris les chunks de reasonning et les tool calls
+                    // TODO bien séparer le message final des tokens de reasonning visuellement
+                    // TODO gérer les tool calls et les tool end via des composant et pas juste en concaténant le message dégulassement
+                    // lastMessage.content = event.finalOutput;
                     lastMessage.isStreaming = false;
                     await scrollToBottom();
                 }
-            } else if (event.type === "tool_call") {
-                // Tool is being called, show indicator
+            } else if (event.type === "toolStart") {
+                // Tool is being called
+                // Call event handler to update datas
+                if (event.toolData.updateEvent !== undefined)
+                    toolDataUpdateStore.updateDataOnToolStart(
+                        event.toolData.updateEvent
+                    );
+                // show indicator
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += `\n🔧 Using ${event.toolName}...`;
+                    lastMessage.content += `\n🔧 Using ${event.toolData.name}...`;
                     await scrollToBottom();
                 }
-            } else if (event.type === "tool_end") {
+            } else if (event.type === "toolEnd") {
                 // Tool execution completed
+                // Call event handler to update datas
+                if (event.toolData.updateEvent !== undefined)
+                    toolDataUpdateStore.updateDataOnToolEnd(
+                        event.toolData.updateEvent
+                    );
+                // update indicator
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += `\n✅ ${event.toolName} completed.`;
+                    lastMessage.content += `\n✅ ${event.toolData.name} completed.`;
                     await scrollToBottom();
                 }
             }
@@ -137,6 +155,7 @@ const handleSendMessage = async (message: string) => {
         </div>
 
         <div ref="messagesContainer" class="messages">
+            <!-- TODO make bot message full width like ChatGPT -->
             <Message
                 v-for="message in messages"
                 :key="message.id"

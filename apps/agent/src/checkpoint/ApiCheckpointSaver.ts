@@ -33,12 +33,12 @@ export class ApiCheckpointSaver extends BaseCheckpointSaver<number> {
         metadata: CheckpointMetadata,
         newVersions: ChannelVersions
     ): Promise<RunnableConfig> {
-        console.log("[ApiCheckpointSaver] Saving checkpoint", {
-            config,
-            checkpoint,
-            metadata,
-            newVersions,
-        });
+        // console.log("[ApiCheckpointSaver] Saving checkpoint", {
+        //     config,
+        //     checkpoint,
+        //     metadata,
+        //     newVersions,
+        // });
         const threadId = config?.configurable?.thread_id;
         if (!threadId) return config;
         const id = checkpoint.id || uuidv4();

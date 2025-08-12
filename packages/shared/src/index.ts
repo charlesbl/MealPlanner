@@ -11,3 +11,4 @@ export * from "./mealService.js";
 export * from "./schemas/auth.schemas.js";
 export * from "./schemas/meal.schemas.js";
 export * from "./schemas/user.schemas.js";
+export * from "./toolDataUpdateEvents.js";
