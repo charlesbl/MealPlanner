@@ -1,4 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
+import { planService } from "@mealplanner/shared-all";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
 
@@ -11,7 +12,6 @@ const readPlanSelectionSchema = z.object({
         ),
 });
 
-// TODO: Remplacer par appel API semaine quand disponible
 export const getReadPlanSelectionTool = (
     token: string
 ): AgentTool<typeof readPlanSelectionSchema> => {
@@ -26,8 +26,18 @@ export const getReadPlanSelectionTool = (
                 input: z.infer<typeof readPlanSelectionSchema>
             ): Promise<string> => {
                 try {
-                    // TODO: Appel API pour lire la sélection semaine avec le token
-                    return `Plan read (API call to be implemented).`;
+                    const items = await planService.fetchPlan(token);
+                    if (items.length === 0) return "Your plan is empty.";
+                    const plan = items.map((item) => ({
+                        id: item.id,
+                        name: item.meal.name,
+                        description: input.showDetails
+                            ? item.meal.description || "No description"
+                            : undefined,
+                        mealType: item.meal.mealTypes.join(", "),
+                        order: item.order,
+                    }));
+                    return JSON.stringify(plan);
                 } catch (error: any) {
                     console.error("Error in readPlanSelectionTool:", error);
                     return `Error reading plan: ${error.message}`;

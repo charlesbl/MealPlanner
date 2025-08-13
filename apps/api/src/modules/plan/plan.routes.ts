@@ -5,7 +5,7 @@ import { planControllerFactory } from "./plan.controller.js";
 export function planRouterFactory() {
     const router = Router();
     const controller = planControllerFactory();
-    router.get("/", requireAuth, controller.getAll);
+    router.get("/", requireAuth, controller.get);
     router.post("/add", requireAuth, controller.add);
     router.post("/remove", requireAuth, controller.remove);
     return router;

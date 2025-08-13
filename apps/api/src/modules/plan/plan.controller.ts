@@ -8,7 +8,7 @@ export function planControllerFactory() {
     const selectionRepo = AppDataSource.getRepository(MealPlanEntity);
     const mealRepo = AppDataSource.getRepository(MealEntity);
     return {
-        getAll: async (req: AuthRequest, res: Response) => {
+        get: async (req: AuthRequest, res: Response) => {
             const userId = req.user?.sub;
             if (!userId)
                 return res
@@ -49,13 +49,13 @@ export function planControllerFactory() {
         },
         remove: async (req: AuthRequest, res: Response) => {
             const userId = req.user?.sub;
-            const { mealId } = req.body;
-            if (!userId || !mealId)
+            const { id } = req.body;
+            if (!userId || !id)
                 return res
                     .status(400)
                     .json({ status: "error", error: "Missing data" });
             const selection = await selectionRepo.findOne({
-                where: { user: { id: userId }, meal: { id: mealId } },
+                where: { id, user: { id: userId } },
             });
             if (!selection)
                 return res

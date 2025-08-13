@@ -150,8 +150,9 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     type: "toolStart",
                     toolData: {
                         name: toolName,
-                        updateEvent:
-                            tool.getToolUpdateEventOnToolStart?.(input),
+                        updateEvent: tool.getToolUpdateEventOnToolStart?.(
+                            input.data
+                        ),
                     },
                 });
             }
@@ -181,7 +182,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     );
                 }
 
-                const output = e.data.output?.kwargs?.content;
+                const output = e.data.output?.lc_kwargs?.content;
                 if (!isValidToolIO(output)) {
                     throw new Error(
                         `Tool output is not a string: ${JSON.stringify(output)}`
@@ -197,7 +198,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     toolData: {
                         name: toolName,
                         updateEvent: tool.getToolUpdateEventOnToolEnd?.(
-                            input,
+                            input.data,
                             output
                         ),
                     },

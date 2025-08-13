@@ -1,18 +1,11 @@
 import type { AuthUser } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import {
-    authLogin,
-    authMe,
-    authRegister,
-    clearToken,
-    getToken,
-    saveToken,
-} from "../services/authService";
+import { authService } from "../services/authService";
 
 export const useAuthStore = defineStore("auth", () => {
     const user = ref<AuthUser | null>(null);
-    const token = ref<string | null>(getToken());
+    const token = ref<string | null>(authService.getToken());
     const loading = ref(!!token.value);
     const error = ref<string | null>(null);
 
@@ -23,7 +16,7 @@ export const useAuthStore = defineStore("auth", () => {
         }
         try {
             loading.value = true;
-            user.value = await authMe(token.value);
+            user.value = await authService.authMe(token.value);
         } catch (e: any) {
             logout();
         } finally {
@@ -35,10 +28,10 @@ export const useAuthStore = defineStore("auth", () => {
         loading.value = true;
         error.value = null;
         try {
-            const res = await authLogin(email, password);
+            const res = await authService.authLogin(email, password);
             token.value = res.token;
             user.value = res.user;
-            saveToken(res.token);
+            authService.saveToken(res.token);
         } catch (e: any) {
             error.value = e?.message || "Login failed";
             throw e;
@@ -51,10 +44,10 @@ export const useAuthStore = defineStore("auth", () => {
         loading.value = true;
         error.value = null;
         try {
-            const res = await authRegister(name, email, password);
+            const res = await authService.authRegister(name, email, password);
             token.value = res.token;
             user.value = res.user;
-            saveToken(res.token);
+            authService.saveToken(res.token);
         } catch (e: any) {
             error.value = e?.message || "Register failed";
             throw e;
@@ -66,7 +59,7 @@ export const useAuthStore = defineStore("auth", () => {
     function logout() {
         token.value = null;
         user.value = null;
-        clearToken();
+        authService.clearToken();
     }
 
     return { user, token, loading, error, init, login, register, logout };

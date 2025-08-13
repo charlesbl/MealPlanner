@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { sendMessageToBotStream } from "@/services/chatService";
+import { chatService } from "@/services/chatService";
 import { getOrCreateThreadId, resetThreadId } from "@/stores/threadStore";
+import { useToolDataUpdateStore } from "@/stores/toolDataUpdateStore";
 import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
 import Settings from "./Settings.vue";
-import { useToolDataUpdateStore } from "@/stores/toolDataUpdateStore";
 
 interface ChatMessage {
     id: string;
@@ -69,7 +69,7 @@ const handleSendMessage = async (message: string) => {
 
     try {
         const threadId = getOrCreateThreadId();
-        const stream = sendMessageToBotStream(message, threadId);
+        const stream = chatService.sendMessageToBotStream(message, threadId);
 
         for await (const event of stream) {
             if (event.type === "stream") {

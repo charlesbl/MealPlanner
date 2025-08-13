@@ -1,11 +1,8 @@
 <script lang="ts" setup>
-import { computed } from "vue";
 import { usePlanStore } from "../../stores/planStore";
 import MealCard from "../MealCard.vue";
 
 const planStore = usePlanStore();
-
-const plan = computed(() => planStore.getPlanWithData());
 
 function handleRemoveMealFromPlan(mealId: string, planMealId?: string) {
     const success = planMealId
@@ -22,15 +19,17 @@ function handleRemoveMealFromPlan(mealId: string, planMealId?: string) {
     <div class="plan-container">
         <div class="plan-header">
             <h1>Ma Semaine</h1>
-            <p class="meal-count">{{ plan.length }} repas sélectionnés</p>
+            <p class="meal-count">
+                {{ planStore.plan.length }} repas sélectionnés
+            </p>
         </div>
 
-        <div class="plan-content" v-if="plan.length > 0">
+        <div class="plan-content" v-if="planStore.plan.length > 0">
             <div class="meals-list">
                 <MealCard
-                    v-for="meal in plan"
-                    :key="meal.planMealId"
-                    :meal="meal"
+                    v-for="planMeal in planStore.plan"
+                    :key="planMeal.id"
+                    :meal="planMeal.meal"
                     @delete="handleRemoveMealFromPlan"
                 />
             </div>

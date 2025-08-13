@@ -13,7 +13,7 @@ function getApiBase(): string {
     return base.replace(/\/$/, "");
 }
 
-export async function authRegister(
+async function authRegister(
     name: string,
     email: string,
     password: string
@@ -29,7 +29,7 @@ export async function authRegister(
     return body.data;
 }
 
-export async function authLogin(
+async function authLogin(
     email: string,
     password: string
 ): Promise<AuthUserWithToken> {
@@ -44,7 +44,7 @@ export async function authLogin(
     return body.data;
 }
 
-export async function authMe(token: string): Promise<AuthUser> {
+async function authMe(token: string): Promise<AuthUser> {
     const res = await fetch(`${getApiBase()}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
     });
@@ -54,14 +54,23 @@ export async function authMe(token: string): Promise<AuthUser> {
     return body.data;
 }
 
-export function saveToken(token: string) {
+function saveToken(token: string) {
     localStorage.setItem("auth_token", token);
 }
 
-export function getToken(): string | null {
+function getToken(): string | null {
     return localStorage.getItem("auth_token");
 }
 
-export function clearToken() {
+function clearToken() {
     localStorage.removeItem("auth_token");
 }
+
+export const authService = {
+    authRegister,
+    authLogin,
+    authMe,
+    saveToken,
+    getToken,
+    clearToken,
+};

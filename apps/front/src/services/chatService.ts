@@ -22,9 +22,9 @@
  */
 import type { StreamEventData } from "@mealplanner/shared-all";
 import { createParser, type EventSourceMessage } from "eventsource-parser";
-import { getToken } from "./authService";
+import { authService } from "./authService";
 
-export async function* sendMessageToBotStream(
+async function* sendMessageToBotStream(
     message: string,
     threadId: string
 ): AsyncGenerator<StreamEventData, void, unknown> {
@@ -33,7 +33,7 @@ export async function* sendMessageToBotStream(
     const headers: Record<string, string> = {
         "Content-Type": "application/json",
     };
-    const token = getToken();
+    const token = authService.getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
     const resp = await fetch(getAgentUrl(), {
@@ -90,3 +90,7 @@ function getAgentUrl(): string {
     const base = import.meta.env.VITE_AGENT_URL || "http://localhost:8787";
     return `${base.replace(/\/$/, "")}/chat`;
 }
+
+export const chatService = {
+    sendMessageToBotStream,
+};

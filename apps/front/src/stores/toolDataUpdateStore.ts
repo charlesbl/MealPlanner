@@ -1,16 +1,18 @@
 import type { ToolUpdateEvent } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { useLibraryStore } from "./libraryStore";
+import { usePlanStore } from "./planStore";
 
 export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
     const libraryStore = useLibraryStore();
+    const planStore = usePlanStore();
     const updateDataOnToolStart = async (
         toolDataUpdateEvent: ToolUpdateEvent
     ) => {
         switch (toolDataUpdateEvent.type) {
             case "updateLibrary":
             case "updateMeal":
-            case "updateMealSelection":
+            case "updatePlan":
             case "deleteMeal":
                 break;
             default:
@@ -29,15 +31,14 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
             case "updateLibrary":
                 await libraryStore.updateLibrary();
                 break;
+            case "updatePlan":
+                await planStore.updatePlan();
+                break;
             case "updateMeal":
                 // TODO Handle meal update logic here
                 console.log(
                     `Meal updated with ID: ${toolDataUpdateEvent.mealId}`
                 );
-                break;
-            case "updateMealSelection":
-                // TODO Handle meal selection update logic here
-                console.log("Meal selection updated");
                 break;
             case "deleteMeal":
                 console.log(

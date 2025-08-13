@@ -13,7 +13,7 @@ export function buildApiRouter() {
     api.use("/auth", authRouterFactory());
     api.use("/user", userRouterFactory());
     api.use("/meal", mealRouterFactory());
-    api.use("/selection", planRouterFactory());
+    api.use("/plan", planRouterFactory());
 
     return api;
 }

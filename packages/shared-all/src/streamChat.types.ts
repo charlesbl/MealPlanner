@@ -7,7 +7,7 @@ export type ToolUpdateEvent =
           mealId: string;
       }
     | {
-          type: "updateMealSelection";
+          type: "updatePlan";
       }
     | {
           type: "deleteMeal";
