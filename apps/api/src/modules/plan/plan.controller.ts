@@ -1,11 +1,11 @@
 import { AuthRequest } from "@mealplanner/shared-back";
 import { Response } from "express";
 import { AppDataSource } from "../../data-source.js";
-import { MealEntity } from "./meal.entity.js";
-import { UserSelectionEntity } from "./userSelection.entity.js";
+import MealEntity from "../meal/meal.entity.js";
+import { PlanEntity } from "./plan.entity.js";
 
-export function userSelectionControllerFactory() {
-    const selectionRepo = AppDataSource.getRepository(UserSelectionEntity);
+export function planControllerFactory() {
+    const selectionRepo = AppDataSource.getRepository(PlanEntity);
     const mealRepo = AppDataSource.getRepository(MealEntity);
     return {
         getAll: async (req: AuthRequest, res: Response) => {
@@ -32,11 +32,12 @@ export function userSelectionControllerFactory() {
             const meal = await mealRepo.findOne({
                 where: { id: mealId, user: { id: userId } },
             });
-            const isMealInDeck = meal !== null;
-            if (!isMealInDeck)
-                return res
-                    .status(404)
-                    .json({ status: "error", error: "Meal not in your deck" });
+            const isMealInLibrary = meal !== null;
+            if (!isMealInLibrary)
+                return res.status(404).json({
+                    status: "error",
+                    error: "Meal not in your library",
+                });
 
             const selection = selectionRepo.create({
                 user: { id: userId },

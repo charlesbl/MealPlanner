@@ -1,11 +1,11 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import type { Meal } from "@mealplanner/shared-all";
-import * as mealService from "@mealplanner/shared-all";
+import * as libraryService from "@mealplanner/shared-all";
 import { MealType } from "@mealplanner/shared-all";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
 
-const readMealsSchema = z.object({
+const readLibrarySchema = z.object({
     mealType: z
         .enum(MealType)
         .optional()
@@ -16,60 +16,62 @@ const readMealsSchema = z.object({
         .number()
         .optional()
         .describe(
-            "Optional limit on number of meals to return (default: all meals)"
+            "Optional limit on number of meals to return (default: all meals in library)"
         ),
 });
 
 const mealTypeDescription = Object.values(MealType).join(", ");
 
-export const getReadMealsTool = (
+export const getReadLibraryTool = (
     token: string
-): AgentTool<typeof readMealsSchema> => {
+): AgentTool<typeof readLibrarySchema> => {
     return {
-        schema: readMealsSchema,
+        schema: readLibrarySchema,
         tool: new DynamicStructuredTool({
-            name: "read_meals",
-            description: `Reads all meals from the deck or filters by meal type. Valid meal types are: ${mealTypeDescription}. Returns meals sorted by creation date (newest first). Meals are stored without specific dates and can be reused in weekly selections`,
-            schema: readMealsSchema,
+            name: "read_library",
+            description: `Reads all meals from the library or filters by meal type. Valid meal types are: ${mealTypeDescription}. Returns meals from library sorted by creation date (newest first).`,
+            schema: readLibrarySchema,
             func: async (input): Promise<string> => {
                 console.log(
-                    `Executing readMealsTool with input: ${JSON.stringify(
+                    `Executing readLibraryTool with input: ${JSON.stringify(
                         input
                     )}`
                 );
                 try {
-                    console.log(`Fetching meals with token: ${token}`);
-                    const meals = await mealService.fetchMeals(token);
-                    console.log(`Fetched ${meals.length} meals`);
+                    console.log(`Fetching library with token: ${token}`);
+                    const library = await libraryService.fetchLibrary(token);
+                    console.log(`Fetched ${library.length} meals in library`);
 
-                    let filteredMeals = input.mealType
-                        ? meals.filter((m: Meal) =>
+                    let filteredLibrary = input.mealType
+                        ? library.filter((m: Meal) =>
                               m.mealTypes.includes(input.mealType!)
                           )
-                        : meals;
+                        : library;
 
                     if (input.limit && input.limit > 0) {
-                        filteredMeals = filteredMeals.slice(0, input.limit);
+                        filteredLibrary = filteredLibrary.slice(0, input.limit);
                     }
 
-                    if (filteredMeals.length === 0) {
+                    if (filteredLibrary.length === 0) {
                         const filterText = input.mealType
                             ? ` for ${input.mealType}`
                             : "";
-                        console.log(`No meals found${filterText} in the deck.`);
-                        return `No meals found${filterText} in your deck.`;
+                        console.log(
+                            `No meals found${filterText} in the library.`
+                        );
+                        return `No meals found${filterText} in your library.`;
                     }
 
                     // Format output for better readability
-                    let output = `Found ${filteredMeals.length} meal${
-                        filteredMeals.length > 1 ? "s" : ""
-                    } in your deck`;
+                    let output = `Found ${filteredLibrary.length} meal${
+                        filteredLibrary.length > 1 ? "s" : ""
+                    } in your library`;
                     if (input.mealType) {
                         output += ` (${input.mealType})`;
                     }
                     output += ":\n\n";
 
-                    filteredMeals.forEach((meal: Meal, index: number) => {
+                    filteredLibrary.forEach((meal: Meal, index: number) => {
                         output += `${index + 1}. **${meal.name}** (${
                             meal.mealTypes
                         })\n`;
@@ -81,14 +83,14 @@ export const getReadMealsTool = (
                     });
 
                     console.log(
-                        `Read meals tool executed with input: ${JSON.stringify(
+                        `Read library tool executed with input: ${JSON.stringify(
                             input
                         )}`
                     );
                     return output;
                 } catch (error: any) {
-                    console.error("Error in readMealsTool:", error);
-                    return `Error reading meals: ${error.message}`;
+                    console.error("Error in readLibraryTool:", error);
+                    return `Error reading library: ${error.message}`;
                 }
             },
         }),

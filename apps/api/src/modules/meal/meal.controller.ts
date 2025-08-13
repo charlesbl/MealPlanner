@@ -11,16 +11,19 @@ import { AppDataSource } from "../../data-source.js";
 import { MealEntity } from "./meal.entity.js";
 
 export function mealControllerFactory() {
-    const mealsRepo = AppDataSource.getRepository(MealEntity);
+    const mealRepo = AppDataSource.getRepository(MealEntity);
     return {
-        getAll: async (req: AuthRequest, res: Response<MealListResponse>) => {
+        getLibrary: async (
+            req: AuthRequest,
+            res: Response<MealListResponse>
+        ) => {
             const userId = req.user?.sub;
             if (!userId)
                 return res.status(401).json({
                     status: "error",
                     error: "Unauthorized",
                 });
-            const meals = await mealsRepo.find({
+            const meals = await mealRepo.find({
                 where: { user: { id: userId } },
             });
             res.json({ status: "success", data: meals });
@@ -32,7 +35,7 @@ export function mealControllerFactory() {
                     status: "error",
                     error: "Unauthorized",
                 });
-            const meal = await mealsRepo.findOne({
+            const meal = await mealRepo.findOne({
                 where: { id: req.params.id, user: { id: userId } },
             });
             if (!meal)
@@ -51,11 +54,11 @@ export function mealControllerFactory() {
                 });
             try {
                 const data = createMealSchema.parse(req.body);
-                const meal = mealsRepo.create({
+                const meal = mealRepo.create({
                     ...data,
                     user: { id: userId },
                 });
-                await mealsRepo.save(meal);
+                await mealRepo.save(meal);
                 res.status(201).json({ status: "success", data: meal });
             } catch (err) {
                 res.status(400).json({
@@ -76,7 +79,7 @@ export function mealControllerFactory() {
                     error: "Unauthorized",
                 });
             try {
-                const meal = await mealsRepo.findOne({
+                const meal = await mealRepo.findOne({
                     where: { id: req.params.id, user: { id: userId } },
                 });
                 if (!meal)
@@ -86,7 +89,7 @@ export function mealControllerFactory() {
                     });
                 const updates = updateMealSchema.parse(req.body);
                 Object.assign(meal, updates);
-                await mealsRepo.save(meal);
+                await mealRepo.save(meal);
                 res.json({ status: "success", data: meal });
             } catch (err) {
                 res.status(400).json({
@@ -106,7 +109,7 @@ export function mealControllerFactory() {
                     status: "error",
                     error: "Unauthorized",
                 });
-            const meal = await mealsRepo.findOne({
+            const meal = await mealRepo.findOne({
                 where: { id: req.params.id, user: { id: userId } },
             });
             if (!meal)
@@ -114,7 +117,7 @@ export function mealControllerFactory() {
                     status: "error",
                     error: "Meal not found",
                 });
-            await mealsRepo.remove(meal);
+            await mealRepo.remove(meal);
             res.status(204).send();
         },
     };

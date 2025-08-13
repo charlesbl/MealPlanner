@@ -2,8 +2,8 @@ import { Router } from "express";
 
 import { authRouterFactory } from "./modules/auth/auth.routes.js";
 import { mealRouterFactory } from "./modules/meal/meal.routes.js";
-import { userSelectionRouterFactory } from "./modules/meal/userSelection.routes.js";
-import { usersRouterFactory } from "./modules/user/user.routes.js";
+import { planRouterFactory } from "./modules/plan/plan.routes.js";
+import { userRouterFactory } from "./modules/user/user.routes.js";
 
 export function buildApiRouter() {
     const api = Router();
@@ -11,9 +11,9 @@ export function buildApiRouter() {
     // Mount domain routers (no versioning to preserve current client contracts)
 
     api.use("/auth", authRouterFactory());
-    api.use("/users", usersRouterFactory());
-    api.use("/meals", mealRouterFactory());
-    api.use("/selection", userSelectionRouterFactory());
+    api.use("/user", userRouterFactory());
+    api.use("/meal", mealRouterFactory());
+    api.use("/selection", planRouterFactory());
 
     return api;
 }

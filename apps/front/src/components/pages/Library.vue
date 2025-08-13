@@ -1,18 +1,18 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useMealStore } from "../../stores/mealStore";
+import { useLibraryStore } from "../../stores/libraryStore";
 import MealCard from "../MealCard.vue";
 
-const mealStore = useMealStore();
+const libraryStore = useLibraryStore();
 
-const sortedMeals = computed(() =>
-    mealStore.meals.sort(
+const sortedLibrary = computed(() =>
+    libraryStore.library.sort(
         (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
     )
 );
 
 function handleDeleteMeal(mealId: string) {
-    const success = mealStore.deleteMeal(mealId);
+    const success = libraryStore.deleteMeal(mealId);
     if (!success) {
         console.error("Failed to delete meal");
     }
@@ -20,14 +20,16 @@ function handleDeleteMeal(mealId: string) {
 </script>
 
 <template>
-    <div class="deck-container">
-        <div class="deck-header">
+    <div class="library-container">
+        <div class="library-header">
             <h1>Mes Repas</h1>
-            <p class="meal-count">{{ sortedMeals.length }} repas enregistrés</p>
+            <p class="meal-count">
+                {{ sortedLibrary.length }} repas enregistrés
+            </p>
         </div>
-        <div class="meals-list" v-if="sortedMeals.length > 0">
+        <div class="meals-list" v-if="sortedLibrary.length > 0">
             <MealCard
-                v-for="meal in sortedMeals"
+                v-for="meal in sortedLibrary"
                 :key="meal.id"
                 :meal="meal"
                 @delete="handleDeleteMeal"
@@ -44,7 +46,7 @@ function handleDeleteMeal(mealId: string) {
 </template>
 
 <style scoped>
-.deck-container {
+.library-container {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     height: 100%;
@@ -52,11 +54,11 @@ function handleDeleteMeal(mealId: string) {
     overflow-y: auto;
 }
 
-.deck-header {
+.library-header {
     margin-bottom: 24px;
 }
 
-.deck-header h1 {
+.library-header h1 {
     margin: 0 0 8px 0;
     font-size: 1.5rem;
     font-weight: 700;
@@ -92,11 +94,11 @@ function handleDeleteMeal(mealId: string) {
 
 /* Tablet and larger screens */
 @media (min-width: 768px) {
-    .deck-container {
+    .library-container {
         padding: 24px;
     }
 
-    .deck-header h1 {
+    .library-header h1 {
         font-size: 2rem;
     }
 
@@ -107,7 +109,7 @@ function handleDeleteMeal(mealId: string) {
 
 /* Desktop screens */
 @media (min-width: 1024px) {
-    .deck-container {
+    .library-container {
         padding: 32px;
         max-width: 1200px;
         margin: 0 auto;

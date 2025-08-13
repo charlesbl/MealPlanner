@@ -1,6 +1,6 @@
 export type ToolUpdateEvent =
     | {
-          type: "updateMeals";
+          type: "updateLibrary";
       }
     | {
           type: "updateMeal";

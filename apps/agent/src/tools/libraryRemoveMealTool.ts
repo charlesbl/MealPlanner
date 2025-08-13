@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import * as mealService from "@mealplanner/shared-all";
+import * as libraryService from "@mealplanner/shared-all";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
 
@@ -22,7 +22,7 @@ export const getDeleteMealTool = (
             schema: deleteMealSchema,
             func: async (input): Promise<string> => {
                 try {
-                    await mealService.deleteMeal(input.mealId, token);
+                    await libraryService.deleteMeal(input.mealId, token);
                     return `Successfully deleted meal with ID: '${input.mealId}'.`;
                 } catch (error: any) {
                     console.error("Error in deleteMealTool:", error);

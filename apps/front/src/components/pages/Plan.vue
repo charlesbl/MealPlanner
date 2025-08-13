@@ -1,39 +1,37 @@
 <script lang="ts" setup>
 import { computed } from "vue";
-import { useWeekStore } from "../../stores/weekStore";
+import { usePlanStore } from "../../stores/planStore";
 import MealCard from "../MealCard.vue";
 
-const weekStore = useWeekStore();
+const planStore = usePlanStore();
 
-const selectedMeals = computed(() => weekStore.getSelectedMealsWithData());
+const plan = computed(() => planStore.getPlanWithData());
 
-function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
-    const success = weekMealId
-        ? weekStore.removeWeekMealById(weekMealId)
-        : weekStore.removeMealFromWeek(mealId);
+function handleRemoveMealFromPlan(mealId: string, planMealId?: string) {
+    const success = planMealId
+        ? planStore.removePlanMealById(planMealId)
+        : planStore.removeMealFromPlan(mealId);
 
     if (!success) {
-        console.error("Failed to remove meal from week");
+        console.error("Failed to remove meal from plan");
     }
 }
 </script>
 
 <template>
-    <div class="week-container">
-        <div class="week-header">
+    <div class="plan-container">
+        <div class="plan-header">
             <h1>Ma Semaine</h1>
-            <p class="meal-count">
-                {{ selectedMeals.length }} repas sélectionnés
-            </p>
+            <p class="meal-count">{{ plan.length }} repas sélectionnés</p>
         </div>
 
-        <div class="week-content" v-if="selectedMeals.length > 0">
+        <div class="plan-content" v-if="plan.length > 0">
             <div class="meals-list">
                 <MealCard
-                    v-for="meal in selectedMeals"
-                    :key="meal.weekMealId"
+                    v-for="meal in plan"
+                    :key="meal.planMealId"
                     :meal="meal"
-                    @delete="handleRemoveMealFromWeek"
+                    @delete="handleRemoveMealFromPlan"
                 />
             </div>
         </div>
@@ -48,7 +46,7 @@ function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
 </template>
 
 <style scoped>
-.week-container {
+.plan-container {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     height: 100%;
@@ -56,11 +54,11 @@ function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
     overflow-y: auto;
 }
 
-.week-header {
+.plan-header {
     margin-bottom: 24px;
 }
 
-.week-header h1 {
+.plan-header h1 {
     margin: 0 0 8px 0;
     font-size: 1.5rem;
     font-weight: 700;
@@ -72,7 +70,7 @@ function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
     font-size: 0.9rem;
 }
 
-.week-content {
+.plan-content {
     display: flex;
     flex-direction: column;
 }
@@ -101,11 +99,11 @@ function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
 
 /* Tablet and larger screens */
 @media (min-width: 768px) {
-    .week-container {
+    .plan-container {
         padding: 24px;
     }
 
-    .week-header h1 {
+    .plan-header h1 {
         font-size: 2rem;
     }
 
@@ -116,7 +114,7 @@ function handleRemoveMealFromWeek(mealId: string, weekMealId?: string) {
 
 /* Desktop screens */
 @media (min-width: 1024px) {
-    .week-container {
+    .plan-container {
         padding: 32px;
         max-width: 1200px;
         margin: 0 auto;

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import Chat from "./components/pages/Chat.vue";
-import Deck from "./components/pages/Deck.vue";
+import Library from "./components/pages/Library.vue";
 import Login from "./components/pages/Login.vue";
+import Plan from "./components/pages/Plan.vue";
 import Register from "./components/pages/Register.vue";
-import Week from "./components/pages/Week.vue";
 import { useDarkMode } from "./composables/useDarkMode";
 import { useAuthStore } from "./stores/authStore";
 
@@ -47,9 +47,9 @@ watch(
 
 <template>
     <div v-if="isAuthenticated" ref="appContainer" class="app-container">
-        <div class="page"><Deck /></div>
+        <div class="page"><Library /></div>
         <div class="page"><Chat /></div>
-        <div class="page"><Week /></div>
+        <div class="page"><Plan /></div>
     </div>
     <div v-else class="auth-container">
         <Login v-if="!showRegister" @go-register="showRegister = true" />

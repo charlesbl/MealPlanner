@@ -6,7 +6,7 @@ import {
     PrimaryGeneratedColumn,
 } from "typeorm";
 import { MealEntity } from "../meal/meal.entity.js";
-import { UserSelectionEntity } from "../meal/userSelection.entity.js";
+import { PlanEntity } from "../plan/plan.entity.js";
 
 @Entity({ name: "users" })
 export class UserEntity {
@@ -24,10 +24,10 @@ export class UserEntity {
     passwordHash!: string;
 
     @OneToMany(() => MealEntity, (meal) => meal.user)
-    meals!: MealEntity[];
+    library!: MealEntity[];
 
-    @OneToMany(() => UserSelectionEntity, (sel) => sel.user)
-    userSelections!: UserSelectionEntity[];
+    @OneToMany(() => PlanEntity, (sel) => sel.user)
+    plans!: PlanEntity[];
 }
 
 export default UserEntity;

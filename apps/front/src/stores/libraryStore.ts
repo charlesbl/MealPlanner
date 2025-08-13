@@ -1,34 +1,34 @@
-import * as mealService from "@mealplanner/shared-all";
+import * as libraryService from "@mealplanner/shared-all";
 import { type Meal } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { useAuthStore } from "./authStore";
 
-export const useMealStore = defineStore("mealStore", () => {
-    const meals = ref<Meal[]>([]);
+export const useLibraryStore = defineStore("libraryStore", () => {
+    const library = ref<Meal[]>([]);
     const error = ref<string | null>(null);
     const auth = useAuthStore();
 
-    const updateMeals = async () => {
+    const updateLibrary = async () => {
         error.value = null;
         try {
             if (!auth.token) throw new Error("Not authenticated");
-            meals.value = await mealService.fetchMeals(auth.token);
+            library.value = await libraryService.fetchLibrary(auth.token);
         } catch (e: any) {
             error.value = e.message || "Failed to fetch meals";
         }
     };
 
     const updateDeletedMeal = async (id: string) => {
-        meals.value = meals.value.filter((meal) => meal.id !== id);
+        library.value = library.value.filter((meal) => meal.id !== id);
     };
 
     const deleteMeal = async (id: string) => {
         error.value = null;
         try {
             if (!auth.token) throw new Error("Not authenticated");
-            await mealService.deleteMeal(id, auth.token);
-            meals.value = meals.value.filter((m) => m.id !== id);
+            await libraryService.deleteMeal(id, auth.token);
+            library.value = library.value.filter((m) => m.id !== id);
             return true;
         } catch (e: any) {
             error.value = e.message || "Failed to delete meal";
@@ -37,25 +37,25 @@ export const useMealStore = defineStore("mealStore", () => {
     };
 
     const getMealById = (id: string): Meal | undefined => {
-        return meals.value.find((m) => m.id === id);
+        return library.value.find((m) => m.id === id);
     };
 
-    const mealCount = () => meals.value.length;
+    const mealCount = () => library.value.length;
 
     // Fetch when authenticated token is available; clear on logout
     watch(
         () => auth.token,
         (token) => {
-            if (token) void updateMeals();
-            else meals.value = [];
+            if (token) void updateLibrary();
+            else library.value = [];
         },
         { immediate: true }
     );
 
     return {
-        meals,
+        library,
         error,
-        updateMeals,
+        updateLibrary,
         updateDeletedMeal,
         deleteMeal,
         getMealById,

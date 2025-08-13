@@ -1,14 +1,14 @@
 import type { ToolUpdateEvent } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
-import { useMealStore } from "./mealStore";
+import { useLibraryStore } from "./libraryStore";
 
 export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
-    const mealStore = useMealStore();
+    const mealStore = useLibraryStore();
     const updateDataOnToolStart = async (
         toolDataUpdateEvent: ToolUpdateEvent
     ) => {
         switch (toolDataUpdateEvent.type) {
-            case "updateMeals":
+            case "updateLibrary":
             case "updateMeal":
             case "updateMealSelection":
             case "deleteMeal":
@@ -26,8 +26,8 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
         toolDataUpdateEvent: ToolUpdateEvent
     ) => {
         switch (toolDataUpdateEvent.type) {
-            case "updateMeals":
-                await mealStore.updateMeals();
+            case "updateLibrary":
+                await mealStore.updateLibrary();
                 break;
             case "updateMeal":
                 // TODO Handle meal update logic here

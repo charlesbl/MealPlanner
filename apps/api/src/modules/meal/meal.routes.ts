@@ -5,7 +5,7 @@ import { mealControllerFactory } from "./meal.controller.js";
 export function mealRouterFactory() {
     const router = Router();
     const mealController = mealControllerFactory();
-    router.get("/", requireAuth, mealController.getAll);
+    router.get("/", requireAuth, mealController.getLibrary);
     router.get("/:id", requireAuth, mealController.getById);
     router.post("/", requireAuth, mealController.create);
     router.put("/:id", requireAuth, mealController.update);

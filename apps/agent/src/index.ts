@@ -8,12 +8,12 @@ import { config } from "dotenv";
 import express, { Response } from "express";
 import { ZodObject } from "zod";
 import { createAgent } from "./agent.js";
-import { getAddMealToWeekTool } from "./tools/addMealToWeekTool.js";
-import { getAddOrUpdateMealTool } from "./tools/addOrUpdateMealTool.js";
-import { getDeleteMealTool } from "./tools/deleteMealTool.js";
-import { getReadMealsTool } from "./tools/readMealsTool.js";
-import { getReadWeekSelectionTool } from "./tools/readWeekSelectionTool.js";
-import { getRemoveMealFromWeekTool } from "./tools/removeMealFromWeekTool.js";
+import { getAddOrUpdateMealTool } from "./tools/libraryAddOrUpdateMealTool.js";
+import { getReadLibraryTool } from "./tools/libraryReadTool.js";
+import { getDeleteMealTool } from "./tools/libraryRemoveMealTool.js";
+import { getAddMealToPlanTool } from "./tools/planAddMealTool.js";
+import { getReadPlanSelectionTool } from "./tools/planReadTool.js";
+import { getRemoveMealFromPlanTool } from "./tools/planRemoveMealTool.js";
 import { AgentTool } from "./tools/types.js";
 
 //dotenv
@@ -76,12 +76,12 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
         };
 
         const tools: AgentTool<ZodObject>[] = [
-            getReadMealsTool(token),
+            getReadLibraryTool(token),
             getAddOrUpdateMealTool(token),
             getDeleteMealTool(token),
-            getAddMealToWeekTool(token),
-            getRemoveMealFromWeekTool(token),
-            getReadWeekSelectionTool(token),
+            getAddMealToPlanTool(token),
+            getRemoveMealFromPlanTool(token),
+            getReadPlanSelectionTool(token),
         ];
         const agent = createAgent(
             llm,

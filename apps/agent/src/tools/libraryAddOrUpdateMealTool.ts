@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import * as mealService from "@mealplanner/shared-all";
+import * as libraryService from "@mealplanner/shared-all";
 import { MealType } from "@mealplanner/shared-all";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
@@ -33,7 +33,7 @@ export const getAddOrUpdateMealTool = (
                 };
             } else {
                 return {
-                    type: "updateMeals",
+                    type: "updateLibrary",
                 };
             }
         },
@@ -43,7 +43,7 @@ export const getAddOrUpdateMealTool = (
                 MealType
             ).join(
                 ", "
-            )}. If mealId is provided, the existing meal will be updated; otherwise, a new meal will be created. Meals are now stored without specific dates and can be reused in weekly selections.`,
+            )}. If mealId is provided, the existing meal will be updated; otherwise, a new meal will be created.`,
             schema: addOrUpdateMealSchema,
             func: async (
                 input: z.infer<typeof addOrUpdateMealSchema>
@@ -51,7 +51,7 @@ export const getAddOrUpdateMealTool = (
                 try {
                     if (input.mealId) {
                         // Update existing meal via API
-                        const updated = await mealService.updateMeal(
+                        const updated = await libraryService.updateMeal(
                             input.mealId,
                             {
                                 name: input.mealName,
@@ -63,7 +63,7 @@ export const getAddOrUpdateMealTool = (
                         return `Successfully updated '${updated.name}' (${updated.mealTypes}).`;
                     } else {
                         // Add new meal via API
-                        const created = await mealService.addMeal(
+                        const created = await libraryService.addMeal(
                             {
                                 name: input.mealName,
                                 description: input.description,
@@ -71,7 +71,7 @@ export const getAddOrUpdateMealTool = (
                             },
                             token
                         );
-                        return `Successfully added new ${created.mealTypes} meal: '${created.name}'. Meal ID: ${created.id}. You can now add this meal to your weekly selection or manage it in your deck.`;
+                        return `Successfully added new ${created.mealTypes} meal: '${created.name}'. Meal ID: ${created.id}. You can now add this meal to your plan or manage it in your library.`;
                     }
                 } catch (error: any) {
                     console.error("Error in addOrUpdateMealTool:", error);

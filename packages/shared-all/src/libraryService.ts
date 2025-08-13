@@ -21,11 +21,11 @@ function getApiBase(): string {
     return (base ?? "http://localhost:3001").replace(/\/$/, "");
 }
 
-export async function fetchMeals(token: string): Promise<Meal[]> {
-    const res = await fetch(`${getApiBase()}/meals`, {
+export async function fetchLibrary(token: string): Promise<Meal[]> {
+    const res = await fetch(`${getApiBase()}/meal`, {
         headers: { Authorization: `Bearer ${token}` },
     });
-    if (!res.ok) throw new Error(`Fetch meals failed: ${res.status}`);
+    if (!res.ok) throw new Error(`Fetch library failed: ${res.status}`);
     const body: MealListResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     body.data.forEach((meal) => {
@@ -38,7 +38,7 @@ export async function addMeal(
     meal: Omit<Meal, "id" | "createdAt">,
     token: string
 ): Promise<Meal> {
-    const res = await fetch(`${getApiBase()}/meals`, {
+    const res = await fetch(`${getApiBase()}/meal`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -57,7 +57,7 @@ export async function updateMeal(
     updates: Partial<Omit<Meal, "id" | "createdAt">>,
     token: string
 ): Promise<Meal> {
-    const res = await fetch(`${getApiBase()}/meals/${id}`, {
+    const res = await fetch(`${getApiBase()}/meal/${id}`, {
         method: "PUT",
         headers: {
             "Content-Type": "application/json",
@@ -72,7 +72,7 @@ export async function updateMeal(
 }
 
 export async function deleteMeal(id: string, token: string): Promise<void> {
-    const res = await fetch(`${getApiBase()}/meals/${id}`, {
+    const res = await fetch(`${getApiBase()}/meal/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
     });

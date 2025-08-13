@@ -2,7 +2,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
 
-const readWeekSelectionSchema = z.object({
+const readPlanSelectionSchema = z.object({
     showDetails: z
         .boolean()
         .optional()
@@ -12,25 +12,25 @@ const readWeekSelectionSchema = z.object({
 });
 
 // TODO: Remplacer par appel API semaine quand disponible
-export const getReadWeekSelectionTool = (
+export const getReadPlanSelectionTool = (
     token: string
-): AgentTool<typeof readWeekSelectionSchema> => {
+): AgentTool<typeof readPlanSelectionSchema> => {
     return {
-    schema: readWeekSelectionSchema,
+        schema: readPlanSelectionSchema,
         tool: new DynamicStructuredTool({
-            name: "read_week_selection",
+            name: "read_plan_selection",
             description:
-                "Reads the current weekly meal selection. Shows all meals selected for the week with optional grouping by meal type.",
-            schema: readWeekSelectionSchema,
+                "Reads the current plan. Shows all meals selected for the plan with optional grouping by meal type.",
+            schema: readPlanSelectionSchema,
             func: async (
-                input: z.infer<typeof readWeekSelectionSchema>
+                input: z.infer<typeof readPlanSelectionSchema>
             ): Promise<string> => {
                 try {
                     // TODO: Appel API pour lire la sélection semaine avec le token
-                    return `Weekly selection read (API call to be implemented).`;
+                    return `Plan read (API call to be implemented).`;
                 } catch (error: any) {
-                    console.error("Error in readWeekSelectionTool:", error);
-                    return `Error reading weekly selection: ${error.message}`;
+                    console.error("Error in readPlanSelectionTool:", error);
+                    return `Error reading plan: ${error.message}`;
                 }
             },
         }),
