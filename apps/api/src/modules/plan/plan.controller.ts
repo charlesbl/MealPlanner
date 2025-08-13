@@ -2,10 +2,10 @@ import { AuthRequest } from "@mealplanner/shared-back";
 import { Response } from "express";
 import { AppDataSource } from "../../data-source.js";
 import MealEntity from "../meal/meal.entity.js";
-import { PlanEntity } from "./plan.entity.js";
+import { MealPlanEntity } from "./plan.entity.js";
 
 export function planControllerFactory() {
-    const selectionRepo = AppDataSource.getRepository(PlanEntity);
+    const selectionRepo = AppDataSource.getRepository(MealPlanEntity);
     const mealRepo = AppDataSource.getRepository(MealEntity);
     return {
         getAll: async (req: AuthRequest, res: Response) => {

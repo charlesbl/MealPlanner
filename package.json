@@ -22,6 +22,9 @@
         "db:down": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml down",
         "db:purge": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml down -v",
         "db:logs": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml logs -f",
-        "db:ps": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml ps"
+        "db:ps": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml ps",
+        "migration:generate": "pnpm --filter @mealplanner/api migration:generate",
+        "migration:run": "pnpm --filter @mealplanner/api migration:run",
+        "migration:revert": "pnpm --filter @mealplanner/api migration"
     }
 }

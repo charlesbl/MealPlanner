@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { useLibraryStore } from "./libraryStore";
 
 export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
-    const mealStore = useLibraryStore();
+    const libraryStore = useLibraryStore();
     const updateDataOnToolStart = async (
         toolDataUpdateEvent: ToolUpdateEvent
     ) => {
@@ -27,7 +27,7 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
     ) => {
         switch (toolDataUpdateEvent.type) {
             case "updateLibrary":
-                await mealStore.updateLibrary();
+                await libraryStore.updateLibrary();
                 break;
             case "updateMeal":
                 // TODO Handle meal update logic here
@@ -43,7 +43,9 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
                 console.log(
                     `Meal deleted with ID: ${toolDataUpdateEvent.mealId}`
                 );
-                await mealStore.updateDeletedMeal(toolDataUpdateEvent.mealId);
+                await libraryStore.updateDeletedMeal(
+                    toolDataUpdateEvent.mealId
+                );
                 break;
             default:
                 console.error(

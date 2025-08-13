@@ -4,7 +4,7 @@ import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { fileURLToPath } from "url";
 import { MealEntity } from "./modules/meal/meal.entity.js";
-import { PlanEntity } from "./modules/plan/plan.entity.js";
+import { MealPlanEntity } from "./modules/plan/plan.entity.js";
 import { UserEntity } from "./modules/user/user.entity.js";
 
 dotenv.config();
@@ -26,6 +26,6 @@ export const AppDataSource = new DataSource({
     database: DB_NAME,
     synchronize: false,
     logging: false,
-    entities: [UserEntity, MealEntity, PlanEntity],
+    entities: [UserEntity, MealEntity, MealPlanEntity],
     migrations: [path.join(__dirname, "migrations/*.{ts,js}")],
 });

@@ -2,8 +2,8 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import MealEntity from "../meal/meal.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
-@Entity({ name: "user_selection" })
-export class PlanEntity {
+@Entity({ name: "mealPlan" })
+export class MealPlanEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 

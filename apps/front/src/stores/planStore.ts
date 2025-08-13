@@ -63,10 +63,10 @@ export const usePlanStore = defineStore("planStore", () => {
         planMealId: string;
         order: number;
     })[] {
-        const mealStore = useLibraryStore();
+        const libraryStore = useLibraryStore();
         return plan.value
             .map((planMeal: PlanMeal) => {
-                const meal = mealStore.getMealById(planMeal.mealId);
+                const meal = libraryStore.getMealById(planMeal.mealId);
                 if (meal) {
                     return {
                         ...meal,

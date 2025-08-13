@@ -6,7 +6,7 @@ import {
     OneToMany,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { PlanEntity } from "../plan/plan.entity.js";
+import { MealPlanEntity } from "../plan/plan.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
 @Entity({ name: "meals" })
@@ -31,8 +31,8 @@ export class MealEntity {
     })
     user!: UserEntity;
 
-    @OneToMany("PlanEntity", (sel: PlanEntity) => sel.meal)
-    plans!: PlanEntity[];
+    @OneToMany("MealPlanEntity", (sel: MealPlanEntity) => sel.meal)
+    plans!: MealPlanEntity[];
 }
 
 export default MealEntity;
