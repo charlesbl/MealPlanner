@@ -1,17 +1,17 @@
 import { z } from "zod";
 import type { APIResponse } from "./common.schemas.js";
-import { mealSchema } from "./meal.schemas.js";
+import { recipeSchema } from "./recipe.schemas.js";
 
 export const planItemSchema = z.object({
     id: z.uuid(),
-    meal: mealSchema,
+    recipe: recipeSchema,
     order: z.number().int().nullable().optional(),
 });
 
 export type PlanItem = z.infer<typeof planItemSchema>;
 
 export const addPlanItemSchema = z.object({
-    mealId: z.uuid(),
+    recipeId: z.uuid(),
     order: z.number().int().optional(),
 });
 export type PlanAddRequest = z.infer<typeof addPlanItemSchema>;

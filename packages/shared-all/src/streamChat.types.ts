@@ -3,15 +3,15 @@ export type ToolUpdateEvent =
           type: "updateLibrary";
       }
     | {
-          type: "updateMeal";
-          mealId: string;
+          type: "updateRecipe";
+          recipeId: string;
       }
     | {
           type: "updatePlan";
       }
     | {
-          type: "deleteMeal";
-          mealId: string;
+          type: "removeRecipe";
+          recipeId: string;
       };
 
 export type ToolUpdateEventType = ToolUpdateEvent["type"];

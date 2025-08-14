@@ -5,8 +5,8 @@ import {
     OneToMany,
     PrimaryGeneratedColumn,
 } from "typeorm";
-import { MealEntity } from "../meal/meal.entity.js";
 import { PlanItemEntity } from "../planItem/planItem.entity.js";
+import { RecipeEntity } from "../recipe/recipe.entity.js";
 
 @Entity({ name: "users" })
 export class UserEntity {
@@ -23,8 +23,8 @@ export class UserEntity {
     @Column({ name: "password_hash", type: "varchar", length: 255 })
     passwordHash!: string;
 
-    @OneToMany(() => MealEntity, (meal) => meal.user)
-    library!: MealEntity[];
+    @OneToMany(() => RecipeEntity, (recipe) => recipe.user)
+    library!: RecipeEntity[];
 
     @OneToMany(() => PlanItemEntity, (sel) => sel.user)
     plans!: PlanItemEntity[];

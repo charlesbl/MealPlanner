@@ -14,12 +14,9 @@ async function fetchPlan(token: string): Promise<PlanItem[]> {
     if (!res.ok) throw new Error(`Fetch plan failed: ${res.status}`);
     const body: PlanGetResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
-    // Ensure nested meal.createdAt is a Date
+    // Ensure nested recipe.createdAt is a Date
     body.data.forEach((item) => {
-        if (item.meal && (item.meal as any).createdAt)
-            (item.meal as any).createdAt = new Date(
-                (item.meal as any).createdAt
-            );
+        item.recipe.createdAt = new Date(item.recipe.createdAt);
     });
     return body.data;
 }
@@ -39,10 +36,7 @@ async function addToPlan(
     if (!res.ok) throw new Error(`Add to plan failed: ${res.status}`);
     const body: PlanAddResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
-    if (body.data?.meal && (body.data.meal as any).createdAt)
-        (body.data.meal as any).createdAt = new Date(
-            (body.data.meal as any).createdAt
-        );
+    body.data.recipe.createdAt = new Date(body.data.recipe.createdAt);
     return body.data;
 }
 

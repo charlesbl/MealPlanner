@@ -11,9 +11,9 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
     ) => {
         switch (toolDataUpdateEvent.type) {
             case "updateLibrary":
-            case "updateMeal":
+            case "updateRecipe":
             case "updatePlan":
-            case "deleteMeal":
+            case "removeRecipe":
                 break;
             default:
                 console.error(
@@ -34,18 +34,18 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
             case "updatePlan":
                 await planStore.updatePlan();
                 break;
-            case "updateMeal":
-                // TODO Handle meal update logic here
+            case "updateRecipe":
+                // TODO Handle recipe update logic here
                 console.log(
-                    `Meal updated with ID: ${toolDataUpdateEvent.mealId}`
+                    `Recipe updated with ID: ${toolDataUpdateEvent.recipeId}`
                 );
                 break;
-            case "deleteMeal":
+            case "removeRecipe":
                 console.log(
-                    `Meal deleted with ID: ${toolDataUpdateEvent.mealId}`
+                    `Recipe deleted with ID: ${toolDataUpdateEvent.recipeId}`
                 );
-                await libraryStore.updateDeletedMeal(
-                    toolDataUpdateEvent.mealId
+                await libraryStore.updateDeletedRecipe(
+                    toolDataUpdateEvent.recipeId
                 );
                 break;
             default:

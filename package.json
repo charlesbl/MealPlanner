@@ -9,6 +9,7 @@
         "dev:api": "pnpm --filter @mealplanner/api dev",
         "dev:shared-all": "pnpm --filter @mealplanner/shared-all dev",
         "dev:shared-back": "pnpm --filter @mealplanner/shared-back dev",
+        "dev:shared": "pnpm --parallel --filter @mealplanner/shared-all --filter @mealplanner/shared-back dev",
         "dev": "pnpm -r --parallel run dev",
         "dev:stack": "pnpm db:up && pnpm dev",
         "build:front": "pnpm --filter @mealplanner/front build",

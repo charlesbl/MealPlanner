@@ -1,16 +1,16 @@
 <script lang="ts" setup>
 import { usePlanStore } from "../../stores/planStore";
-import MealCard from "../MealCard.vue";
+import RecipeCard from "../RecipeCard.vue";
 
 const planStore = usePlanStore();
 
-function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
+function handleRemoveRecipeFromPlan(recipeId: string, planItemId?: string) {
     const success = planItemId
         ? planStore.removePlanItemById(planItemId)
-        : planStore.removeMealFromPlan(mealId);
+        : planStore.removeRecipeFromPlan(recipeId);
 
     if (!success) {
-        console.error("Failed to remove meal from plan");
+        console.error("Failed to remove recipe from plan");
     }
 }
 </script>
@@ -19,18 +19,18 @@ function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
     <div class="plan-container">
         <div class="plan-header">
             <h1>Ma Semaine</h1>
-            <p class="meal-count">
+            <p class="recipe-count">
                 {{ planStore.plan.length }} repas sélectionnés
             </p>
         </div>
 
         <div class="plan-content" v-if="planStore.plan.length > 0">
-            <div class="meals-list">
-                <MealCard
+            <div class="recipes-list">
+                <RecipeCard
                     v-for="planItem in planStore.plan"
                     :key="planItem.id"
-                    :meal="planItem.meal"
-                    @delete="handleRemoveMealFromPlan"
+                    :recipe="{ ...planItem.recipe, planItemId: planItem.id }"
+                    @delete="handleRemoveRecipeFromPlan"
                 />
             </div>
         </div>
@@ -63,7 +63,7 @@ function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
     font-weight: 700;
 }
 
-.meal-count {
+.recipe-count {
     margin: 0;
     color: var(--text-secondary, #666);
     font-size: 0.9rem;
@@ -74,7 +74,7 @@ function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
     flex-direction: column;
 }
 
-.meals-list {
+.recipes-list {
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -106,7 +106,7 @@ function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
         font-size: 2rem;
     }
 
-    .meals-list {
+    .recipes-list {
         gap: 16px;
     }
 }
@@ -119,7 +119,7 @@ function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
         margin: 0 auto;
     }
 
-    .meals-list {
+    .recipes-list {
         gap: 20px;
     }
 }

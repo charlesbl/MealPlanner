@@ -3,40 +3,45 @@ import { planService } from "@mealplanner/shared-all";
 import { z } from "zod";
 import { AgentTool } from "./types.js";
 
-const addMealToPlanSchema = z.object({
-    mealId: z.string().describe("The ID of the meal to add to the plan"),
+const addMealSchema = z.object({
+    recipeId: z
+        .string()
+        .describe("The ID of the recipe to add to the plan as a meal"),
 });
 
-export const getAddMealToPlanTool = (
+export const getAddMealTool = (
     token: string
-): AgentTool<typeof addMealToPlanSchema> => {
+): AgentTool<typeof addMealSchema> => {
     return {
-        schema: addMealToPlanSchema,
+        schema: addMealSchema,
         getToolUpdateEventOnToolEnd: () => ({
             type: "updatePlan",
         }),
         tool: new DynamicStructuredTool({
-            name: "add_meal_to_plan",
-            description: "Adds a meal from the library to the current plan.",
-            schema: addMealToPlanSchema,
+            name: "add_meal",
+            description:
+                "Adds a recipe from the library to the current plan as a meal.",
+            schema: addMealSchema,
             func: async (
-                input: z.infer<typeof addMealToPlanSchema>
+                input: z.infer<typeof addMealSchema>
             ): Promise<string> => {
                 try {
                     // Determine next order based on current plan length
                     const current = await planService.fetchPlan(token);
                     const created = await planService.addToPlan(
-                        { mealId: input.mealId, order: current.length },
+                        { recipeId: input.recipeId, order: current.length },
                         token
                     );
                     return `Added '${
-                        created.meal.name
+                        created.recipe.name
                     }' to the plan at position ${
                         (created.order ?? current.length) + 1
-                    }. Meal ID: ${created.meal.id}. PlanItemId: ${created.id}.`;
+                    }. Recipe ID: ${created.recipe.id}. PlanItemId: ${
+                        created.id
+                    }.`;
                 } catch (error: any) {
-                    console.error("Error in addMealToPlanTool:", error);
-                    return `Error adding meal to plan: ${error.message}`;
+                    console.error("Error in addMealTool:", error);
+                    return `Error adding recipe to plan: ${error.message}`;
                 }
             },
         }),

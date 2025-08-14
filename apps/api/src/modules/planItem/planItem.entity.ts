@@ -1,5 +1,5 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import MealEntity from "../meal/meal.entity.js";
+import RecipeEntity from "../recipe/recipe.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
 // TODO rename to planEntry
@@ -13,10 +13,10 @@ export class PlanItemEntity {
     })
     user!: UserEntity;
 
-    @ManyToOne("MealEntity", (meal: MealEntity) => meal.plan, {
+    @ManyToOne("RecipeEntity", (recipe: RecipeEntity) => recipe.plan, {
         onDelete: "CASCADE",
     })
-    meal!: MealEntity;
+    recipe!: RecipeEntity;
 
     @Column({ type: "int", nullable: true })
     order?: number;

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { useLibraryStore } from "../../stores/libraryStore";
-import MealCard from "../MealCard.vue";
+import RecipeCard from "../RecipeCard.vue";
 
 const libraryStore = useLibraryStore();
 
@@ -11,10 +11,10 @@ const sortedLibrary = computed(() =>
     )
 );
 
-function handleDeleteMeal(mealId: string) {
-    const success = libraryStore.deleteMeal(mealId);
+function handleDeleteRecipe(recipeId: string) {
+    const success = libraryStore.deleteRecipe(recipeId);
     if (!success) {
-        console.error("Failed to delete meal");
+        console.error("Failed to delete recipe");
     }
 }
 </script>
@@ -23,16 +23,16 @@ function handleDeleteMeal(mealId: string) {
     <div class="library-container">
         <div class="library-header">
             <h1>Mes Repas</h1>
-            <p class="meal-count">
+            <p class="recipe-count">
                 {{ sortedLibrary.length }} repas enregistrés
             </p>
         </div>
-        <div class="meals-list" v-if="sortedLibrary.length > 0">
-            <MealCard
-                v-for="meal in sortedLibrary"
-                :key="meal.id"
-                :meal="meal"
-                @delete="handleDeleteMeal"
+        <div class="recipes-list" v-if="sortedLibrary.length > 0">
+            <RecipeCard
+                v-for="recipe in sortedLibrary"
+                :key="recipe.id"
+                :recipe="recipe"
+                @delete="handleDeleteRecipe"
             />
         </div>
 
@@ -64,13 +64,13 @@ function handleDeleteMeal(mealId: string) {
     font-weight: 700;
 }
 
-.meal-count {
+.recipe-count {
     margin: 0;
     color: var(--text-secondary, #666);
     font-size: 0.9rem;
 }
 
-.meals-list {
+.recipes-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -102,7 +102,7 @@ function handleDeleteMeal(mealId: string) {
         font-size: 2rem;
     }
 
-    .meals-list {
+    .recipes-list {
         gap: 12px;
     }
 }

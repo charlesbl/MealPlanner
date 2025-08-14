@@ -19,10 +19,13 @@ export const usePlanStore = defineStore("planStore", () => {
         }
     }
 
-    async function addMealToPlan(mealId: string): Promise<PlanItem | null> {
+    async function addRecipeToPlan(recipeId: string): Promise<PlanItem | null> {
         try {
             if (!auth.token) throw new Error("Not authenticated");
-            const created = await planService.addToPlan({ mealId }, auth.token);
+            const created = await planService.addToPlan(
+                { recipeId },
+                auth.token
+            );
             plan.value.push(created);
             return created;
         } catch (e: any) {
@@ -31,7 +34,7 @@ export const usePlanStore = defineStore("planStore", () => {
         }
     }
 
-    async function removeMealFromPlan(planItemId: string): Promise<boolean> {
+    async function removeRecipeFromPlan(planItemId: string): Promise<boolean> {
         try {
             if (!auth.token) throw new Error("Not authenticated");
             await planService.removeFromPlan({ id: planItemId }, auth.token);
@@ -55,7 +58,7 @@ export const usePlanStore = defineStore("planStore", () => {
             (planItem: PlanItem) => planItem.id === planItemId
         );
         if (!item) return false;
-        return removeMealFromPlan(item.id);
+        return removeRecipeFromPlan(item.id);
     }
 
     watch(
@@ -71,8 +74,8 @@ export const usePlanStore = defineStore("planStore", () => {
         plan,
         error,
         updatePlan,
-        addMealToPlan,
-        removeMealFromPlan,
+        addRecipeToPlan,
+        removeRecipeFromPlan,
         removePlanItemById,
     };
 });

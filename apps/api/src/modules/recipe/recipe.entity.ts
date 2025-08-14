@@ -1,4 +1,4 @@
-import { MealType } from "@mealplanner/shared-all";
+import { RecipeType } from "@mealplanner/shared-all";
 import {
     Column,
     Entity,
@@ -9,8 +9,8 @@ import {
 import { PlanItemEntity } from "../planItem/planItem.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
-@Entity({ name: "meals" })
-export class MealEntity {
+@Entity({ name: "recipes" })
+export class RecipeEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
@@ -21,7 +21,7 @@ export class MealEntity {
     description?: string;
 
     @Column({ type: "simple-array" })
-    mealTypes!: MealType[];
+    recipeTypes!: RecipeType[];
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt!: Date;
@@ -31,8 +31,8 @@ export class MealEntity {
     })
     user!: UserEntity;
 
-    @OneToMany("PlanItemEntity", (sel: PlanItemEntity) => sel.meal)
+    @OneToMany("PlanItemEntity", (sel: PlanItemEntity) => sel.recipe)
     plan!: PlanItemEntity[];
 }
 
-export default MealEntity;
+export default RecipeEntity;

@@ -1,10 +1,10 @@
 import { requireAuth } from "@mealplanner/shared-back";
 import { Router } from "express";
-import { mealControllerFactory } from "./meal.controller.js";
+import { recipeControllerFactory } from "./recipe.controller.js";
 
-export function mealRouterFactory() {
+export function recipeRouterFactory() {
     const router = Router();
-    const controller = mealControllerFactory();
+    const controller = recipeControllerFactory();
     router.get("/", requireAuth, controller.getLibrary);
     router.get("/:id", requireAuth, controller.getById);
     router.post("/", requireAuth, controller.create);

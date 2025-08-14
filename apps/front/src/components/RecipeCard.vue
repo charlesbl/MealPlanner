@@ -1,25 +1,25 @@
 <script lang="ts" setup>
-import type { Meal } from "@mealplanner/shared-all";
+import type { Recipe } from "@mealplanner/shared-all";
 import { getCurrentInstance } from "vue";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 interface Props {
-    meal: Meal & { planItemId?: string };
+    recipe: Recipe & { planItemId?: string };
 }
 
 const emit = defineEmits<{
-    delete: [mealId: string, planItemId?: string];
+    delete: [recipeId: string, planItemId?: string];
 }>();
 
 const props = defineProps<Props>();
 
 const instance = getCurrentInstance();
-const uniqueId = `toggle-${props.meal.id}-${
+const uniqueId = `toggle-${props.recipe.id}-${
     instance?.uid || Math.random().toString(36).slice(2, 11)
 }`;
 
-function formatMealTypes(mealTypes: string[]): string {
-    return mealTypes.join(", ");
+function formatRecipeTypes(recipeTypes: string[]): string {
+    return recipeTypes.join(", ");
 }
 
 function formatDate(date: Date): string {
@@ -34,20 +34,20 @@ function handleDelete(event: Event) {
     event.stopPropagation();
     event.preventDefault();
 
-    emit("delete", props.meal.id, props.meal.planItemId);
+    emit("delete", props.recipe.id, props.recipe.planItemId);
 }
 </script>
 
 <template>
-    <div class="meal-card">
-        <div class="meal-description">
+    <div class="recipe-card">
+        <div class="recipe-description">
             <input type="checkbox" :id="uniqueId" class="toggle-checkbox" />
-            <label :for="uniqueId" class="meal-card-clickable">
-                <div class="meal-header">
-                    <h3 class="meal-name">{{ meal.name }}</h3>
-                    <div class="meal-header-actions">
-                        <span class="meal-types">{{
-                            formatMealTypes(meal.mealTypes)
+            <label :for="uniqueId" class="recipe-card-clickable">
+                <div class="recipe-header">
+                    <h3 class="recipe-name">{{ recipe.name }}</h3>
+                    <div class="recipe-header-actions">
+                        <span class="recipe-types">{{
+                            formatRecipeTypes(recipe.recipeTypes)
                         }}</span>
                         <button
                             @click="handleDelete"
@@ -59,11 +59,13 @@ function handleDelete(event: Event) {
                     </div>
                 </div>
                 <div class="description-content">
-                    <MarkdownRenderer>{{ meal.description }}</MarkdownRenderer>
+                    <MarkdownRenderer>{{
+                        recipe.description
+                    }}</MarkdownRenderer>
                 </div>
-                <div class="meal-footer">
-                    <span class="meal-date">{{
-                        formatDate(meal.createdAt)
+                <div class="recipe-footer">
+                    <span class="recipe-date">{{
+                        formatDate(recipe.createdAt)
                     }}</span>
                     <span class="toggle-hint">
                         <span class="show-more">▼</span>
@@ -76,7 +78,7 @@ function handleDelete(event: Event) {
 </template>
 
 <style scoped>
-.meal-card {
+.recipe-card {
     background-color: var(--bg-secondary);
     color: var(--text-primary);
     border: 1px solid var(--border-light);
@@ -87,12 +89,12 @@ function handleDelete(event: Event) {
     overflow: hidden;
 }
 
-.meal-card:hover {
+.recipe-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.meal-card-clickable {
+.recipe-card-clickable {
     display: block;
     padding: 16px;
     cursor: pointer;
@@ -105,14 +107,14 @@ function handleDelete(event: Event) {
     overflow: hidden;
 }
 
-.meal-description {
+.recipe-description {
     margin: 0;
     line-height: 1.4;
     color: var(--text-secondary, #666);
     position: relative;
 }
 
-.meal-header {
+.recipe-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -121,7 +123,7 @@ function handleDelete(event: Event) {
     gap: 8px;
 }
 
-.meal-name {
+.recipe-name {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
@@ -129,14 +131,14 @@ function handleDelete(event: Event) {
     min-width: 0;
 }
 
-.meal-header-actions {
+.recipe-header-actions {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
 }
 
-.meal-types {
+.recipe-types {
     font-size: 0.8rem;
     color: var(--text-secondary, #666);
     background-color: var(--bg-primary);
@@ -225,13 +227,13 @@ function handleDelete(event: Event) {
     user-select: none;
 }
 
-.meal-card-clickable:hover .toggle-hint {
+.recipe-card-clickable:hover .toggle-hint {
     transform: scale(1.1);
     color: var(--accent-color-hover, #0056b3);
 }
 
 /* Animation de rotation pour la flèche */
-.toggle-checkbox:checked ~ .meal-card-clickable .toggle-hint {
+.toggle-checkbox:checked ~ .recipe-card-clickable .toggle-hint {
     animation: bounce 0.3s ease-in-out;
 }
 
@@ -245,7 +247,7 @@ function handleDelete(event: Event) {
     }
 }
 
-.meal-footer {
+.recipe-footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -253,7 +255,7 @@ function handleDelete(event: Event) {
     gap: 8px;
 }
 
-.meal-date {
+.recipe-date {
     font-size: 0.8rem;
     color: var(--text-tertiary, #999);
 }
@@ -268,38 +270,38 @@ function handleDelete(event: Event) {
 }
 
 /* État étendu : afficher tout le contenu */
-.toggle-checkbox:checked ~ .meal-card-clickable .description-content {
+.toggle-checkbox:checked ~ .recipe-card-clickable .description-content {
     max-height: none;
 }
 
 /* Masquer le gradient en mode étendu */
-.toggle-checkbox:checked ~ .meal-card-clickable .description-content::after {
+.toggle-checkbox:checked ~ .recipe-card-clickable .description-content::after {
     opacity: 0;
 }
 
 /* État étendu : afficher "Voir moins", masquer "Voir plus" */
-.toggle-checkbox:checked ~ .meal-card-clickable .toggle-hint .show-more {
+.toggle-checkbox:checked ~ .recipe-card-clickable .toggle-hint .show-more {
     display: none;
 }
 
-.toggle-checkbox:checked ~ .meal-card-clickable .toggle-hint .show-less {
+.toggle-checkbox:checked ~ .recipe-card-clickable .toggle-hint .show-less {
     display: inline;
 }
 
 /* Mobile-first responsive design */
 @media (max-width: 480px) {
-    .meal-header {
+    .recipe-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
 
-    .meal-header-actions {
+    .recipe-header-actions {
         align-self: stretch;
         justify-content: space-between;
     }
 
-    .meal-types {
+    .recipe-types {
         flex: 1;
     }
 
