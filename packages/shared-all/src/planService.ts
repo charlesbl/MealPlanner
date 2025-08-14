@@ -1,13 +1,13 @@
 import {
+    type Meal,
     type PlanAddRequest,
     type PlanAddResponse,
     type PlanGetResponse,
-    type PlanItem,
     type PlanRemoveRequest,
 } from "./schemas/plan.schemas.js";
 import { getApiBase } from "./utils.js";
 
-async function fetchPlan(token: string): Promise<PlanItem[]> {
+async function fetchPlan(token: string): Promise<Meal[]> {
     const res = await fetch(`${getApiBase()}/plan`, {
         headers: { Authorization: `Bearer ${token}` },
     });
@@ -24,7 +24,7 @@ async function fetchPlan(token: string): Promise<PlanItem[]> {
 async function addToPlan(
     payload: PlanAddRequest,
     token: string
-): Promise<PlanItem> {
+): Promise<Meal> {
     const res = await fetch(`${getApiBase()}/plan/add`, {
         method: "POST",
         headers: {

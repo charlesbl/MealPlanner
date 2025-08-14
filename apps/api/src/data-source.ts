@@ -3,7 +3,7 @@ import path from "node:path";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { fileURLToPath } from "url";
-import { PlanItemEntity } from "./modules/planItem/planItem.entity.js";
+import { MealEntity } from "./modules/meal/meal.entity.js";
 import { RecipeEntity } from "./modules/recipe/recipe.entity.js";
 import { UserEntity } from "./modules/user/user.entity.js";
 
@@ -26,6 +26,6 @@ export const AppDataSource = new DataSource({
     database: DB_NAME,
     synchronize: false,
     logging: false,
-    entities: [UserEntity, RecipeEntity, PlanItemEntity],
+    entities: [UserEntity, RecipeEntity, MealEntity],
     migrations: [path.join(__dirname, "migrations/*.{ts,js}")],
 });

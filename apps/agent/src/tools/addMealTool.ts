@@ -36,9 +36,7 @@ export const getAddMealTool = (
                         created.recipe.name
                     }' to the plan at position ${
                         (created.order ?? current.length) + 1
-                    }. Recipe ID: ${created.recipe.id}. PlanItemId: ${
-                        created.id
-                    }.`;
+                    }. Recipe ID: ${created.recipe.id}. MealId: ${created.id}.`;
                 } catch (error: any) {
                     console.error("Error in addMealTool:", error);
                     return `Error adding recipe to plan: ${error.message}`;

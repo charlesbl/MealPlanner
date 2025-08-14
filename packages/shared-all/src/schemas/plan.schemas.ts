@@ -2,25 +2,25 @@ import { z } from "zod";
 import type { APIResponse } from "./common.schemas.js";
 import { recipeSchema } from "./recipe.schemas.js";
 
-export const planItemSchema = z.object({
+export const mealSchema = z.object({
     id: z.uuid(),
     recipe: recipeSchema,
     order: z.number().int().nullable().optional(),
 });
 
-export type PlanItem = z.infer<typeof planItemSchema>;
+export type Meal = z.infer<typeof mealSchema>;
 
-export const addPlanItemSchema = z.object({
+export const addMealSchema = z.object({
     recipeId: z.uuid(),
     order: z.number().int().optional(),
 });
-export type PlanAddRequest = z.infer<typeof addPlanItemSchema>;
-export type PlanAddResponse = APIResponse<PlanItem>;
+export type PlanAddRequest = z.infer<typeof addMealSchema>;
+export type PlanAddResponse = APIResponse<Meal>;
 
-export type PlanGetResponse = APIResponse<PlanItem[]>;
+export type PlanGetResponse = APIResponse<Meal[]>;
 
-export const removePlanItemSchema = z.object({
+export const removeMealSchema = z.object({
     id: z.uuid(),
 });
-export type PlanRemoveRequest = z.infer<typeof removePlanItemSchema>;
+export type PlanRemoveRequest = z.infer<typeof removeMealSchema>;
 // The API currently returns 204 No Content for remove; no response body

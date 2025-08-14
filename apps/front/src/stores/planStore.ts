@@ -1,11 +1,11 @@
-import type { PlanItem } from "@mealplanner/shared-all";
+import type { Meal } from "@mealplanner/shared-all";
 import { planService } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { ref, watch } from "vue";
 import { useAuthStore } from "./authStore";
 
 export const usePlanStore = defineStore("planStore", () => {
-    const plan = ref<PlanItem[]>([]);
+    const plan = ref<Meal[]>([]);
     const error = ref<string | null>(null);
     const auth = useAuthStore();
 
@@ -19,7 +19,7 @@ export const usePlanStore = defineStore("planStore", () => {
         }
     }
 
-    async function addRecipeToPlan(recipeId: string): Promise<PlanItem | null> {
+    async function addRecipeToPlan(recipeId: string): Promise<Meal | null> {
         try {
             if (!auth.token) throw new Error("Not authenticated");
             const created = await planService.addToPlan(
@@ -34,16 +34,16 @@ export const usePlanStore = defineStore("planStore", () => {
         }
     }
 
-    async function removeRecipeFromPlan(planItemId: string): Promise<boolean> {
+    async function removeRecipeFromPlan(mealId: string): Promise<boolean> {
         try {
             if (!auth.token) throw new Error("Not authenticated");
-            await planService.removeFromPlan({ id: planItemId }, auth.token);
+            await planService.removeFromPlan({ id: mealId }, auth.token);
             const idx = plan.value.findIndex(
-                (planItem: PlanItem) => planItem.id === planItemId
+                (meal: Meal) => meal.id === mealId
             );
             if (idx === -1) return false;
             plan.value.splice(idx, 1);
-            plan.value.forEach((wm: PlanItem, i: number) => {
+            plan.value.forEach((wm: Meal, i: number) => {
                 wm.order = i;
             });
             return true;
@@ -53,10 +53,8 @@ export const usePlanStore = defineStore("planStore", () => {
         }
     }
 
-    async function removePlanItemById(planItemId: string): Promise<boolean> {
-        const item = plan.value.find(
-            (planItem: PlanItem) => planItem.id === planItemId
-        );
+    async function removeMealById(mealId: string): Promise<boolean> {
+        const item = plan.value.find((meal: Meal) => meal.id === mealId);
         if (!item) return false;
         return removeRecipeFromPlan(item.id);
     }
@@ -76,6 +74,6 @@ export const usePlanStore = defineStore("planStore", () => {
         updatePlan,
         addRecipeToPlan,
         removeRecipeFromPlan,
-        removePlanItemById,
+        removeMealById,
     };
 });

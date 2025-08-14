@@ -39,8 +39,17 @@ if (!OPENROUTER_API_KEY) {
 const llm = new ChatOpenAI({
     configuration: { baseURL: OPENROUTER_BASE_URL },
     apiKey: OPENROUTER_API_KEY,
-    modelName: "z-ai/glm-4.5",
+    // modelName: "z-ai/glm-4.5",
+    // modelName: "openai/gpt-oss-120b",
+    // modelName: "mistralai/mistral-medium-3",
+    modelName: "mistralai/mistral-small-24b-instruct-2501",
     temperature: 0.7,
+    modelKwargs: {
+        // preset: "@preset/default",
+        provider: {
+            order: ["mistral"],
+        },
+    },
 });
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
@@ -97,7 +106,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
             const e = event as StreamEvent;
             // Token chunks
             if (e.event === "on_chat_model_stream") {
-                const content = (e as any)?.data?.chunk?.content;
+                const content = e.data?.chunk?.content;
                 const text = Array.isArray(content)
                     ? content
                           .map((p: any) =>
@@ -206,9 +215,9 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
             }
             // Final output from graph end/state
             if (e.event === "on_graph_end" || e.event === "on_chain_end") {
-                const output = (e as any)?.data?.output;
+                const output = e.data?.output;
                 if (typeof output === "string" && output) final = output;
-                const maybeMessages = (output as any)?.messages;
+                const maybeMessages = output?.messages;
                 if (Array.isArray(maybeMessages) && maybeMessages.length > 0) {
                     const last = maybeMessages[maybeMessages.length - 1];
                     const content = last?.content;

@@ -3,8 +3,8 @@ import RecipeEntity from "../recipe/recipe.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
 // TODO rename to planEntry
-@Entity({ name: "planItems" })
-export class PlanItemEntity {
+@Entity({ name: "meals" })
+export class MealEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 

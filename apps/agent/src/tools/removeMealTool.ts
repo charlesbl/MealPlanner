@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AgentTool } from "./types.js";
 
 const removeMealSchema = z.object({
-    id: z.string().describe("The ID of the planItem to remove from the plan"),
+    id: z.string().describe("The ID of the meal to remove from the plan"),
 });
 
 export const getRemoveRecipeFromPlanTool = (
