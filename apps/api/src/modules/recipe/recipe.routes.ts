@@ -9,6 +9,6 @@ export function recipeRouterFactory() {
     router.get("/:id", requireAuth, controller.getById);
     router.post("/", requireAuth, controller.create);
     router.put("/:id", requireAuth, controller.update);
-    router.delete("/:id", requireAuth, controller.delete);
+    router.delete("/:id", requireAuth, controller.remove);
     return router;
 }

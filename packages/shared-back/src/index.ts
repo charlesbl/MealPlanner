@@ -2,7 +2,8 @@ import { JwtUserPayload } from "@mealplanner/shared-all";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 
-export type AuthRequestPayload = { user?: JwtUserPayload } & { token?: string };
+// TODO user is verify in requireAuth, so it's nullable only in requireAuth not in other places
+export type AuthRequestPayload = { user?: JwtUserPayload; token?: string };
 export type AuthRequest = Request & AuthRequestPayload;
 
 export function getJwtSecret(): Secret {

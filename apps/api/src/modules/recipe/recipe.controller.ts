@@ -6,6 +6,8 @@ import type {
 } from "@mealplanner/shared-all";
 import {
     createRecipeSchema,
+    getRecipeSchema,
+    removeRecipeSchema,
     updateRecipeSchema,
 } from "@mealplanner/shared-all";
 import type { AuthRequest } from "@mealplanner/shared-back";
@@ -38,8 +40,9 @@ export function recipeControllerFactory() {
                     status: "error",
                     error: "Unauthorized",
                 });
+            const { id } = getRecipeSchema.parse(req.params);
             const recipe = await recipeRepo.findOne({
-                where: { id: req.params.id, user: { id: userId } },
+                where: { id, user: { id: userId } },
             });
             if (!recipe)
                 return res.status(404).json({
@@ -88,8 +91,9 @@ export function recipeControllerFactory() {
                     error: "Unauthorized",
                 });
             try {
+                const { id } = updateRecipeSchema.parse(req.params);
                 const recipe = await recipeRepo.findOne({
-                    where: { id: req.params.id, user: { id: userId } },
+                    where: { id, user: { id: userId } },
                 });
                 if (!recipe)
                     return res.status(404).json({
@@ -111,15 +115,16 @@ export function recipeControllerFactory() {
                 });
             }
         },
-        delete: async (req: AuthRequest, res: Response) => {
+        remove: async (req: AuthRequest, res: Response) => {
             const userId = req.user?.sub;
             if (!userId)
                 return res.status(401).json({
                     status: "error",
                     error: "Unauthorized",
                 });
+            const { id } = removeRecipeSchema.parse(req.params);
             const recipe = await recipeRepo.findOne({
-                where: { id: req.params.id, user: { id: userId } },
+                where: { id, user: { id: userId } },
             });
             if (!recipe)
                 return res.status(404).json({

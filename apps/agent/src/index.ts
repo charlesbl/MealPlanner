@@ -105,6 +105,18 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
         for await (const event of stream) {
             const e = event as StreamEvent;
             // Token chunks
+            if (e.event.includes("on_chain_")) {
+                console.log(`[agent] Received chain event: ${e.name}`);
+                if (e.data.output?.id !== undefined) {
+                    console.log(`[agent] Chain ID: ${e.data.output.id}`);
+                }
+                if (e.data.input?.id !== undefined) {
+                    console.log(`[agent] Chain ID: ${e.data.output.id}`);
+                }
+            }
+            if (e.event === "on_chat_model_start") {
+                send({ type: "streamStart", runId: e.run_id });
+            }
             if (e.event === "on_chat_model_stream") {
                 const content = e.data?.chunk?.content;
                 const text = Array.isArray(content)
@@ -120,7 +132,13 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                     : "";
                 if (text) {
                     final += text;
-                    send({ type: "stream", chunk: text });
+                    send({ type: "stream", chunk: text, runId: e.run_id });
+                }
+            }
+            if (e.event === "on_chat_model_end") {
+                const text = e.data.output?.content;
+                if (typeof text === "string") {
+                    send({ type: "streamEnd", text: text, runId: e.run_id });
                 }
             }
             // Tool lifecycle events
@@ -163,6 +181,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                             input.data
                         ),
                     },
+                    runId: e.run_id,
                 });
             }
             if (e.event === "on_tool_end") {
@@ -211,6 +230,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
                             output
                         ),
                     },
+                    runId: e.run_id,
                 });
             }
             // Final output from graph end/state
@@ -256,6 +276,11 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
         } catch {}
         res.end();
     }
+});
+
+app.get("/history", requireAuth, async (req: AuthRequest, res: Response) => {
+    // TODO
+    throw new Error("Not implemented yet");
 });
 
 const isValidToolIO = (input: any): input is string | undefined => {

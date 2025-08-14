@@ -4,7 +4,7 @@ import {
     type PlanAddResponse,
     type PlanGetResponse,
     type PlanRemoveRequest,
-} from "./schemas/plan.schemas.js";
+} from "./schemas/meal.schemas.js";
 import { getApiBase } from "./utils.js";
 
 async function fetchPlan(token: string): Promise<Meal[]> {

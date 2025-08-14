@@ -7,11 +7,25 @@ import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
 import Settings from "./Settings.vue";
 
+type Part = {
+    runId?: string;
+    isStreaming?: boolean;
+} & (
+    | {
+          type: "text";
+          content: string;
+      }
+    | {
+          type: "tool";
+          status: "running" | "completed";
+          toolName: string;
+      }
+);
+
 interface ChatMessage {
     id: string;
-    content: string;
     isUser: boolean;
-    isStreaming?: boolean;
+    parts: Part[];
 }
 
 const toolDataUpdateStore = useToolDataUpdateStore();
@@ -49,8 +63,13 @@ const handleSendMessage = async (message: string) => {
     // Add user message
     const userMessage: ChatMessage = {
         id: Date.now().toString(),
-        content: message,
         isUser: true,
+        parts: [
+            {
+                type: "text",
+                content: message,
+            },
+        ],
     };
     messages.value.push(userMessage);
     await scrollToBottom();
@@ -58,9 +77,8 @@ const handleSendMessage = async (message: string) => {
     // Add bot message placeholder for streaming
     const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
-        content: "",
         isUser: false,
-        isStreaming: true,
+        parts: [],
     };
     messages.value.push(botMessage);
     await scrollToBottom();
@@ -72,22 +90,53 @@ const handleSendMessage = async (message: string) => {
         const stream = chatService.sendMessageToBotStream(message, threadId);
 
         for await (const event of stream) {
-            if (event.type === "stream") {
+            if (event.type === "streamStart") {
                 // Update the bot message content
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += event.chunk;
+                    lastMessage.parts.push({
+                        type: "text",
+                        content: "",
+                        isStreaming: true,
+                        runId: event.runId,
+                    });
+
                     await scrollToBottom();
                 }
-            } else if (event.type === "end") {
-                // Final message received, stop streaming indicator
+            } else if (event.type === "stream") {
+                // Update the bot message content
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    // TODO ne pas remplacer tous le message mais vérifier si il manque pas des chunks et fix le message final en gardant tous les chunks, y compris les chunks de reasonning et les tool calls
-                    // TODO bien séparer le message final des tokens de reasonning visuellement
-                    // TODO gérer les tool calls et les tool end via des composant et pas juste en concaténant le message dégulassement
-                    // lastMessage.content = event.finalOutput;
-                    lastMessage.isStreaming = false;
+                    const part = lastMessage.parts.find(
+                        (part) => part.runId === event.runId
+                    );
+                    if (part != undefined && part.type === "text") {
+                        part.isStreaming = true;
+                        part.content += event.chunk;
+                    } else {
+                        throw new Error(
+                            "No matching part found for runId: " + event.runId
+                        );
+                    }
+
+                    await scrollToBottom();
+                }
+            } else if (event.type === "streamEnd") {
+                // Update the bot message content
+                const lastMessage = messages.value[messages.value.length - 1];
+                if (lastMessage && !lastMessage.isUser) {
+                    const part = lastMessage.parts.find(
+                        (part) => part.runId === event.runId
+                    );
+                    if (part != undefined && part.type === "text") {
+                        part.isStreaming = false;
+                        part.content = event.text;
+                    } else {
+                        throw new Error(
+                            "No matching part found for runId: " + event.runId
+                        );
+                    }
+
                     await scrollToBottom();
                 }
             } else if (event.type === "toolStart") {
@@ -100,7 +149,12 @@ const handleSendMessage = async (message: string) => {
                 // show indicator
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += `\n🔧 Using ${event.toolData.name}...`;
+                    lastMessage.parts.push({
+                        type: "tool",
+                        status: "running",
+                        runId: event.runId,
+                        toolName: event.toolData.name,
+                    });
                     await scrollToBottom();
                 }
             } else if (event.type === "toolEnd") {
@@ -113,7 +167,16 @@ const handleSendMessage = async (message: string) => {
                 // update indicator
                 const lastMessage = messages.value[messages.value.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
-                    lastMessage.content += `\n✅ ${event.toolData.name} completed.`;
+                    const part = lastMessage.parts.find(
+                        (part) => part.runId === event.runId
+                    );
+                    if (part && part.type === "tool") {
+                        part.status = "completed";
+                    } else {
+                        throw new Error(
+                            "No matching part found for runId: " + event.runId
+                        );
+                    }
                     await scrollToBottom();
                 }
             }
@@ -124,14 +187,17 @@ const handleSendMessage = async (message: string) => {
         // Update the bot message with error
         const lastMessage = messages.value[messages.value.length - 1];
         if (lastMessage && !lastMessage.isUser) {
-            lastMessage.content =
-                "Sorry, I encountered an error. Please try again.";
-            lastMessage.isStreaming = false;
+            lastMessage.parts.push({
+                type: "text",
+                content: "Sorry, I encountered an error. Please try again.",
+                isStreaming: false,
+            });
         }
     } finally {
         isProcessing.value = false;
     }
 };
+console.log(messages);
 </script>
 
 <template>
@@ -159,9 +225,20 @@ const handleSendMessage = async (message: string) => {
             <Message
                 v-for="message in messages"
                 :key="message.id"
-                :content="message.content"
+                :content="
+                    message.parts
+                        .map((part) => {
+                            if (part.type === 'text') {
+                                return part.content.trim();
+                            } else if (part.type === 'tool') {
+                                return `🔧 ${part.toolName} (${part.status})`;
+                            }
+                            return '';
+                        })
+                        .join('\n')
+                "
                 :is-user="message.isUser"
-                :is-streaming="message.isStreaming"
+                :is-streaming="message.parts.some((part) => part.isStreaming)"
             />
             <div v-if="messages.length === 0" class="empty-state">
                 <p>Start a conversation by typing a message below!</p>

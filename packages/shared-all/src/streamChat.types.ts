@@ -16,14 +16,20 @@ export type ToolUpdateEvent =
 
 export type ToolUpdateEventType = ToolUpdateEvent["type"];
 
+export interface ChatModelStartEventData {
+    type: "streamStart";
+    runId: string;
+}
+
 export interface ChatModelStreamEventData {
     type: "stream";
     chunk: string;
+    runId: string;
 }
-
-export interface ChainEndEventData {
-    type: "end";
-    finalOutput: string;
+export interface ChatModelEndEventData {
+    type: "streamEnd";
+    text: string;
+    runId: string;
 }
 
 export interface ToolCallEventData {
@@ -32,6 +38,7 @@ export interface ToolCallEventData {
         name: string;
         updateEvent?: ToolUpdateEvent;
     };
+    runId: string;
 }
 
 export interface ToolEndEventData {
@@ -40,10 +47,18 @@ export interface ToolEndEventData {
         name: string;
         updateEvent?: ToolUpdateEvent;
     };
+    runId: string;
+}
+
+export interface ChainEndEventData {
+    type: "end";
+    finalOutput: string;
 }
 
 export type StreamEventData =
+    | ChatModelStartEventData
     | ChatModelStreamEventData
+    | ChatModelEndEventData
     | ChainEndEventData
     | ToolCallEventData
     | ToolEndEventData;
