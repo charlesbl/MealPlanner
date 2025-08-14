@@ -4,11 +4,11 @@ import { getCurrentInstance } from "vue";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 
 interface Props {
-    meal: Meal & { planMealId?: string };
+    meal: Meal & { planItemId?: string };
 }
 
 const emit = defineEmits<{
-    delete: [mealId: string, planMealId?: string];
+    delete: [mealId: string, planItemId?: string];
 }>();
 
 const props = defineProps<Props>();
@@ -34,7 +34,7 @@ function handleDelete(event: Event) {
     event.stopPropagation();
     event.preventDefault();
 
-    emit("delete", props.meal.id, props.meal.planMealId);
+    emit("delete", props.meal.id, props.meal.planItemId);
 }
 </script>
 

@@ -4,11 +4,11 @@ import { mealControllerFactory } from "./meal.controller.js";
 
 export function mealRouterFactory() {
     const router = Router();
-    const mealController = mealControllerFactory();
-    router.get("/", requireAuth, mealController.getLibrary);
-    router.get("/:id", requireAuth, mealController.getById);
-    router.post("/", requireAuth, mealController.create);
-    router.put("/:id", requireAuth, mealController.update);
-    router.delete("/:id", requireAuth, mealController.delete);
+    const controller = mealControllerFactory();
+    router.get("/", requireAuth, controller.getLibrary);
+    router.get("/:id", requireAuth, controller.getById);
+    router.post("/", requireAuth, controller.create);
+    router.put("/:id", requireAuth, controller.update);
+    router.delete("/:id", requireAuth, controller.delete);
     return router;
 }

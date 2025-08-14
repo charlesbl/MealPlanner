@@ -1,18 +1,18 @@
 import {
     type PlanAddRequest,
     type PlanAddResponse,
-    type PlanListResponse,
-    type PlanMeal,
+    type PlanGetResponse,
+    type PlanItem,
     type PlanRemoveRequest,
 } from "./schemas/plan.schemas.js";
 import { getApiBase } from "./utils.js";
 
-async function fetchPlan(token: string): Promise<PlanMeal[]> {
+async function fetchPlan(token: string): Promise<PlanItem[]> {
     const res = await fetch(`${getApiBase()}/plan`, {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Fetch plan failed: ${res.status}`);
-    const body: PlanListResponse = await res.json();
+    const body: PlanGetResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     // Ensure nested meal.createdAt is a Date
     body.data.forEach((item) => {
@@ -27,7 +27,7 @@ async function fetchPlan(token: string): Promise<PlanMeal[]> {
 async function addToPlan(
     payload: PlanAddRequest,
     token: string
-): Promise<PlanMeal> {
+): Promise<PlanItem> {
     const res = await fetch(`${getApiBase()}/plan/add`, {
         method: "POST",
         headers: {

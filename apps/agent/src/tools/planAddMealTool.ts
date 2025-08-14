@@ -17,8 +17,7 @@ export const getAddMealToPlanTool = (
         }),
         tool: new DynamicStructuredTool({
             name: "add_meal_to_plan",
-            description:
-                "Adds a meal from the library to the current plan. The meal will be available in the plan view for meal planning.",
+            description: "Adds a meal from the library to the current plan.",
             schema: addMealToPlanSchema,
             func: async (
                 input: z.infer<typeof addMealToPlanSchema>
@@ -34,7 +33,7 @@ export const getAddMealToPlanTool = (
                         created.meal.name
                     }' to the plan at position ${
                         (created.order ?? current.length) + 1
-                    }. Meal ID: ${created.meal.id}.`;
+                    }. Meal ID: ${created.meal.id}. PlanItemId: ${created.id}.`;
                 } catch (error: any) {
                     console.error("Error in addMealToPlanTool:", error);
                     return `Error adding meal to plan: ${error.message}`;

@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { authRouterFactory } from "./modules/auth/auth.routes.js";
 import { mealRouterFactory } from "./modules/meal/meal.routes.js";
-import { planRouterFactory } from "./modules/plan/plan.routes.js";
+import { planRouterFactory } from "./modules/planItem/planItem.routes.js";
 import { userRouterFactory } from "./modules/user/user.routes.js";
 
 export function buildApiRouter() {

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AgentTool } from "./types.js";
 
 const removeMealFromPlanSchema = z.object({
-    id: z.string().describe("The ID of the meal to remove from the plan"),
+    id: z.string().describe("The ID of the planItem to remove from the plan"),
 });
 
 export const getRemoveMealFromPlanTool = (
@@ -19,7 +19,7 @@ export const getRemoveMealFromPlanTool = (
         tool: new DynamicStructuredTool({
             name: "remove_meal_from_plan",
             description:
-                "Removes a meal from the current plan. The meal will remain in your library and can be added back later.",
+                "Removes a item from the current plan. The item's meal will remain in your library and can be added back later.",
             schema: removeMealFromPlanSchema,
             func: async (
                 input: z.infer<typeof removeMealFromPlanSchema>

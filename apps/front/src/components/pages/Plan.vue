@@ -4,9 +4,9 @@ import MealCard from "../MealCard.vue";
 
 const planStore = usePlanStore();
 
-function handleRemoveMealFromPlan(mealId: string, planMealId?: string) {
-    const success = planMealId
-        ? planStore.removePlanMealById(planMealId)
+function handleRemoveMealFromPlan(mealId: string, planItemId?: string) {
+    const success = planItemId
+        ? planStore.removePlanItemById(planItemId)
         : planStore.removeMealFromPlan(mealId);
 
     if (!success) {
@@ -27,9 +27,9 @@ function handleRemoveMealFromPlan(mealId: string, planMealId?: string) {
         <div class="plan-content" v-if="planStore.plan.length > 0">
             <div class="meals-list">
                 <MealCard
-                    v-for="planMeal in planStore.plan"
-                    :key="planMeal.id"
-                    :meal="planMeal.meal"
+                    v-for="planItem in planStore.plan"
+                    :key="planItem.id"
+                    :meal="planItem.meal"
                     @delete="handleRemoveMealFromPlan"
                 />
             </div>

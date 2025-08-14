@@ -8,16 +8,16 @@ export const planItemSchema = z.object({
     order: z.number().int().nullable().optional(),
 });
 
-export type PlanMeal = z.infer<typeof planItemSchema>;
+export type PlanItem = z.infer<typeof planItemSchema>;
 
 export const addPlanItemSchema = z.object({
     mealId: z.uuid(),
     order: z.number().int().optional(),
 });
 export type PlanAddRequest = z.infer<typeof addPlanItemSchema>;
-export type PlanAddResponse = APIResponse<PlanMeal>;
+export type PlanAddResponse = APIResponse<PlanItem>;
 
-export type PlanListResponse = APIResponse<PlanMeal[]>;
+export type PlanGetResponse = APIResponse<PlanItem[]>;
 
 export const removePlanItemSchema = z.object({
     id: z.uuid(),

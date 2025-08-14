@@ -3,8 +3,8 @@ import MealEntity from "../meal/meal.entity.js";
 import type { UserEntity } from "../user/user.entity.js";
 
 // TODO rename to planEntry
-@Entity({ name: "mealPlan" })
-export class MealPlanEntity {
+@Entity({ name: "planItems" })
+export class PlanItemEntity {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
@@ -13,7 +13,7 @@ export class MealPlanEntity {
     })
     user!: UserEntity;
 
-    @ManyToOne("MealEntity", (meal: MealEntity) => meal.plans, {
+    @ManyToOne("MealEntity", (meal: MealEntity) => meal.plan, {
         onDelete: "CASCADE",
     })
     meal!: MealEntity;

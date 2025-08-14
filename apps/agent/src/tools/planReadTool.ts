@@ -20,7 +20,7 @@ export const getReadPlanSelectionTool = (
         tool: new DynamicStructuredTool({
             name: "read_plan_selection",
             description:
-                "Reads the current plan. Shows all meals selected for the plan with optional grouping by meal type.",
+                "Reads the current plan. Shows all items in plan, containing the meal for each item.",
             schema: readPlanSelectionSchema,
             func: async (
                 input: z.infer<typeof readPlanSelectionSchema>
@@ -30,11 +30,14 @@ export const getReadPlanSelectionTool = (
                     if (items.length === 0) return "Your plan is empty.";
                     const plan = items.map((item) => ({
                         id: item.id,
-                        name: item.meal.name,
-                        description: input.showDetails
-                            ? item.meal.description || "No description"
-                            : undefined,
-                        mealType: item.meal.mealTypes.join(", "),
+                        meal: {
+                            id: item.meal.id,
+                            name: item.meal.name,
+                            description: input.showDetails
+                                ? item.meal.description || "No description"
+                                : undefined,
+                            mealType: item.meal.mealTypes.join(", "),
+                        },
                         order: item.order,
                     }));
                     return JSON.stringify(plan);
