@@ -5,8 +5,7 @@ import {
     loginSchema,
     registerSchema,
 } from "@mealplanner/shared-all";
-import type { AuthRequest } from "@mealplanner/shared-back";
-import { signToken } from "@mealplanner/shared-back";
+import { AuthAPIResponse, signToken } from "@mealplanner/shared-back";
 import bcrypt from "bcryptjs";
 import type { NextFunction, Request, Response } from "express";
 import { AppDataSource } from "../../data-source.js";
@@ -89,21 +88,13 @@ export function authControllerFactory() {
     };
 
     const me = async (
-        req: AuthRequest,
-        res: Response<AuthMeResponse>,
+        req: Request,
+        res: AuthAPIResponse<AuthMeResponse>,
         next: NextFunction
     ) => {
         try {
-            const authReq = req;
-            if (!authReq.user?.sub) {
-                res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
-                return;
-            }
             const user = await usersRepo.findOne({
-                where: { id: authReq.user.sub },
+                where: { id: res.locals.user.sub },
             });
             if (!user) {
                 res.status(404).json({

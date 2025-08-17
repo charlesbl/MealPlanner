@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { AuthUser } from "./auth.schemas.js";
-import { APIResponse } from "./common.schemas.js";
 
 export const updateUserSchema = z.object({
     name: z
@@ -15,4 +14,4 @@ export const userIdParamSchema = z.object({
 
 // Types aligned with APIResponse convention
 export type UserUpdateRequest = z.infer<typeof updateUserSchema>;
-export type UserUpdateResponse = APIResponse<AuthUser>;
+export type UserUpdateResponse = AuthUser;

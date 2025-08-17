@@ -10,8 +10,8 @@ import {
     removeRecipeSchema,
     updateRecipeSchema,
 } from "@mealplanner/shared-all";
-import type { AuthRequest } from "@mealplanner/shared-back";
-import { Response } from "express";
+import { AuthAPIResponse } from "@mealplanner/shared-back";
+import { Request } from "express";
 import { AppDataSource } from "../../data-source.js";
 import { RecipeEntity } from "./recipe.entity.js";
 
@@ -19,27 +19,20 @@ export function recipeControllerFactory() {
     const recipeRepo = AppDataSource.getRepository(RecipeEntity);
     return {
         getLibrary: async (
-            req: AuthRequest,
-            res: Response<RecipeListResponse>
+            req: Request,
+            res: AuthAPIResponse<RecipeListResponse>
         ) => {
-            const userId = req.user?.sub;
-            if (!userId)
-                return res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
+            const userId = res.locals.user.sub;
             const recipes = await recipeRepo.find({
                 where: { user: { id: userId } },
             });
             res.json({ status: "success", data: recipes });
         },
-        getById: async (req: AuthRequest, res: Response<RecipeGetResponse>) => {
-            const userId = req.user?.sub;
-            if (!userId)
-                return res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
+        getById: async (
+            req: Request,
+            res: AuthAPIResponse<RecipeGetResponse>
+        ) => {
+            const userId = res.locals.user.sub;
             const { id } = getRecipeSchema.parse(req.params);
             const recipe = await recipeRepo.findOne({
                 where: { id, user: { id: userId } },
@@ -52,15 +45,10 @@ export function recipeControllerFactory() {
             res.json({ status: "success", data: recipe });
         },
         create: async (
-            req: AuthRequest,
-            res: Response<RecipeCreateResponse>
+            req: Request,
+            res: AuthAPIResponse<RecipeCreateResponse>
         ) => {
-            const userId = req.user?.sub;
-            if (!userId)
-                return res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
+            const userId = res.locals.user.sub;
             try {
                 const data = createRecipeSchema.parse(req.body);
                 const recipe = recipeRepo.create({
@@ -81,15 +69,10 @@ export function recipeControllerFactory() {
             }
         },
         update: async (
-            req: AuthRequest,
-            res: Response<RecipeUpdateResponse>
+            req: Request,
+            res: AuthAPIResponse<RecipeUpdateResponse>
         ) => {
-            const userId = req.user?.sub;
-            if (!userId)
-                return res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
+            const userId = res.locals.user.sub;
             try {
                 const { id } = updateRecipeSchema.parse(req.params);
                 const recipe = await recipeRepo.findOne({
@@ -115,13 +98,8 @@ export function recipeControllerFactory() {
                 });
             }
         },
-        remove: async (req: AuthRequest, res: Response) => {
-            const userId = req.user?.sub;
-            if (!userId)
-                return res.status(401).json({
-                    status: "error",
-                    error: "Unauthorized",
-                });
+        remove: async (req: Request, res: AuthAPIResponse<never>) => {
+            const userId = res.locals.user.sub;
             const { id } = removeRecipeSchema.parse(req.params);
             const recipe = await recipeRepo.findOne({
                 where: { id, user: { id: userId } },

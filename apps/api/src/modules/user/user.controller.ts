@@ -3,8 +3,8 @@ import {
     userIdParamSchema,
     type UserUpdateResponse,
 } from "@mealplanner/shared-all";
-import type { AuthRequest } from "@mealplanner/shared-back";
-import type { NextFunction, Response } from "express";
+import { AuthAPIResponse } from "@mealplanner/shared-back";
+import type { NextFunction, Request } from "express";
 import { AppDataSource } from "../../data-source.js";
 import UserEntity from "./user.entity.js";
 
@@ -12,13 +12,13 @@ export function userControllerFactory() {
     const usersRepo = AppDataSource.getRepository(UserEntity);
     // TODO: Implement user update info in frontend
     const update = async (
-        req: AuthRequest,
-        res: Response<UserUpdateResponse>,
+        req: Request,
+        res: AuthAPIResponse<UserUpdateResponse>,
         next: NextFunction
     ) => {
         try {
             const { id } = userIdParamSchema.parse(req.params);
-            const userId = req.user?.sub;
+            const userId = res.locals.user.sub;
             if (!userId || userId !== id) {
                 res.status(403).json({ status: "error", error: "Forbidden" });
                 return;

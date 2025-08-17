@@ -2,10 +2,10 @@ import { HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
 import { StreamEventData } from "@mealplanner/shared-all";
-import { AuthRequest, requireAuth } from "@mealplanner/shared-back";
+import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
-import express, { Response } from "express";
+import express, { Request } from "express";
 import { ZodObject } from "zod";
 import { createAgent } from "./agent.js";
 import { getAddMealTool } from "./tools/addMealTool.js";
@@ -53,23 +53,21 @@ const llm = new ChatOpenAI({
 });
 
 // SSE endpoint: POST /chat -> streams tokens as JSON events
-app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
+app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     try {
         const userMessage: string = (req.body?.message ?? "").toString();
         const thread_id: string | undefined = req.body?.thread_id;
-        const token = req.token;
-        const user = req.user;
+        const token = res.locals.token;
+        const user = res.locals.user;
         console.log(
             `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
         );
 
-        if (!token) {
-            res.status(401).json({ error: "Unauthorized: Missing token" });
-            return;
-        }
-
         if (!userMessage) {
-            res.status(400).json({ error: "message is required" });
+            res.status(400).json({
+                status: "error",
+                error: "message is required",
+            });
             return;
         }
 
@@ -278,7 +276,7 @@ app.post("/chat", requireAuth, async (req: AuthRequest, res: Response) => {
     }
 });
 
-app.get("/history", requireAuth, async (req: AuthRequest, res: Response) => {
+app.get("/history", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     // TODO
     throw new Error("Not implemented yet");
 });

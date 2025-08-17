@@ -1,4 +1,4 @@
-export type APIResponse<T> =
+export type APIResponsePayload<T> =
     | {
           status: "success";
           data: T;

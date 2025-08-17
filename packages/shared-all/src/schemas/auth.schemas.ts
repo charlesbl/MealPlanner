@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { APIResponse } from "./common.schemas.js";
+import { APIResponsePayload } from "./common.schemas.js";
 
 // Shared types
 export type AuthUser = {
@@ -30,7 +30,7 @@ export const registerSchema = z.object({
     password: z.string().min(6).max(255),
 });
 export type AuthRegisterRequest = z.infer<typeof registerSchema>;
-export type AuthRegisterResponse = APIResponse<AuthUserWithToken>;
+export type AuthRegisterResponse = APIResponsePayload<AuthUserWithToken>;
 
 // Login
 export const loginSchema = z.object({
@@ -38,8 +38,8 @@ export const loginSchema = z.object({
     password: z.string().min(1),
 });
 export type AuthLoginRequest = z.infer<typeof loginSchema>;
-export type AuthLoginResponse = APIResponse<AuthUserWithToken>;
+export type AuthLoginResponse = APIResponsePayload<AuthUserWithToken>;
 
 // Me
 export type AuthMeRequest = {};
-export type AuthMeResponse = APIResponse<AuthUser>;
+export type AuthMeResponse = APIResponsePayload<AuthUser>;

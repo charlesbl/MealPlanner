@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { APIResponse } from "./common.schemas.js";
+import type { APIResponsePayload } from "./common.schemas.js";
 import { recipeSchema } from "./recipe.schemas.js";
 
 export const mealSchema = z.object({
@@ -15,9 +15,9 @@ export const addMealSchema = z.object({
     order: z.number().int().optional(),
 });
 export type PlanAddRequest = z.infer<typeof addMealSchema>;
-export type PlanAddResponse = APIResponse<Meal>;
+export type PlanAddResponse = APIResponsePayload<Meal>;
 
-export type PlanGetResponse = APIResponse<Meal[]>;
+export type PlanGetResponse = APIResponsePayload<Meal[]>;
 
 export const removeMealSchema = z.object({
     id: z.uuid(),

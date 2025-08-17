@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { APIResponse } from "./common.schemas.js";
+import type { APIResponsePayload } from "./common.schemas.js";
 
 // Shared types
 export enum RecipeType {
@@ -34,24 +34,24 @@ export const createRecipeSchema = z.object({
     recipeTypes: recipeSchema.shape.recipeTypes,
 });
 export type RecipeCreateRequest = z.infer<typeof createRecipeSchema>;
-export type RecipeCreateResponse = APIResponse<Recipe>;
+export type RecipeCreateResponse = APIResponsePayload<Recipe>;
 
 // Get
 export const getRecipeSchema = z.object({
     id: z.uuid(),
 });
 export type RecipeGetRequest = z.infer<typeof getRecipeSchema>;
-export type RecipeGetResponse = APIResponse<Recipe>;
+export type RecipeGetResponse = APIResponsePayload<Recipe>;
 
 // Update (use partial of createRecipeSchema and add id)
 export const updateRecipeSchema = createRecipeSchema.extend({
     id: z.uuid(),
 });
 export type RecipeUpdateRequest = z.infer<typeof updateRecipeSchema>;
-export type RecipeUpdateResponse = APIResponse<Recipe>;
+export type RecipeUpdateResponse = APIResponsePayload<Recipe>;
 
 // List
-export type RecipeListResponse = APIResponse<Recipe[]>;
+export type RecipeListResponse = APIResponsePayload<Recipe[]>;
 
 // Remove
 export const removeRecipeSchema = z.object({
