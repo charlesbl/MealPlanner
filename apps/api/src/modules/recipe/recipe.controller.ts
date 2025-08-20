@@ -1,8 +1,8 @@
 import type {
-    RecipeCreateResponse,
-    RecipeGetResponse,
-    RecipeListResponse,
-    RecipeUpdateResponse,
+    RecipeCreateBodyResponse,
+    RecipeGetBodyResponse,
+    RecipeListBodyResponse,
+    RecipeUpdateBodyResponse,
 } from "@mealplanner/shared-all";
 import {
     createRecipeSchema,
@@ -20,7 +20,7 @@ export function recipeControllerFactory() {
     return {
         getLibrary: async (
             req: Request,
-            res: AuthAPIResponse<RecipeListResponse>
+            res: AuthAPIResponse<RecipeListBodyResponse>
         ) => {
             const userId = res.locals.user.sub;
             const recipes = await recipeRepo.find({
@@ -30,7 +30,7 @@ export function recipeControllerFactory() {
         },
         getById: async (
             req: Request,
-            res: AuthAPIResponse<RecipeGetResponse>
+            res: AuthAPIResponse<RecipeGetBodyResponse>
         ) => {
             const userId = res.locals.user.sub;
             const { id } = getRecipeSchema.parse(req.params);
@@ -46,7 +46,7 @@ export function recipeControllerFactory() {
         },
         create: async (
             req: Request,
-            res: AuthAPIResponse<RecipeCreateResponse>
+            res: AuthAPIResponse<RecipeCreateBodyResponse>
         ) => {
             const userId = res.locals.user.sub;
             try {
@@ -70,7 +70,7 @@ export function recipeControllerFactory() {
         },
         update: async (
             req: Request,
-            res: AuthAPIResponse<RecipeUpdateResponse>
+            res: AuthAPIResponse<RecipeUpdateBodyResponse>
         ) => {
             const userId = res.locals.user.sub;
             try {

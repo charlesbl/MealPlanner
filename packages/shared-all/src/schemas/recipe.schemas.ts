@@ -33,25 +33,25 @@ export const createRecipeSchema = z.object({
     description: recipeSchema.shape.description,
     recipeTypes: recipeSchema.shape.recipeTypes,
 });
-export type RecipeCreateRequest = z.infer<typeof createRecipeSchema>;
-export type RecipeCreateResponse = APIResponsePayload<Recipe>;
+export type RecipeCreateBodyRequest = z.infer<typeof createRecipeSchema>;
+export type RecipeCreateBodyResponse = APIResponsePayload<Recipe>;
 
 // Get
 export const getRecipeSchema = z.object({
     id: z.uuid(),
 });
-export type RecipeGetRequest = z.infer<typeof getRecipeSchema>;
-export type RecipeGetResponse = APIResponsePayload<Recipe>;
+export type RecipeGetBodyRequest = z.infer<typeof getRecipeSchema>;
+export type RecipeGetBodyResponse = APIResponsePayload<Recipe>;
 
 // Update (use partial of createRecipeSchema and add id)
 export const updateRecipeSchema = createRecipeSchema.extend({
     id: z.uuid(),
 });
-export type RecipeUpdateRequest = z.infer<typeof updateRecipeSchema>;
-export type RecipeUpdateResponse = APIResponsePayload<Recipe>;
+export type RecipeUpdateBodyRequest = z.infer<typeof updateRecipeSchema>;
+export type RecipeUpdateBodyResponse = APIResponsePayload<Recipe>;
 
 // List
-export type RecipeListResponse = APIResponsePayload<Recipe[]>;
+export type RecipeListBodyResponse = APIResponsePayload<Recipe[]>;
 
 // Remove
 export const removeRecipeSchema = z.object({

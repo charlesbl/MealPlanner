@@ -14,12 +14,12 @@ export const addMealSchema = z.object({
     recipeId: z.uuid(),
     order: z.number().int().optional(),
 });
-export type PlanAddRequest = z.infer<typeof addMealSchema>;
-export type PlanAddResponse = APIResponsePayload<Meal>;
+export type PlanAddBodyRequest = z.infer<typeof addMealSchema>;
+export type PlanAddBodyResponse = APIResponsePayload<Meal>;
 
-export type PlanGetResponse = APIResponsePayload<Meal[]>;
+export type PlanGetBodyResponse = APIResponsePayload<Meal[]>;
 
 export const removeMealSchema = z.object({
     id: z.uuid(),
 });
-export type PlanRemoveRequest = z.infer<typeof removeMealSchema>;
+export type PlanRemoveBodyRequest = z.infer<typeof removeMealSchema>;

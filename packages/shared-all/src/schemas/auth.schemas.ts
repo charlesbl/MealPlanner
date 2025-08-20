@@ -29,17 +29,17 @@ export const registerSchema = z.object({
     email: z.email().transform((s) => s.toLowerCase()),
     password: z.string().min(6).max(255),
 });
-export type AuthRegisterRequest = z.infer<typeof registerSchema>;
-export type AuthRegisterResponse = APIResponsePayload<AuthUserWithToken>;
+export type AuthRegisterBodyRequest = z.infer<typeof registerSchema>;
+export type AuthRegisterBodyResponse = APIResponsePayload<AuthUserWithToken>;
 
 // Login
 export const loginSchema = z.object({
     email: z.email().transform((s) => s.toLowerCase()),
     password: z.string().min(1),
 });
-export type AuthLoginRequest = z.infer<typeof loginSchema>;
-export type AuthLoginResponse = APIResponsePayload<AuthUserWithToken>;
+export type AuthLoginBodyRequest = z.infer<typeof loginSchema>;
+export type AuthLoginBodyResponse = APIResponsePayload<AuthUserWithToken>;
 
 // Me
-export type AuthMeRequest = {};
-export type AuthMeResponse = APIResponsePayload<AuthUser>;
+export type AuthMeBodyRequest = {};
+export type AuthMeBodyResponse = APIResponsePayload<AuthUser>;

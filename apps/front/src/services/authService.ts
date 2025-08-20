@@ -1,9 +1,9 @@
 // Simple auth service for JWT-based auth
 
 import type {
-    AuthLoginResponse,
-    AuthMeResponse,
-    AuthRegisterResponse,
+    AuthLoginBodyResponse,
+    AuthMeBodyResponse,
+    AuthRegisterBodyResponse,
     AuthUser,
     AuthUserWithToken,
 } from "@mealplanner/shared-all";
@@ -24,7 +24,7 @@ async function authRegister(
         body: JSON.stringify({ name, email, password }),
     });
     if (!res.ok) throw new Error(`Register failed: ${res.status}`);
-    const body: AuthRegisterResponse = await res.json();
+    const body: AuthRegisterBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     return body.data;
 }
@@ -39,7 +39,7 @@ async function authLogin(
         body: JSON.stringify({ email, password }),
     });
     if (!res.ok) throw new Error(`Login failed: ${res.status}`);
-    const body: AuthLoginResponse = await res.json();
+    const body: AuthLoginBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     return body.data;
 }
@@ -49,7 +49,7 @@ async function authMe(token: string): Promise<AuthUser> {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Auth check failed: ${res.status}`);
-    const body: AuthMeResponse = await res.json();
+    const body: AuthMeBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     return body.data;
 }

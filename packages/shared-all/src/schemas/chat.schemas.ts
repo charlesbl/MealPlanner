@@ -10,4 +10,4 @@ export const chatMessageSchema = z.object({
     thread_id: z.string().min(1).max(255).optional(),
 });
 
-export type ChatSendRequest = z.infer<typeof chatMessageSchema>;
+export type ChatSendBodyRequest = z.infer<typeof chatMessageSchema>;

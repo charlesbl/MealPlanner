@@ -1,7 +1,7 @@
 import {
     updateUserSchema,
     userIdParamSchema,
-    type UserUpdateResponse,
+    type UserUpdateBodyResponse,
 } from "@mealplanner/shared-all";
 import { AuthAPIResponse } from "@mealplanner/shared-back";
 import type { NextFunction, Request } from "express";
@@ -13,7 +13,7 @@ export function userControllerFactory() {
     // TODO: Implement user update info in frontend
     const update = async (
         req: Request,
-        res: AuthAPIResponse<UserUpdateResponse>,
+        res: AuthAPIResponse<UserUpdateBodyResponse>,
         next: NextFunction
     ) => {
         try {

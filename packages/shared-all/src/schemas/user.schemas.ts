@@ -13,5 +13,5 @@ export const userIdParamSchema = z.object({
 });
 
 // Types aligned with APIResponse convention
-export type UserUpdateRequest = z.infer<typeof updateUserSchema>;
-export type UserUpdateResponse = AuthUser;
+export type UserUpdateBodyRequest = z.infer<typeof updateUserSchema>;
+export type UserUpdateBodyResponse = AuthUser;

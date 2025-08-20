@@ -1,7 +1,7 @@
 import {
     addMealSchema,
-    PlanAddResponse,
-    PlanGetResponse,
+    PlanAddBodyResponse,
+    PlanGetBodyResponse,
     removeMealSchema,
 } from "@mealplanner/shared-all";
 import { AuthAPIResponse } from "@mealplanner/shared-back";
@@ -14,7 +14,10 @@ export function mealControllerFactory() {
     const selectionRepo = AppDataSource.getRepository(MealEntity);
     const recipeRepo = AppDataSource.getRepository(RecipeEntity);
     return {
-        get: async (req: Request, res: AuthAPIResponse<PlanGetResponse>) => {
+        get: async (
+            req: Request,
+            res: AuthAPIResponse<PlanGetBodyResponse>
+        ) => {
             const userId = res.locals.user.sub;
             const selections = await selectionRepo.find({
                 where: { user: { id: userId } },
@@ -23,7 +26,10 @@ export function mealControllerFactory() {
             });
             res.json({ status: "success", data: selections });
         },
-        add: async (req: Request, res: AuthAPIResponse<PlanAddResponse>) => {
+        add: async (
+            req: Request,
+            res: AuthAPIResponse<PlanAddBodyResponse>
+        ) => {
             const userId = res.locals.user.sub;
             const { recipeId, order } = addMealSchema.parse(req.body);
             const recipe = await recipeRepo.findOne({

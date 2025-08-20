@@ -1,8 +1,8 @@
 import {
     type Recipe,
-    type RecipeCreateResponse,
-    type RecipeListResponse,
-    type RecipeUpdateResponse,
+    type RecipeCreateBodyResponse,
+    type RecipeListBodyResponse,
+    type RecipeUpdateBodyResponse,
 } from "./schemas/recipe.schemas.js";
 import { getApiBase } from "./utils.js";
 
@@ -11,7 +11,7 @@ async function fetchLibrary(token: string): Promise<Recipe[]> {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Fetch library failed: ${res.status}`);
-    const body: RecipeListResponse = await res.json();
+    const body: RecipeListBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     body.data.forEach((recipe) => {
         recipe.createdAt = new Date(recipe.createdAt);
@@ -32,7 +32,7 @@ async function addRecipe(
         body: JSON.stringify(recipe),
     });
     if (!res.ok) throw new Error(`Add recipe failed: ${res.status}`);
-    const body: RecipeCreateResponse = await res.json();
+    const body: RecipeCreateBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     return body.data;
 }
@@ -51,7 +51,7 @@ async function updateRecipe(
         body: JSON.stringify(updates),
     });
     if (!res.ok) throw new Error(`Update recipe failed: ${res.status}`);
-    const body: RecipeUpdateResponse = await res.json();
+    const body: RecipeUpdateBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     return body.data;
 }

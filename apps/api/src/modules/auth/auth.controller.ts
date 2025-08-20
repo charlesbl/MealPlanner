@@ -1,7 +1,7 @@
 import {
-    AuthLoginResponse,
-    AuthMeResponse,
-    AuthRegisterResponse,
+    AuthLoginBodyResponse,
+    AuthMeBodyResponse,
+    AuthRegisterBodyResponse,
     loginSchema,
     registerSchema,
 } from "@mealplanner/shared-all";
@@ -15,7 +15,7 @@ export function authControllerFactory() {
     const usersRepo = AppDataSource.getRepository(UserEntity);
     const register = async (
         req: Request,
-        res: Response<AuthRegisterResponse>,
+        res: Response<AuthRegisterBodyResponse>,
         next: NextFunction
     ) => {
         try {
@@ -51,7 +51,7 @@ export function authControllerFactory() {
 
     const login = async (
         req: Request,
-        res: Response<AuthLoginResponse>,
+        res: Response<AuthLoginBodyResponse>,
         next: NextFunction
     ) => {
         try {
@@ -89,7 +89,7 @@ export function authControllerFactory() {
 
     const me = async (
         req: Request,
-        res: AuthAPIResponse<AuthMeResponse>,
+        res: AuthAPIResponse<AuthMeBodyResponse>,
         next: NextFunction
     ) => {
         try {

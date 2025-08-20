@@ -1,9 +1,9 @@
 import {
     type Meal,
-    type PlanAddRequest,
-    type PlanAddResponse,
-    type PlanGetResponse,
-    type PlanRemoveRequest,
+    type PlanAddBodyRequest,
+    type PlanAddBodyResponse,
+    type PlanGetBodyResponse,
+    type PlanRemoveBodyRequest,
 } from "./schemas/meal.schemas.js";
 import { getApiBase } from "./utils.js";
 
@@ -12,7 +12,7 @@ async function fetchPlan(token: string): Promise<Meal[]> {
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Fetch plan failed: ${res.status}`);
-    const body: PlanGetResponse = await res.json();
+    const body: PlanGetBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     // Ensure nested recipe.createdAt is a Date
     body.data.forEach((item) => {
@@ -22,7 +22,7 @@ async function fetchPlan(token: string): Promise<Meal[]> {
 }
 
 async function addToPlan(
-    payload: PlanAddRequest,
+    payload: PlanAddBodyRequest,
     token: string
 ): Promise<Meal> {
     const res = await fetch(`${getApiBase()}/plan/add`, {
@@ -34,14 +34,14 @@ async function addToPlan(
         body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error(`Add to plan failed: ${res.status}`);
-    const body: PlanAddResponse = await res.json();
+    const body: PlanAddBodyResponse = await res.json();
     if (body.status === "error") throw new Error(body.error);
     body.data.recipe.createdAt = new Date(body.data.recipe.createdAt);
     return body.data;
 }
 
 async function removeFromPlan(
-    payload: PlanRemoveRequest,
+    payload: PlanRemoveBodyRequest,
     token: string
 ): Promise<void> {
     const res = await fetch(`${getApiBase()}/plan/remove`, {
