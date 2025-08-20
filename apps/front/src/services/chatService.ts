@@ -20,7 +20,11 @@
  * - Input: message (string)
  * - Output: stream of backend events (tokens, chain end, tool calls, etc.)
  */
-import type { StreamEventData } from "@mealplanner/shared-all";
+import type {
+    APIResponsePayload,
+    GetHistoryBodyResponse,
+    StreamEventData,
+} from "@mealplanner/shared-all";
 import { createParser, type EventSourceMessage } from "eventsource-parser";
 import { authService } from "./authService";
 
@@ -36,7 +40,7 @@ async function* sendMessageToBotStream(
     const token = authService.getToken();
     if (token) headers["Authorization"] = `Bearer ${token}`;
 
-    const resp = await fetch(getAgentUrl(), {
+    const resp = await fetch(`${getAgentUrl()}/chat`, {
         method: "POST",
         headers,
         signal: controller.signal,
@@ -88,9 +92,30 @@ async function* sendMessageToBotStream(
 
 function getAgentUrl(): string {
     const base = import.meta.env.VITE_AGENT_URL || "http://localhost:8787";
-    return `${base.replace(/\/$/, "")}/chat`;
+    return base.replace(/\/$/, "");
+}
+
+async function getHistory(threadId: string): Promise<GetHistoryBodyResponse> {
+    const headers: Record<string, string> = {};
+    const token = authService.getToken();
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const url = new URL(`${getAgentUrl()}/history`);
+    url.searchParams.set("thread_id", threadId);
+
+    const response = await fetch(url.toString(), { headers });
+    if (!response.ok) {
+        throw new Error(`Agent server error: ${response.status}`);
+    }
+    const responsePayload =
+        (await response.json()) as APIResponsePayload<GetHistoryBodyResponse>;
+    if (responsePayload.status === "error") {
+        throw new Error(responsePayload.error);
+    }
+    return responsePayload.data;
 }
 
 export const chatService = {
     sendMessageToBotStream,
+    getHistory,
 };

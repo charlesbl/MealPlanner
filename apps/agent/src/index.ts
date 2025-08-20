@@ -1,7 +1,20 @@
-import { HumanMessage } from "@langchain/core/messages";
+import {
+    AIMessage,
+    AIMessageChunk,
+    HumanMessage,
+    ToolMessage,
+} from "@langchain/core/messages";
+import { RunnableConfig } from "@langchain/core/runnables";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
-import { StreamEventData, chatMessageSchema } from "@mealplanner/shared-all";
+import {
+    ChatMessage,
+    GetHistoryBodyResponse,
+    Part,
+    StreamEventData,
+    chatMessageSchema,
+    getHistorySchema,
+} from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
@@ -277,10 +290,137 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     }
 });
 
-app.get("/history", requireAuth, async (req: Request, res: AuthAPIResponse) => {
-    // TODO
-    throw new Error("Not implemented yet");
-});
+app.get(
+    "/history",
+    requireAuth,
+    async (req: Request, res: AuthAPIResponse<GetHistoryBodyResponse>) => {
+        try {
+            const parsed = getHistorySchema.safeParse(req.query);
+            if (!parsed.success) {
+                return res.status(400).json({
+                    status: "error",
+                    error: parsed.error.message,
+                });
+            }
+            const { thread_id } = parsed.data;
+
+            const config: RunnableConfig = {
+                configurable: { thread_id },
+            };
+
+            // Read the latest (or specific) checkpoint for this thread
+            const tuple = await checkpointer.getTuple(config);
+            if (!tuple) {
+                return res.json({
+                    status: "success",
+                    data: {
+                        messages: [],
+                    },
+                });
+            }
+
+            const checkpoint = tuple.checkpoint;
+            const chValues = checkpoint.channel_values;
+            const rawMessages = chValues.messages;
+
+            const messageParts = Array.isArray(rawMessages)
+                ? convertLangChainMessagesToChatMessages(rawMessages)
+                : [];
+
+            const payload = {
+                thread_id,
+                checkpoint_id: checkpoint.id,
+                ts: checkpoint.ts,
+                count: messageParts.length,
+                messages: messageParts,
+            };
+
+            return res.json({
+                status: "success",
+                data: payload,
+            });
+        } catch (err: any) {
+            console.error("[agent] /history error:", err);
+            return res.status(500).json({
+                status: "error",
+                error: err?.message ?? "Unknown error",
+            });
+        }
+    }
+);
+
+type LangChainMessage =
+    | {
+          role: "user";
+          message: HumanMessage;
+      }
+    | {
+          role: "assistant";
+          message: AIMessage | AIMessageChunk;
+      }
+    | {
+          role: "tool";
+          message: ToolMessage;
+      };
+const convertLangChainMessagesToChatMessages = (
+    langchainMessages: unknown[]
+): ChatMessage[] => {
+    const getCastedMessage = (m: unknown): LangChainMessage | undefined => {
+        if (m instanceof HumanMessage) return { role: "user", message: m };
+        if (m instanceof AIMessage || m instanceof AIMessageChunk)
+            return { role: "assistant", message: m };
+        if (m instanceof ToolMessage) return { role: "tool", message: m };
+        return undefined;
+    };
+
+    const transformToPart = ({
+        role,
+        message,
+    }: LangChainMessage): Part | undefined => {
+        if (role === "user") {
+            return { type: "text", content: message.text };
+        }
+        if (role === "assistant") {
+            return { type: "text", content: message.text };
+        }
+        if (role === "tool") {
+            return {
+                type: "tool",
+                status: "completed",
+                toolName: message.name ?? "unknown",
+            };
+        }
+        throw new Error(`Unknown role: ${role}`);
+    };
+
+    const messages: ChatMessage[] = [];
+    langchainMessages.forEach((m, i): Part | undefined => {
+        const cast = getCastedMessage(m);
+        if (cast === undefined) return;
+        const { role, message } = cast;
+        const part = transformToPart(cast);
+        if (part === undefined) return;
+        if (role === "user") {
+            messages.push({
+                id: message.id ?? i.toString(),
+                isUser: role === "user",
+                parts: [part],
+            });
+            return;
+        }
+        const lastMessage = messages[messages.length - 1];
+        if (lastMessage === undefined || lastMessage.isUser) {
+            messages.push({
+                id: message.id ?? i.toString(),
+                isUser: false,
+                parts: [part],
+            });
+            return;
+        }
+        lastMessage.parts.push(part);
+    });
+    return messages;
+};
 
 const isValidToolIO = (input: any): input is string | undefined => {
     return (

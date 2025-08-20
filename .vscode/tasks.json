@@ -99,6 +99,17 @@
 				"$tsc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Build shared-all (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"@mealplanner/shared-all",
+				"build"
+			],
+			"group": "build"
 		}
 	]
 }

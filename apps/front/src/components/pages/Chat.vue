@@ -1,44 +1,22 @@
 <script lang="ts" setup>
 import { chatService } from "@/services/chatService";
-import { getOrCreateThreadId, resetThreadId } from "@/stores/threadStore";
+import { useThreadStore } from "@/stores/threadStore";
 import { useToolDataUpdateStore } from "@/stores/toolDataUpdateStore";
+import type { ChatMessage } from "@mealplanner/shared-all";
 import { nextTick, ref } from "vue";
 import ChatInput from "../ChatInput.vue";
 import Message from "../Message.vue";
 import Settings from "./Settings.vue";
 
-type Part = {
-    runId?: string;
-    isStreaming?: boolean;
-} & (
-    | {
-          type: "text";
-          content: string;
-      }
-    | {
-          type: "tool";
-          status: "running" | "completed";
-          toolName: string;
-      }
-);
-
-interface ChatMessage {
-    id: string;
-    isUser: boolean;
-    parts: Part[];
-}
-
 const toolDataUpdateStore = useToolDataUpdateStore();
+const threadStore = useThreadStore();
 
-const messages = ref<ChatMessage[]>([]);
 const isProcessing = ref(false);
 const messagesContainer = ref<HTMLElement>();
 const showSettings = ref(false);
 
 const clearChatHistory = () => {
-    // Reset local UI and server-side memory by rotating the thread id
-    messages.value = [];
-    resetThreadId();
+    threadStore.resetThreadId();
 };
 
 const toggleSettings = () => {
@@ -71,7 +49,8 @@ const handleSendMessage = async (message: string) => {
             },
         ],
     };
-    messages.value.push(userMessage);
+
+    threadStore.messages = [...threadStore.messages, userMessage];
     await scrollToBottom();
 
     // Add bot message placeholder for streaming
@@ -80,19 +59,22 @@ const handleSendMessage = async (message: string) => {
         isUser: false,
         parts: [],
     };
-    messages.value.push(botMessage);
+    threadStore.messages = [...threadStore.messages, botMessage];
     await scrollToBottom();
 
     isProcessing.value = true;
 
     try {
-        const threadId = getOrCreateThreadId();
-        const stream = chatService.sendMessageToBotStream(message, threadId);
+        const stream = chatService.sendMessageToBotStream(
+            message,
+            threadStore.threadId
+        );
 
         for await (const event of stream) {
             if (event.type === "streamStart") {
                 // Update the bot message content
-                const lastMessage = messages.value[messages.value.length - 1];
+                const lastMessage =
+                    threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     lastMessage.parts.push({
                         type: "text",
@@ -105,7 +87,8 @@ const handleSendMessage = async (message: string) => {
                 }
             } else if (event.type === "stream") {
                 // Update the bot message content
-                const lastMessage = messages.value[messages.value.length - 1];
+                const lastMessage =
+                    threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
                         (part) => part.runId === event.runId
@@ -123,7 +106,8 @@ const handleSendMessage = async (message: string) => {
                 }
             } else if (event.type === "streamEnd") {
                 // Update the bot message content
-                const lastMessage = messages.value[messages.value.length - 1];
+                const lastMessage =
+                    threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
                         (part) => part.runId === event.runId
@@ -147,7 +131,8 @@ const handleSendMessage = async (message: string) => {
                         event.toolData.updateEvent
                     );
                 // show indicator
-                const lastMessage = messages.value[messages.value.length - 1];
+                const lastMessage =
+                    threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     lastMessage.parts.push({
                         type: "tool",
@@ -165,7 +150,8 @@ const handleSendMessage = async (message: string) => {
                         event.toolData.updateEvent
                     );
                 // update indicator
-                const lastMessage = messages.value[messages.value.length - 1];
+                const lastMessage =
+                    threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
                         (part) => part.runId === event.runId
@@ -185,7 +171,8 @@ const handleSendMessage = async (message: string) => {
         console.error("Error sending message:", error);
 
         // Update the bot message with error
-        const lastMessage = messages.value[messages.value.length - 1];
+        const lastMessage =
+            threadStore.messages[threadStore.messages.length - 1];
         if (lastMessage && !lastMessage.isUser) {
             lastMessage.parts.push({
                 type: "text",
@@ -197,7 +184,7 @@ const handleSendMessage = async (message: string) => {
         isProcessing.value = false;
     }
 };
-console.log(messages);
+console.log(threadStore.messages);
 </script>
 
 <template>
@@ -208,7 +195,7 @@ console.log(messages);
         </div>
 
         <!-- Interface de chat normale -->
-        <div class="chat-header" v-if="messages.length > 0">
+        <div class="chat-header" v-if="threadStore.messages.length > 0">
             <button @click="clearChatHistory" class="clear-button">
                 Clear Chat
             </button>
@@ -223,7 +210,7 @@ console.log(messages);
         <div ref="messagesContainer" class="messages">
             <!-- TODO make bot message full width like ChatGPT -->
             <Message
-                v-for="message in messages"
+                v-for="message in threadStore.messages"
                 :key="message.id"
                 :content="
                     message.parts
@@ -240,7 +227,7 @@ console.log(messages);
                 :is-user="message.isUser"
                 :is-streaming="message.parts.some((part) => part.isStreaming)"
             />
-            <div v-if="messages.length === 0" class="empty-state">
+            <div v-if="threadStore.messages.length === 0" class="empty-state">
                 <p>Start a conversation by typing a message below!</p>
             </div>
         </div>
