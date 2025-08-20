@@ -7,7 +7,7 @@ import cors from "cors";
 import { config } from "dotenv";
 import express, { Request } from "express";
 import { ZodObject } from "zod";
-import { createAgent } from "./agent.js";
+import { createAgent, createCheckpointer } from "./agent.js";
 import { getAddMealTool } from "./tools/addMealTool.js";
 import { getAddOrUpdateRecipeTool } from "./tools/addOrUpdateRecipeTool.js";
 import { getReadLibraryTool } from "./tools/readLibraryTool.js";
@@ -52,6 +52,8 @@ const llm = new ChatOpenAI({
     },
 });
 
+const checkpointer = await createCheckpointer();
+
 // SSE endpoint: POST /chat -> streams tokens as JSON events
 app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     try {
@@ -90,7 +92,8 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         ];
         const agent = createAgent(
             llm,
-            tools.map(({ tool }) => tool)
+            tools.map(({ tool }) => tool),
+            checkpointer
         );
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },

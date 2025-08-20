@@ -11,17 +11,20 @@ importers:
   apps/agent:
     dependencies:
       '@langchain/core':
-        specifier: ^0.3.69
-        version: 0.3.69(openai@5.12.2(zod@4.0.17))
+        specifier: ^0.3.72
+        version: 0.3.72(openai@5.12.2(zod@4.0.17))
       '@langchain/langgraph':
-        specifier: ^0.4.4
-        version: 0.4.4(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))(zod-to-json-schema@3.24.6(zod@4.0.17))
+        specifier: ^0.4.6
+        version: 0.4.6(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))(zod-to-json-schema@3.24.6(zod@4.0.17))
       '@langchain/langgraph-checkpoint':
         specifier: ^0.1.0
-        version: 0.1.0(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))
+        version: 0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))
+      '@langchain/langgraph-checkpoint-postgres':
+        specifier: ^0.1.1
+        version: 0.1.1(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17))))
       '@langchain/openai':
-        specifier: ^0.6.7
-        version: 0.6.7(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))
+        specifier: ^0.6.9
+        version: 0.6.9(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))
       '@mealplanner/shared-all':
         specifier: workspace:*
         version: link:../../packages/shared-all
@@ -37,6 +40,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      pg:
+        specifier: ^8.16.3
+        version: 8.16.3
       uuid:
         specifier: ^11.1.0
         version: 11.1.0
@@ -50,9 +56,12 @@ importers:
       '@types/express':
         specifier: ^5.0.3
         version: 5.0.3
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.15.5
       tsx:
-        specifier: ^4.20.3
-        version: 4.20.3
+        specifier: ^4.20.4
+        version: 4.20.4
       typescript:
         specifier: ~5.9.2
         version: 5.9.2
@@ -132,7 +141,7 @@ importers:
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^6.0.1
-        version: 6.0.1(vite@7.1.1(@types/node@24.2.1)(tsx@4.20.3)(yaml@2.8.1))(vue@3.5.18(typescript@5.9.2))
+        version: 6.0.1(vite@7.1.1(@types/node@24.2.1)(tsx@4.20.4)(yaml@2.8.1))(vue@3.5.18(typescript@5.9.2))
       '@vue/tsconfig':
         specifier: ^0.7.0
         version: 0.7.0(typescript@5.9.2)(vue@3.5.18(typescript@5.9.2))
@@ -141,7 +150,7 @@ importers:
         version: 5.9.2
       vite:
         specifier: ^7.1.1
-        version: 7.1.1(@types/node@24.2.1)(tsx@4.20.3)(yaml@2.8.1)
+        version: 7.1.1(@types/node@24.2.1)(tsx@4.20.4)(yaml@2.8.1)
       vue-tsc:
         specifier: ^3.0.5
         version: 3.0.5(typescript@5.9.2)
@@ -374,9 +383,16 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@langchain/core@0.3.69':
-    resolution: {integrity: sha512-N6ZmgcnoMnGw+hQuS8w8FrNUm/5FuvtB868Jr1i1+4pASngLLVUyjeAQbKBBFMFH+WY5ga9LSvaQegUe3TLF8g==}
+  '@langchain/core@0.3.72':
+    resolution: {integrity: sha512-WsGWVZYnlKffj2eEfDocPNiaTRoxyYiLSQdQ7oxZvxGZBqo/90vpjbC33UGK1uPNBM4kT+pkdaol/MnvKUh8TQ==}
     engines: {node: '>=18'}
+
+  '@langchain/langgraph-checkpoint-postgres@0.1.1':
+    resolution: {integrity: sha512-+Woc9yjSwG0ejG/GWcA75j1Fe4eNVCI0wN1psuZ3YarwhjSyEXtAbVPV92soAmKo10AdUpMyANYgutFfYxryzw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      '@langchain/core': '>=0.2.31 <0.4.0'
+      '@langchain/langgraph-checkpoint': ^0.1.0
 
   '@langchain/langgraph-checkpoint@0.1.0':
     resolution: {integrity: sha512-7oY5b0VQSxcV3DgoHdXiCgBhEzml/ZjZfKNeuq6oZ3ggcdUICa/fzrIBbFju6gxPU8ly93s0OsjF4yURnHw70Q==}
@@ -384,8 +400,8 @@ packages:
     peerDependencies:
       '@langchain/core': '>=0.2.31 <0.4.0'
 
-  '@langchain/langgraph-sdk@0.0.107':
-    resolution: {integrity: sha512-2qzboDgYH8KJNz7q2Yzvj6H9i4iZUYfZnB7xY+Dkye6yvI+2m1fFIdpP/Ppu+eFvoIUAsbDHDF+wvR4F11kS3Q==}
+  '@langchain/langgraph-sdk@0.0.109':
+    resolution: {integrity: sha512-UpjL0c681CJqvKxgWD8o9fwUXRZzcDfsz8EcJ2PkXFxQFKRLe4QKZMtBr4OKFTR94pJtlOuTVla4OV5I5w+mdQ==}
     peerDependencies:
       '@langchain/core': '>=0.2.31 <0.4.0'
       react: ^18 || ^19
@@ -398,8 +414,8 @@ packages:
       react-dom:
         optional: true
 
-  '@langchain/langgraph@0.4.4':
-    resolution: {integrity: sha512-ky/ObdX8PV/2GKnjyWoBzW7wBe8u0ZG6t0Dh8HR2mJLhjodMcKMJKHtc+xg/aS3l8bqx0Q8lgXfKCBy/eBXYjA==}
+  '@langchain/langgraph@0.4.6':
+    resolution: {integrity: sha512-4ivuy6PWMvgE7mOByePdJ88Mk7JpoC+nZ6SB0g9qhX3oZtIA5d3Fswtcr5hgS3XlYaTtr5hJRYdXBehZ3JNX3Q==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.3.58 < 0.4.0'
@@ -408,8 +424,8 @@ packages:
       zod-to-json-schema:
         optional: true
 
-  '@langchain/openai@0.6.7':
-    resolution: {integrity: sha512-mNT9AdfEvDjlWU76hEl1HgTFkgk7yFKdIRgQz3KXKZhEERXhAwYJNgPFq8+HIpgxYSnc12akZ1uo8WPS98ErPQ==}
+  '@langchain/openai@0.6.9':
+    resolution: {integrity: sha512-Dl+YVBTFia7WE4/jFemQEVchPbsahy/dD97jo6A9gLnYfTkWa/jh8Q78UjHQ3lobif84j2ebjHPcDHG1L0NUWg==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': '>=0.3.68 <0.4.0'
@@ -571,6 +587,9 @@ packages:
 
   '@types/node@24.2.1':
     resolution: {integrity: sha512-DRh5K+ka5eJic8CjH7td8QpYEV6Zo10gfRkjHCO3weqZHWDtAaSTFtl4+VMqOJ4N5jcuhZ9/l+yy8rVgw7BQeQ==}
+
+  '@types/pg@8.15.5':
+    resolution: {integrity: sha512-LF7lF6zWEKxuT3/OR8wAZGzkg4ENGXFNyiV/JeOt9z5B+0ZVwbql9McqX5c/WStFq1GaGso7H1AzP/qSzmlCKQ==}
 
   '@types/qs@6.14.0':
     resolution: {integrity: sha512-eOunJqu0K1923aExK6y8p6fsihYEn/BYuQ4g0CxAAgFc4b/ZLN4CrsRZ55srTdqoiLzU2B2evC+apEIxprEzkQ==}
@@ -1504,6 +1523,11 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  tsx@4.20.4:
+    resolution: {integrity: sha512-yyxBKfORQ7LuRt/BQKBXrpcq59ZvSW0XxwfjAt3w2/8PmdxaFzijtMhTawprSHhpzeM5BgU2hXHG3lklIERZXg==}
+    engines: {node: '>=18.0.0'}
+    hasBin: true
+
   type-is@2.0.1:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
@@ -1837,7 +1861,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
 
-  '@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17))':
+  '@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
@@ -1857,25 +1881,33 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))':
+  '@langchain/langgraph-checkpoint-postgres@0.1.1(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))(@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17))))':
     dependencies:
-      '@langchain/core': 0.3.69(openai@5.12.2(zod@4.0.17))
+      '@langchain/core': 0.3.72(openai@5.12.2(zod@4.0.17))
+      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))
+      pg: 8.16.3
+    transitivePeerDependencies:
+      - pg-native
+
+  '@langchain/langgraph-checkpoint@0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))':
+    dependencies:
+      '@langchain/core': 0.3.72(openai@5.12.2(zod@4.0.17))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@0.0.107(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))':
+  '@langchain/langgraph-sdk@0.0.109(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 6.6.2
       p-retry: 4.6.2
       uuid: 9.0.1
     optionalDependencies:
-      '@langchain/core': 0.3.69(openai@5.12.2(zod@4.0.17))
+      '@langchain/core': 0.3.72(openai@5.12.2(zod@4.0.17))
 
-  '@langchain/langgraph@0.4.4(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))(zod-to-json-schema@3.24.6(zod@4.0.17))':
+  '@langchain/langgraph@0.4.6(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))(zod-to-json-schema@3.24.6(zod@4.0.17))':
     dependencies:
-      '@langchain/core': 0.3.69(openai@5.12.2(zod@4.0.17))
-      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))
-      '@langchain/langgraph-sdk': 0.0.107(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))
+      '@langchain/core': 0.3.72(openai@5.12.2(zod@4.0.17))
+      '@langchain/langgraph-checkpoint': 0.1.0(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))
+      '@langchain/langgraph-sdk': 0.0.109(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))
       uuid: 10.0.0
       zod: 3.25.76
     optionalDependencies:
@@ -1884,9 +1916,9 @@ snapshots:
       - react
       - react-dom
 
-  '@langchain/openai@0.6.7(@langchain/core@0.3.69(openai@5.12.2(zod@4.0.17)))':
+  '@langchain/openai@0.6.9(@langchain/core@0.3.72(openai@5.12.2(zod@4.0.17)))':
     dependencies:
-      '@langchain/core': 0.3.69(openai@5.12.2(zod@4.0.17))
+      '@langchain/core': 0.3.72(openai@5.12.2(zod@4.0.17))
       js-tiktoken: 1.0.20
       openai: 5.12.2(zod@3.25.76)
       zod: 3.25.76
@@ -2013,6 +2045,12 @@ snapshots:
     dependencies:
       undici-types: 7.10.0
 
+  '@types/pg@8.15.5':
+    dependencies:
+      '@types/node': 24.2.1
+      pg-protocol: 1.10.3
+      pg-types: 2.2.0
+
   '@types/qs@6.14.0': {}
 
   '@types/range-parser@1.2.7': {}
@@ -2032,10 +2070,10 @@ snapshots:
 
   '@types/uuid@10.0.0': {}
 
-  '@vitejs/plugin-vue@6.0.1(vite@7.1.1(@types/node@24.2.1)(tsx@4.20.3)(yaml@2.8.1))(vue@3.5.18(typescript@5.9.2))':
+  '@vitejs/plugin-vue@6.0.1(vite@7.1.1(@types/node@24.2.1)(tsx@4.20.4)(yaml@2.8.1))(vue@3.5.18(typescript@5.9.2))':
     dependencies:
       '@rolldown/pluginutils': 1.0.0-beta.29
-      vite: 7.1.1(@types/node@24.2.1)(tsx@4.20.3)(yaml@2.8.1)
+      vite: 7.1.1(@types/node@24.2.1)(tsx@4.20.4)(yaml@2.8.1)
       vue: 3.5.18(typescript@5.9.2)
 
   '@volar/language-core@2.4.22':
@@ -2983,6 +3021,13 @@ snapshots:
     optionalDependencies:
       fsevents: 2.3.3
 
+  tsx@4.20.4:
+    dependencies:
+      esbuild: 0.25.8
+      get-tsconfig: 4.10.1
+    optionalDependencies:
+      fsevents: 2.3.3
+
   type-is@2.0.1:
     dependencies:
       content-type: 1.0.5
@@ -3035,7 +3080,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  vite@7.1.1(@types/node@24.2.1)(tsx@4.20.3)(yaml@2.8.1):
+  vite@7.1.1(@types/node@24.2.1)(tsx@4.20.4)(yaml@2.8.1):
     dependencies:
       esbuild: 0.25.8
       fdir: 6.4.6(picomatch@4.0.3)
@@ -3046,7 +3091,7 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.2.1
       fsevents: 2.3.3
-      tsx: 4.20.3
+      tsx: 4.20.4
       yaml: 2.8.1
 
   vscode-uri@3.1.0: {}
