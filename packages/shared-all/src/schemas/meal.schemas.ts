@@ -23,4 +23,3 @@ export const removeMealSchema = z.object({
     id: z.uuid(),
 });
 export type PlanRemoveRequest = z.infer<typeof removeMealSchema>;
-// The API currently returns 204 No Content for remove; no response body

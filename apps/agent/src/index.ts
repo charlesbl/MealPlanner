@@ -1,7 +1,7 @@
 import { HumanMessage } from "@langchain/core/messages";
 import type { StreamEvent } from "@langchain/core/tracers/log_stream";
 import { ChatOpenAI } from "@langchain/openai";
-import { StreamEventData } from "@mealplanner/shared-all";
+import { StreamEventData, chatMessageSchema } from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
@@ -55,21 +55,19 @@ const llm = new ChatOpenAI({
 // SSE endpoint: POST /chat -> streams tokens as JSON events
 app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     try {
-        const userMessage: string = (req.body?.message ?? "").toString();
-        const thread_id: string | undefined = req.body?.thread_id;
+        const parsed = chatMessageSchema.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(400).json({
+                status: "error",
+                error: parsed.error.message,
+            });
+        }
+        const { message: userMessage, thread_id } = parsed.data;
         const token = res.locals.token;
         const user = res.locals.user;
         console.log(
             `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
         );
-
-        if (!userMessage) {
-            res.status(400).json({
-                status: "error",
-                error: "message is required",
-            });
-            return;
-        }
 
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
