@@ -1,0 +1,105 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "API",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/apps/api",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["run", "dev"],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Agent",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/apps/agent",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["run", "dev"],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Shared All (watch)",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/packages/shared-all",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["run", "dev"],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Shared Back (watch)",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/packages/shared-back",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["run", "dev"],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Front Dev Server",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/apps/front",
+            "runtimeExecutable": "pnpm",
+            "runtimeArgs": ["run", "dev"],
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Front (Vite + Chrome)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/apps/front/src",
+            "sourceMaps": true,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Front (Vite + Brave)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/apps/front/src",
+            "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Front (Chrome profil existant)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/apps/front/src",
+            "userDataDir": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        },
+        {
+            "name": "Front (Brave profil existant)",
+            "type": "chrome",
+            "request": "launch",
+            "runtimeExecutable": "C:/Program Files/BraveSoftware/Brave-Browser/Application/brave.exe",
+            "url": "http://localhost:5173",
+            "webRoot": "${workspaceFolder}/apps/front/src",
+            "userDataDir": false,
+            "internalConsoleOptions": "openOnSessionStart"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Back Services (API + Agent + Shared)",
+            "configurations": [
+                "Shared All (watch)",
+                "Shared Back (watch)",
+                "API",
+                "Agent"
+            ]
+        },
+        {
+            "name": "Front Services Brave (Front + Shared)",
+            "configurations": [
+                "Front Dev Server",
+                "Front (Brave profil existant)"
+            ]
+        }
+    ]
+}

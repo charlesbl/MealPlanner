@@ -1,0 +1,125 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "dev:api",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:api"
+			]
+		},
+		{
+			"label": "dev:agent",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:agent"
+			]
+		},
+		{
+			"label": "dev:shared-all",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:shared-all"
+			]
+		},
+		{
+			"label": "dev:shared-back",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:shared-back"
+			]
+		},
+		{
+			"label": "Front Dev Server",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:front"
+			],
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "vite",
+				"pattern": [
+					{
+						"regexp": ".*",
+						"file": 0,
+						"message": 0
+					}
+				],
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "(?:VITE|vite) v\\d+\\.\\d+\\.\\d+",
+					"endsPattern": "ready in .*ms"
+				}
+			}
+		},
+		{
+			"label": "Terminate Front Dev Server",
+			"type": "shell",
+			"command": "powershell",
+			"args": [
+				"-NoProfile",
+				"-Command",
+				"Get-Process node -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -like '*Vite*' } | Stop-Process -Force"
+			]
+		},
+		{
+			"label": "Build shared-all",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"@mealplanner/shared-all",
+				"build"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build agent",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"@mealplanner/agent",
+				"build"
+			],
+			"problemMatcher": [
+				"$tsc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build shared-all (one-off)",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"--filter",
+				"@mealplanner/shared-all",
+				"build"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Front Dev Server",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:front"
+			],
+			"isBackground": true
+		}
+	]
+}

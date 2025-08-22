@@ -1,0 +1,36 @@
+{
+    "name": "@mealplanner/api",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "tsx watch src/index.ts",
+        "build": "tsc -p tsconfig.json",
+        "start": "node dist/index.js",
+        "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
+        "migration:generate": "typeorm-ts-node-esm -d src/data-source.ts migration:generate",
+        "migration:run": "pnpm typeorm migration:run",
+        "migration:revert": "pnpm typeorm migration:revert",
+        "seed": "tsx src/seed.ts"
+    },
+    "dependencies": {
+        "@mealplanner/shared-all": "workspace:*",
+        "@mealplanner/shared-back": "workspace:*",
+        "bcryptjs": "^3.0.2",
+        "cors": "^2.8.5",
+        "dotenv": "^17.2.1",
+        "express": "^5.1.0",
+        "zod": "^4.0.17",
+        "pg": "^8.16.3",
+        "reflect-metadata": "^0.2.2",
+        "typeorm": "^0.3.25"
+    },
+    "devDependencies": {
+        "@types/cors": "^2.8.19",
+        "@types/express": "^5.0.3",
+        "@types/node": "^24.2.1",
+        "ts-node": "^10.9.2",
+        "tsx": "^4.20.3",
+        "typescript": "~5.9.2"
+    }
+}

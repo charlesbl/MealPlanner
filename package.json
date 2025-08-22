@@ -1,31 +1,32 @@
 {
-  "name": "meal-planner",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "@langchain/core": "^0.3.55",
-    "@langchain/openai": "^0.5.10",
-    "@types/marked": "^6.0.0",
-    "date-fns": "^4.1.0",
-    "langchain": "^0.3.24",
-    "marked": "^15.0.11",
-    "pinia": "^3.0.2",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.1",
-    "zod": "^3.24.4"
-  },
-  "devDependencies": {
-    "@types/node": "^22.15.17",
-    "@vitejs/plugin-vue": "^5.2.4",
-    "@vue/tsconfig": "^0.7.0",
-    "typescript": "~5.8.3",
-    "vite": "^6.3.5",
-    "vue-tsc": "^2.2.10"
-  }
+    "name": "@mealplanner/monorepo",
+    "private": true,
+    "packageManager": "pnpm@10.15.0",
+    "description": "MealPlanner monorepo with front, agent, api (pnpm workspaces)",
+    "scripts": {
+        "dev:front": "pnpm --filter @mealplanner/front dev",
+        "dev:agent": "pnpm --filter @mealplanner/agent dev",
+        "dev:api": "pnpm --filter @mealplanner/api dev",
+        "dev:shared-all": "pnpm --filter @mealplanner/shared-all dev",
+        "dev:shared-back": "pnpm --filter @mealplanner/shared-back dev",
+        "dev:shared": "pnpm --filter @mealplanner/shared-all --filter @mealplanner/shared-back dev",
+        "dev": "pnpm -r run dev",
+        "dev:stack": "pnpm db:up && pnpm dev",
+        "build:front": "pnpm --filter @mealplanner/front build",
+        "build:agent": "pnpm --filter @mealplanner/agent build",
+        "build:api": "pnpm --filter @mealplanner/api build",
+        "build:shared-all": "pnpm --filter @mealplanner/shared-all build",
+        "build:shared-back": "pnpm --filter @mealplanner/shared-back build",
+        "build:shared": "pnpm --parallel --filter @mealplanner/shared-all --filter @mealplanner/shared-back build",
+        "build": "pnpm -r --parallel run build",
+        "preview": "pnpm --filter @mealplanner/front preview",
+        "db:up": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml up -d",
+        "db:down": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml down",
+        "db:purge": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml down -v",
+        "db:logs": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml logs -f",
+        "db:ps": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml ps",
+        "migration:generate": "pnpm --filter @mealplanner/api migration:generate",
+        "migration:run": "pnpm --filter @mealplanner/api migration:run",
+        "migration:revert": "pnpm --filter @mealplanner/api migration"
+    }
 }
