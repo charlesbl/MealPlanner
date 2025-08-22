@@ -110,6 +110,16 @@
 				"build"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Front Dev Server",
+			"type": "shell",
+			"command": "pnpm",
+			"args": [
+				"run",
+				"dev:front"
+			],
+			"isBackground": true
 		}
 	]
 }
