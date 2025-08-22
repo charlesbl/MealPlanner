@@ -4,8 +4,9 @@ import { useThreadStore } from "@/stores/threadStore";
 import { useToolDataUpdateStore } from "@/stores/toolDataUpdateStore";
 import type { ChatMessage } from "@mealplanner/shared-all";
 import { nextTick, ref } from "vue";
+import AssistantMessage from "../AssistantMessage.vue";
 import ChatInput from "../ChatInput.vue";
-import Message from "../Message.vue";
+import UserMessage from "../UserMessage.vue";
 import Settings from "./Settings.vue";
 
 const toolDataUpdateStore = useToolDataUpdateStore();
@@ -194,39 +195,34 @@ console.log(threadStore.messages);
             <Settings @close="closeSettings" />
         </div>
 
-        <!-- Interface de chat normale -->
-        <div class="chat-header" v-if="threadStore.messages.length > 0">
-            <button @click="clearChatHistory" class="clear-button">
+        <!-- Header -->
+        <div
+            class="chat-header"
+            :class="{ 'is-empty': threadStore.messages.length === 0 }"
+        >
+            <button
+                v-if="threadStore.messages.length > 0"
+                @click="clearChatHistory"
+                class="clear-button"
+            >
                 Clear Chat
             </button>
             <button @click="toggleSettings" class="settings-button">⚙️</button>
         </div>
 
-        <!-- Header pour les paramètres quand il n'y a pas de messages -->
-        <div v-else class="chat-header-empty">
-            <button @click="toggleSettings" class="settings-button">⚙️</button>
-        </div>
-
         <div ref="messagesContainer" class="messages">
-            <!-- TODO make bot message full width like ChatGPT -->
-            <Message
-                v-for="message in threadStore.messages"
-                :key="message.id"
-                :content="
-                    message.parts
-                        .map((part) => {
-                            if (part.type === 'text') {
-                                return part.content.trim();
-                            } else if (part.type === 'tool') {
-                                return `🔧 ${part.toolName} (${part.status})`;
-                            }
-                            return '';
-                        })
-                        .join('\n')
-                "
-                :is-user="message.isUser"
-                :is-streaming="message.parts.some((part) => part.isStreaming)"
-            />
+            <template v-for="message in threadStore.messages">
+                <UserMessage
+                    v-if="message.isUser"
+                    :key="message.id + '-user'"
+                    :message="message"
+                />
+                <AssistantMessage
+                    v-else
+                    :key="message.id + '-assistant'"
+                    :message="message"
+                />
+            </template>
             <div v-if="threadStore.messages.length === 0" class="empty-state">
                 <p>Start a conversation by typing a message below!</p>
             </div>
@@ -270,14 +266,8 @@ console.log(threadStore.messages);
     flex-shrink: 0;
 }
 
-.chat-header-empty {
-    display: flex;
+.chat-header.is-empty {
     justify-content: flex-end;
-    align-items: center;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border-medium);
-    background-color: var(--bg-primary);
-    flex-shrink: 0;
 }
 
 .clear-button {
