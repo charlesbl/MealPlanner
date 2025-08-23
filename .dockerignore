@@ -1,0 +1,23 @@
+# General
+
+.git
+.gitignore
+node_modules
+**/node_modules
+.pnpm-store
+.vscode
+\*.log
+dist
+**/dist
+
+# Local env/config
+
+.env
+**/.env
+\*.local
+**/\*.local
+
+# Misc
+
+**/\*.md
+apps/db/**

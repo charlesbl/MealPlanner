@@ -1,17 +1,13 @@
 // Simple auth service for JWT-based auth
 
-import type {
-    AuthLoginBodyResponse,
-    AuthMeBodyResponse,
-    AuthRegisterBodyResponse,
-    AuthUser,
-    AuthUserWithToken,
+import {
+    getApiBase,
+    type AuthLoginBodyResponse,
+    type AuthMeBodyResponse,
+    type AuthRegisterBodyResponse,
+    type AuthUser,
+    type AuthUserWithToken,
 } from "@mealplanner/shared-all";
-
-function getApiBase(): string {
-    const base = import.meta.env.VITE_API_URL || "http://localhost:3001";
-    return base.replace(/\/$/, "");
-}
 
 async function authRegister(
     name: string,
