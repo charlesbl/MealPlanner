@@ -5,7 +5,13 @@ import { AppDataSource } from "./data-source.js";
 
 dotenv.config();
 
-const PORT = Number(process.env.PORT || 3001);
+if (process.env.PORT === undefined) {
+    throw new Error("PORT environment variable is not set");
+}
+const PORT = Number(process.env.PORT);
+if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
+    throw new Error("PORT environment variable is not a valid port number");
+}
 
 async function bootstrap() {
     await AppDataSource.initialize();

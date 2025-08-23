@@ -32,25 +32,20 @@ import { AgentTool } from "./tools/types.js";
 //dotenv
 config();
 
-// Simple, minimal SSE agent server that streams assistant output
-
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Read API key from env (server-side)
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_BASE_URL =
-    process.env.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1";
+const OPENAI_BASE_URL =
+    process.env.OPENAI_BASE_URL || "https://openrouter.ai/api/v1";
 
 if (!OPENROUTER_API_KEY) {
-    console.warn(
-        "[agent] OPENROUTER_API_KEY is not set. Set it in your environment."
-    );
+    throw new Error("OPENROUTER_API_KEY environment variable is not set");
 }
 
 const llm = new ChatOpenAI({
-    configuration: { baseURL: OPENROUTER_BASE_URL },
+    configuration: { baseURL: OPENAI_BASE_URL },
     apiKey: OPENROUTER_API_KEY,
     // modelName: "z-ai/glm-4.5",
     // modelName: "openai/gpt-oss-120b",
@@ -67,7 +62,6 @@ const llm = new ChatOpenAI({
 
 const checkpointer = await createCheckpointer();
 
-// SSE endpoint: POST /chat -> streams tokens as JSON events
 app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
     try {
         const parsed = chatMessageSchema.safeParse(req.body);
@@ -116,16 +110,6 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
 
         for await (const event of stream) {
             const e = event as StreamEvent;
-            // Token chunks
-            if (e.event.includes("on_chain_")) {
-                console.log(`[agent] Received chain event: ${e.name}`);
-                if (e.data.output?.id !== undefined) {
-                    console.log(`[agent] Chain ID: ${e.data.output.id}`);
-                }
-                if (e.data.input?.id !== undefined) {
-                    console.log(`[agent] Chain ID: ${e.data.output.id}`);
-                }
-            }
             if (e.event === "on_chat_model_start") {
                 send({ type: "streamStart", runId: e.run_id });
             }
@@ -245,7 +229,6 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                     runId: e.run_id,
                 });
             }
-            // Final output from graph end/state
             if (e.event === "on_graph_end" || e.event === "on_chain_end") {
                 const output = e.data?.output;
                 if (typeof output === "string" && output) final = output;
@@ -429,7 +412,13 @@ const isValidToolIO = (input: any): input is string | undefined => {
     );
 };
 
-const PORT = process.env.PORT ? Number(process.env.PORT) : 8787;
+if (process.env.PORT === undefined) {
+    throw new Error("PORT environment variable is not set");
+}
+const PORT = Number(process.env.PORT);
+if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
+    throw new Error("PORT environment variable is not a valid port number");
+}
 app.listen(PORT, () => {
     console.log(`[agent] SSE server listening on http://localhost:${PORT}`);
 });

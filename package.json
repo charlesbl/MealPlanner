@@ -17,7 +17,7 @@
         "build:api": "pnpm --filter @mealplanner/api build",
         "build:shared-all": "pnpm --filter @mealplanner/shared-all build",
         "build:shared-back": "pnpm --filter @mealplanner/shared-back build",
-        "build:shared": "pnpm --parallel --filter @mealplanner/shared-all --filter @mealplanner/shared-back build",
+        "build:shared": "pnpm --filter @mealplanner/shared-all --filter @mealplanner/shared-back build",
         "build": "pnpm -r --parallel run build",
         "preview": "pnpm --filter @mealplanner/front preview",
         "db:up": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml up -d",

@@ -90,11 +90,6 @@ async function* sendMessageToBotStream(
     }
 }
 
-function getAgentUrl(): string {
-    const base = import.meta.env.VITE_AGENT_URL || "http://localhost:8787";
-    return base.replace(/\/$/, "");
-}
-
 async function getHistory(threadId: string): Promise<GetHistoryBodyResponse> {
     const headers: Record<string, string> = {};
     const token = authService.getToken();
@@ -113,6 +108,15 @@ async function getHistory(threadId: string): Promise<GetHistoryBodyResponse> {
         throw new Error(responsePayload.error);
     }
     return responsePayload.data;
+}
+
+function getAgentUrl(): string {
+    const base = import.meta.env.VITE_AGENT_URL;
+    if (base === undefined)
+        throw new Error(
+            "Agent URL is not defined in environment variables, use VITE_AGENT_URL"
+        );
+    return base.replace(/\/$/, "");
 }
 
 export const chatService = {

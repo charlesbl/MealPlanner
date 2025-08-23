@@ -7,11 +7,16 @@ export function getApiBase(): string {
         // ignore
     }
     // Fallback to Node.js environment variables via globalThis to avoid Node typings
-    if (!base) {
+    if (base === undefined) {
         const proc = (globalThis as any)?.process;
         base = proc?.env?.VITE_API_URL ?? proc?.env?.API_URL;
     }
-    return (base ?? "http://localhost:3001").replace(/\/$/, "");
+    if (base === undefined)
+        throw new Error(
+            "API base URL is not defined in environment variables, use VITE_API_URL or API_URL"
+        );
+
+    return base.replace(/\/$/, "");
 }
 
 export function generateId(): string {
