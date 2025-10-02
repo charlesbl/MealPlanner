@@ -1,0 +1,127 @@
+name: mealplanner-prod
+
+services:
+  # ===== Bases de données =====
+  postgres-api:
+    image: postgres:16-alpine
+    container_name: mealplanner-postgres-api
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${API_POSTGRES_USER:-mealplanner_api}
+      POSTGRES_PASSWORD: ${API_POSTGRES_PASSWORD:-mealplanner_api}
+      POSTGRES_DB: ${API_POSTGRES_DB:-mealplanner_api}
+    ports:
+      - "${API_HOST_PORT:-5432}:5432"
+    volumes:
+      - pg_api_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mealplanner-network
+
+  postgres-agent:
+    image: postgres:16-alpine
+    container_name: mealplanner-postgres-agent
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${AGENT_POSTGRES_USER:-mealplanner_agent}
+      POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-mealplanner_agent}
+      POSTGRES_DB: ${AGENT_POSTGRES_DB:-mealplanner_agent}
+    ports:
+      - "${AGENT_HOST_PORT:-5433}:5432"
+    volumes:
+      - pg_agent_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mealplanner-network
+
+  # ===== API =====
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: mealplanner-api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: ${API_PORT:-3000}
+      DB_URL: postgresql://${API_POSTGRES_USER:-mealplanner_api}:${API_POSTGRES_PASSWORD:-mealplanner_api}@postgres-api:5432/${API_POSTGRES_DB:-mealplanner_api}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${API_EXTERNAL_PORT:-3000}:${API_PORT:-3000}"
+    depends_on:
+      postgres-api:
+        condition: service_healthy
+    networks:
+      - mealplanner-network
+    command: ["node", "dist/index.js"]
+
+  # ===== Agent =====
+  agent:
+    build:
+      context: .
+      dockerfile: apps/agent/Dockerfile
+    container_name: mealplanner-agent
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: ${AGENT_PORT:-3001}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
+      AGENT_DB_URL: postgresql://${AGENT_POSTGRES_USER:-mealplanner_agent}:${AGENT_POSTGRES_PASSWORD:-mealplanner_agent}@postgres-agent:5432/${AGENT_POSTGRES_DB:-mealplanner_agent}
+      API_BASE_URL: ${API_BASE_URL:-http://api:3000}
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "${AGENT_EXTERNAL_PORT:-3001}:${AGENT_PORT:-3001}"
+    depends_on:
+      postgres-agent:
+        condition: service_healthy
+      api:
+        condition: service_started
+    networks:
+      - mealplanner-network
+    command: ["node", "dist/index.js"]
+
+  # ===== Front-end =====
+  front:
+    build:
+      context: .
+      dockerfile: apps/front/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+        VITE_AGENT_URL: ${VITE_AGENT_URL:-http://localhost:3001}
+    container_name: mealplanner-front
+    restart: unless-stopped
+    ports:
+      - "${FRONT_PORT:-80}:80"
+    depends_on:
+      - api
+      - agent
+    networks:
+      - mealplanner-network
+
+volumes:
+  pg_api_data:
+    name: mealplanner_pg_api_data
+  pg_agent_data:
+    name: mealplanner_pg_agent_data
+
+networks:
+  mealplanner-network:
+    driver: bridge
+    name: mealplanner-network
