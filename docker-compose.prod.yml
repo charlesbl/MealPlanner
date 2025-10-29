@@ -60,7 +60,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: ${API_PORT:-3000}
-      DB_URL: postgresql://${API_POSTGRES_USER:-mealplanner_api}:${API_POSTGRES_PASSWORD:-mealplanner_api}@postgres-api:5432/${API_POSTGRES_DB:-mealplanner_api}
+      DB_URL: ${API_DB_URL:-postgresql://mealplanner_api:mealplanner_api@postgres-api:5432/mealplanner_api}
       JWT_SECRET: ${JWT_SECRET}
     ports:
       - "${API_EXTERNAL_PORT:-3000}:${API_PORT:-3000}"
@@ -83,7 +83,7 @@ services:
       PORT: ${AGENT_PORT:-3001}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
-      AGENT_DB_URL: postgresql://${AGENT_POSTGRES_USER:-mealplanner_agent}:${AGENT_POSTGRES_PASSWORD:-mealplanner_agent}@postgres-agent:5432/${AGENT_POSTGRES_DB:-mealplanner_agent}
+      DB_URL: ${AGENT_DB_URL:-postgresql://mealplanner_agent:mealplanner_agent@postgres-agent:5432/mealplanner_agent}
       API_BASE_URL: ${API_BASE_URL:-http://api:3000}
       JWT_SECRET: ${JWT_SECRET}
     ports:
