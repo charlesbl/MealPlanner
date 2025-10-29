@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${API_POSTGRES_PASSWORD:-mealplanner_api}
       POSTGRES_DB: ${API_POSTGRES_DB:-mealplanner_api}
     ports:
-      - "${API_HOST_PORT:-5432}:5432"
+      - "${API_POSTGRES_PORT:-5432}:5432"
     volumes:
       - pg_api_data:/var/lib/postgresql/data
     healthcheck:
@@ -35,7 +35,7 @@ services:
       POSTGRES_PASSWORD: ${AGENT_POSTGRES_PASSWORD:-mealplanner_agent}
       POSTGRES_DB: ${AGENT_POSTGRES_DB:-mealplanner_agent}
     ports:
-      - "${AGENT_HOST_PORT:-5433}:5432"
+      - "${AGENT_POSTGRES_PORT:-5433}:5432"
     volumes:
       - pg_agent_data:/var/lib/postgresql/data
     healthcheck:
@@ -83,7 +83,7 @@ services:
       PORT: ${AGENT_PORT:-3001}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
       OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
-      DB_URL: ${AGENT_DB_URL:-postgresql://mealplanner_agent:mealplanner_agent@postgres-agent:5432/mealplanner_agent}
+      DB_URL: ${AGENT_DB_URL:-postgresql://mealplanner_agent:mealplanner_agent@postgres-agent:5433/mealplanner_agent}
       API_BASE_URL: ${API_BASE_URL:-http://api:3000}
       JWT_SECRET: ${JWT_SECRET}
     ports:
