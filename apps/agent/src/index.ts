@@ -50,12 +50,12 @@ const llm = new ChatOpenAI({
     // modelName: "z-ai/glm-4.5",
     // modelName: "openai/gpt-oss-120b",
     // modelName: "mistralai/mistral-medium-3",
-    modelName: "mistralai/mistral-small-24b-instruct-2501",
+    modelName: "minimax/minimax-m2.5",
     temperature: 0.7,
     modelKwargs: {
         // preset: "@preset/default",
         provider: {
-            order: ["mistral"],
+            order: ["fireworks"],
         },
     },
 });

@@ -2,7 +2,7 @@ export function getApiBase(): string {
     let base: string | undefined;
     // Try Vite (browser/SSR) via import.meta.env when available
     try {
-        base = (import.meta as any)?.env?.VITE_API_URL;
+        base = (import.meta as any).env?.VITE_API_URL;
     } catch {
         // ignore
     }
