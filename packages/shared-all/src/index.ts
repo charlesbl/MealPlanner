@@ -6,6 +6,7 @@ export * from "./utils.js";
 export * from "./journalService.js";
 export * from "./libraryService.js";
 export * from "./planService.js";
+export * from "./profileService.js";
 export * from "./threadService.js";
 
 // Schemas

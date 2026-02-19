@@ -30,7 +30,7 @@ import { authService } from "./authService";
 
 async function* sendMessageToBotStream(
     message: string,
-    threadId: string,
+    threadId: string | undefined,
 ): AsyncGenerator<StreamEventData, void, unknown> {
     const controller = new AbortController();
 

@@ -104,12 +104,10 @@ export function journalControllerFactory() {
             const userId = res.locals.user.sub;
             const date = req.query.date as string;
             if (!date) {
-                return res
-                    .status(400)
-                    .json({
-                        status: "error",
-                        error: "date query param required",
-                    });
+                return res.status(400).json({
+                    status: "error",
+                    error: "date query param required",
+                });
             }
             const entries = await repo.find({
                 where: { user: { id: userId }, date },
@@ -128,12 +126,10 @@ export function journalControllerFactory() {
             const userId = res.locals.user.sub;
             const startDate = req.query.startDate as string;
             if (!startDate) {
-                return res
-                    .status(400)
-                    .json({
-                        status: "error",
-                        error: "startDate query param required",
-                    });
+                return res.status(400).json({
+                    status: "error",
+                    error: "startDate query param required",
+                });
             }
 
             const start = new Date(startDate);

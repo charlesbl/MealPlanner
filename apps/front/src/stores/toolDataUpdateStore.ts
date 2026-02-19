@@ -1,11 +1,13 @@
 import type { ToolUpdateEvent } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
+import { useJournalStore } from "./journalStore";
 import { useLibraryStore } from "./libraryStore";
 import { usePlanStore } from "./planStore";
 
 export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
     const libraryStore = useLibraryStore();
     const planStore = usePlanStore();
+    const journalStore = useJournalStore();
     const updateDataOnToolStart = async (
         toolDataUpdateEvent: ToolUpdateEvent,
     ) => {
@@ -14,6 +16,7 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
             case "updateRecipe":
             case "updatePlan":
             case "removeRecipe":
+            case "updateJournal":
                 break;
             default:
                 console.error(
@@ -47,6 +50,9 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
                 await libraryStore.updateDeletedRecipe(
                     toolDataUpdateEvent.recipeId,
                 );
+                break;
+            case "updateJournal":
+                await journalStore.fetchDay(toolDataUpdateEvent.date);
                 break;
             default:
                 console.error(

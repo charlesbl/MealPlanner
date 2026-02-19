@@ -1,55 +1,52 @@
 /**
- * Thread Store (Pinia) - manages the current conversation thread_id
- * Persistence: localStorage (browser)
+ * Thread Store (Pinia) - manages the current conversation thread_id and messages
  */
 import { chatService } from "@/services/chatService";
 import type { ChatMessage } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
-import { computed, ref, watch } from "vue";
+import { ref, watch } from "vue";
 
 const THREAD_KEY = "langgraph_thread_id";
 
-function generateThreadId(): string {
-    // Simple 24-char base36 id; sufficient for local threading
-    return (
-        Date.now().toString(36) + Math.random().toString(36).slice(2, 16)
-    ).slice(0, 24);
-}
-
-function readInitialThreadId(): string {
-    if (typeof localStorage === "undefined") return generateThreadId();
-    const id = localStorage.getItem(THREAD_KEY);
-    if (!id) {
-        const newId = generateThreadId();
-        localStorage.setItem(THREAD_KEY, newId);
-        return newId;
-    }
-    return id;
-}
-
 export const useThreadStore = defineStore("thread", () => {
-    const threadId = ref<string>(readInitialThreadId());
-    const readOnlyThreadId = computed(() => threadId.value);
-
+    const threadId = ref<string>(localStorage.getItem(THREAD_KEY) ?? "");
     const messages = ref<ChatMessage[]>([]);
 
+    // Persist to localStorage whenever threadId changes
     watch(threadId, (newId) => {
-        if (typeof localStorage === "undefined") return;
-        localStorage.setItem(THREAD_KEY, newId);
+        if (newId) {
+            localStorage.setItem(THREAD_KEY, newId);
+        } else {
+            localStorage.removeItem(THREAD_KEY);
+        }
     });
 
+    // Auto-fetch history when threadId changes
     watch(
         threadId,
         async (newId) => {
-            const newMessages = await chatService.getHistory(newId);
-            messages.value = newMessages.messages;
+            if (!newId) {
+                messages.value = [];
+                return;
+            }
+            try {
+                const res = await chatService.getHistory(newId);
+                messages.value = res.messages;
+            } catch {
+                messages.value = [];
+            }
         },
         { immediate: true },
     );
 
-    function resetThreadId() {
-        threadId.value = generateThreadId();
+    function setThreadId(id: string) {
+        threadId.value = id;
     }
 
-    return { threadId: readOnlyThreadId, messages, resetThreadId };
+    function resetThreadId() {
+        threadId.value = "";
+        messages.value = [];
+    }
+
+    return { threadId, messages, setThreadId, resetThreadId };
 });

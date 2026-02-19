@@ -10,7 +10,7 @@
 Phase 1 — Fondations        [x] [x] [x]
 Phase 2 — Backend           [x] [x] [x] [x] [x]
 Phase 3 — Agent / LLM       [x] [x]
-Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
+Phase 4 — Frontend          [x] [x] [x] [x] [x]
 ```
 
 ---
@@ -36,11 +36,11 @@ Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 
 ## Phase 4 — Frontend
 
-- [ ] **11 — Page Profil** : Formulaire infos perso + objectifs + calcul TDEE
-- [ ] **12 — Page Journal** : Log alimentaire du jour, navigation date, graphe semaine
-- [ ] **13 — Page Dashboard** : Résumé du jour, semaine en cours, bouton quick-add
-- [ ] **14 — Page Bibliothèque** : Refonte grille, filtres, macros sur les cartes
-- [ ] **15 — Page Chat** : Historique conversations, drawer, recipe cards enrichies
+- [x] **11 — Page Profil** : Formulaire infos perso + objectifs + calcul TDEE
+- [x] **12 — Page Journal** : Log alimentaire du jour, navigation date, graphe semaine
+- [x] **13 — Page Dashboard** : Résumé du jour, semaine en cours, bouton quick-add
+- [x] **14 — Page Bibliothèque** : Refonte grille, filtres, macros sur les cartes
+- [x] **15 — Page Chat** : Historique conversations, drawer, recipe cards enrichies
 
 ---
 

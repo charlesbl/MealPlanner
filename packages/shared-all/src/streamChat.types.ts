@@ -65,6 +65,24 @@ export interface ThreadCreatedEventData {
     title: string;
 }
 
+export interface ThreadTitleUpdatedEventData {
+    type: "threadTitleUpdated";
+    threadId: string;
+    title: string;
+}
+
+export interface RecipeCardEventData {
+    type: "recipeCard";
+    recipe: {
+        id: string;
+        name: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+    };
+}
+
 export type StreamEventData =
     | ChatModelStartEventData
     | ChatModelStreamEventData
@@ -72,4 +90,6 @@ export type StreamEventData =
     | ChainEndEventData
     | ToolCallEventData
     | ToolEndEventData
-    | ThreadCreatedEventData;
+    | ThreadCreatedEventData
+    | ThreadTitleUpdatedEventData
+    | RecipeCardEventData;
