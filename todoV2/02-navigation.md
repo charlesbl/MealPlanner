@@ -9,12 +9,12 @@ avec 5 pages en vue-router. Structurer l'arborescence des pages.
 
 ## Checklist
 
-- [ ] Configurer vue-router avec les 5 routes principales
-- [ ] Supprimer le layout scroll-snap dans `App.vue`
-- [ ] Créer le composant `BottomNav.vue`
-- [ ] Créer les shells vides des 5 pages
-- [ ] Gérer la redirection auth (non connecté → Login)
-- [ ] Adapter `App.vue` pour le nouveau layout
+- [x] Configurer vue-router avec les 5 routes principales
+- [x] Supprimer le layout scroll-snap dans `App.vue`
+- [x] Créer le composant `BottomNav.vue`
+- [x] Créer les shells vides des 5 pages
+- [x] Gérer la redirection auth (non connecté → Login)
+- [x] Adapter `App.vue` pour le nouveau layout
 
 ---
 
