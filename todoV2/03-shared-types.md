@@ -9,11 +9,11 @@ pour le profil utilisateur, le journal alimentaire et les conversations.
 
 ## Checklist
 
-- [ ] Ajouter le schéma `UserProfile`
-- [ ] Ajouter le schéma `FoodEntry`
-- [ ] Ajouter les types `MealType` et `NutritionInfo`
-- [ ] Ajouter le schéma `Thread` (conversation)
-- [ ] Exporter tous les nouveaux types depuis `index.ts`
+- [x] Ajouter le schéma `UserProfile`
+- [x] Ajouter le schéma `FoodEntry`
+- [x] Ajouter les types `MealType` et `NutritionInfo`
+- [x] Ajouter le schéma `Thread` (conversation)
+- [x] Exporter tous les nouveaux types depuis `index.ts`
 
 ---
 

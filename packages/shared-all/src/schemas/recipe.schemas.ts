@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { APIResponsePayload } from "./common.schemas.js";
+import { nutritionInfoSchema } from "./nutrition.schemas.js";
 
 // Shared types
 export enum RecipeType {
@@ -22,6 +23,7 @@ export const recipeSchema = z.object({
         .transform((s) => s.trim())
         .optional(),
     recipeTypes: z.array(z.enum(RecipeType)).min(1),
+    nutrition: nutritionInfoSchema.optional(),
     createdAt: z.coerce.date(),
 });
 

@@ -7,7 +7,7 @@
 ## Progression globale
 
 ```
-Phase 1 — Fondations        [x] [x] [ ]
+Phase 1 — Fondations        [x] [x] [x]
 Phase 2 — Backend           [ ] [ ] [ ] [ ] [ ]
 Phase 3 — Agent / LLM       [ ] [ ]
 Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
@@ -19,7 +19,7 @@ Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 
 - [x] **01 — Design system** : Tailwind v4, tokens, typographie, composants de base
 - [x] **02 — Navigation** : Bottom bar 5 onglets, structure des 5 pages, suppression scroll-snap
-- [ ] **03 — Shared types** : Nouveaux types Zod (FoodEntry, UserProfile, Thread)
+- [x] **03 — Shared types** : Nouveaux types Zod (FoodEntry, UserProfile, Thread)
 
 ## Phase 2 — Backend (API)
 
