@@ -23,7 +23,7 @@ export async function createCheckpointer() {
 export function createAgent(
     llm: ChatOpenAI,
     tools: Parameters<typeof createReactAgent>[0]["tools"],
-    checkpointer: BaseCheckpointSaver
+    checkpointer: BaseCheckpointSaver,
 ) {
     return createReactAgent({
         llm,

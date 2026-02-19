@@ -12,31 +12,31 @@ An intelligent meal planning application with conversational AI assistant, built
 
 ### 🤖 Conversational AI Assistant
 
--   **Real-time chat** with streaming responses
--   **Intelligent agent** powered by LangChain and OpenAI
--   **Contextual conversation management** with persistence
--   **Specialized tools** for recipe and meal plan management
+- **Real-time chat** with streaming responses
+- **Intelligent agent** powered by LangChain and OpenAI
+- **Contextual conversation management** with persistence
+- **Specialized tools** for recipe and meal plan management
 
 ### 📚 Recipe Library Management
 
--   **Create and edit** detailed recipes
--   **Categorization** by meal type (Breakfast, Lunch, Dinner, Snacks)
--   **Complete descriptions** with ingredients, steps and chef tips
--   **Search and filtering** by type or preferences
+- **Create and edit** detailed recipes
+- **Categorization** by meal type (Breakfast, Lunch, Dinner, Snacks)
+- **Complete descriptions** with ingredients, steps and chef tips
+- **Search and filtering** by type or preferences
 
 ### 📅 Meal Planning
 
--   **Weekly meal organization**
--   **Selection from personal** recipe library
--   **Flexible management** with easy add/remove
--   **Intuitive interface** with swipe navigation
+- **Weekly meal organization**
+- **Selection from personal** recipe library
+- **Flexible management** with easy add/remove
+- **Intuitive interface** with swipe navigation
 
 ### 🔐 Authentication & Security
 
--   **Complete system** for registration and login
--   **Personalized data** per user
--   **Secure API** with JWT tokens
--   **Robust validation** with Zod schemas
+- **Complete system** for registration and login
+- **Personalized data** per user
+- **Secure API** with JWT tokens
+- **Robust validation** with Zod schemas
 
 ## 🏗️ Architecture
 
@@ -58,49 +58,49 @@ MealPlanner/
 
 #### Frontend
 
--   **Vue.js 3** with Composition API
--   **TypeScript** for type safety
--   **Pinia** for state management
--   **Vite** for build and development
--   **Responsive interface** with custom CSS
+- **Vue.js 3** with Composition API
+- **TypeScript** for type safety
+- **Pinia** for state management
+- **Vite** for build and development
+- **Responsive interface** with custom CSS
 
 #### Backend API
 
--   **Express.js** with TypeScript
--   **TypeORM** for PostgreSQL ORM
--   **JWT** for authentication
--   **Zod validation** on all endpoints
--   **Modular architecture** by domain
+- **Express.js** with TypeScript
+- **TypeORM** for PostgreSQL ORM
+- **JWT** for authentication
+- **Zod validation** on all endpoints
+- **Modular architecture** by domain
 
 #### AI Agent
 
--   **LangChain** for AI orchestration
--   **OpenAI GPT** (via OpenRouter) as LLM
--   **PostgreSQL** for conversation persistence
--   **Specialized tools** for each business action
--   **SSE streaming** for real-time responses
+- **LangChain** for AI orchestration
+- **OpenAI GPT** (via OpenRouter) as LLM
+- **PostgreSQL** for conversation persistence
+- **Specialized tools** for each business action
+- **SSE streaming** for real-time responses
 
 #### Database
 
--   **PostgreSQL 16** with Alpine Linux
--   **TypeORM migrations** for schema management
--   **Optimized relational** data
--   **Indexes** for performance
+- **PostgreSQL 16** with Alpine Linux
+- **TypeORM migrations** for schema management
+- **Optimized relational** data
+- **Indexes** for performance
 
 #### DevOps
 
--   **Docker** for containerization
--   **Docker Compose** for orchestration
--   **Configuration** via environment variables
--   **Volumes** for data persistence
+- **Docker** for containerization
+- **Docker Compose** for orchestration
+- **Configuration** via environment variables
+- **Volumes** for data persistence
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 
--   Node.js 18+
--   pnpm 8+
--   Docker and Docker Compose
+- Node.js 18+
+- pnpm 8+
+- Docker and Docker Compose
 
 ### Installation
 
@@ -162,23 +162,23 @@ docker compose -f docker-compose.prod.yml up -d
 
 ### Development
 
--   `pnpm dev:front` - User interface (Vite dev server)
--   `pnpm dev:api` - REST API (nodemon)
--   `pnpm dev:agent` - AI Agent (tsx watch)
--   `pnpm dev:shared-all` - Shared package (build watch)
+- `pnpm dev:front` - User interface (Vite dev server)
+- `pnpm dev:api` - REST API (nodemon)
+- `pnpm dev:agent` - AI Agent (tsx watch)
+- `pnpm dev:shared-all` - Shared package (build watch)
 
 ### Database
 
--   `pnpm db:up` - Start PostgreSQL
--   `pnpm db:down` - Stop PostgreSQL
--   `pnpm db:purge` - Delete all data
--   `pnpm migration:generate` - Generate a migration
--   `pnpm migration:run` - Run migrations
+- `pnpm db:up` - Start PostgreSQL
+- `pnpm db:down` - Stop PostgreSQL
+- `pnpm db:purge` - Delete all data
+- `pnpm migration:generate` - Generate a migration
+- `pnpm migration:run` - Run migrations
 
 ### Build & Deployment
 
--   `pnpm build` - Build all services
--   `pnpm preview` - Frontend preview
+- `pnpm build` - Build all services
+- `pnpm preview` - Frontend preview
 
 ## 📊 Data Model
 
@@ -186,69 +186,69 @@ docker compose -f docker-compose.prod.yml up -d
 
 #### User
 
--   User profile with authentication
--   One-to-many relationship with recipes and meals
+- User profile with authentication
+- One-to-many relationship with recipes and meals
 
 #### Recipe
 
--   Recipe with name, description, types
--   Belongs to a user
--   Can be in multiple meals
+- Recipe with name, description, types
+- Belongs to a user
+- Can be in multiple meals
 
 #### Meal
 
--   Planning item referencing a recipe
--   Optional order for sequencing
--   Belongs to a user
+- Planning item referencing a recipe
+- Optional order for sequencing
+- Belongs to a user
 
 ### Recipe Types
 
--   `Breakfast` - Morning meal
--   `Lunch` - Midday meal
--   `Dinner` - Evening meal
--   `Snacks` - Light meals
+- `Breakfast` - Morning meal
+- `Lunch` - Midday meal
+- `Dinner` - Evening meal
+- `Snacks` - Light meals
 
 ## 🔧 API Endpoints
 
 ### Authentication
 
--   `POST /auth/register` - Create account
--   `POST /auth/login` - Login
+- `POST /auth/register` - Create account
+- `POST /auth/login` - Login
 
 ### Recipes (Library)
 
--   `GET /library` - List recipes
--   `POST /library` - Create recipe
--   `PUT /library/:id` - Update recipe
--   `DELETE /library/:id` - Delete recipe
+- `GET /library` - List recipes
+- `POST /library` - Create recipe
+- `PUT /library/:id` - Update recipe
+- `DELETE /library/:id` - Delete recipe
 
 ### Planning
 
--   `GET /plan` - List meal plan
--   `POST /plan/add` - Add to plan
--   `POST /plan/remove` - Remove from plan
+- `GET /plan` - List meal plan
+- `POST /plan/add` - Add to plan
+- `POST /plan/remove` - Remove from plan
 
 ### AI Agent
 
--   `POST /chat` - Conversation with agent (SSE)
+- `POST /chat` - Conversation with agent (SSE)
 
 ## 🧠 AI Agent Functionality
 
 The agent uses several specialized tools:
 
--   **`read_library`** - Browse recipe library
--   **`add_or_update_recipe`** - Create/edit recipes
--   **`remove_recipe`** - Delete a recipe
--   **`read_plan`** - View current meal plan
--   **`add_meal`** - Add recipe to plan
--   **`remove_meal`** - Remove item from plan
+- **`read_library`** - Browse recipe library
+- **`add_or_update_recipe`** - Create/edit recipes
+- **`remove_recipe`** - Delete a recipe
+- **`read_plan`** - View current meal plan
+- **`add_meal`** - Add recipe to plan
+- **`remove_meal`** - Remove item from plan
 
 The agent understands business context and guides users in:
 
--   Creating detailed recipes
--   Organizing their meals
--   Discovering their library
--   Intelligent meal planning
+- Creating detailed recipes
+- Organizing their meals
+- Discovering their library
+- Intelligent meal planning
 
 ## 🎯 Use Cases
 
@@ -261,34 +261,34 @@ The agent understands business context and guides users in:
 
 ### For Developers
 
--   Modern microservices architecture
--   Conversational AI integration
--   TypeScript development patterns
--   Frontend/backend state management
--   Real-time streaming
--   Secure authentication
+- Modern microservices architecture
+- Conversational AI integration
+- TypeScript development patterns
+- Frontend/backend state management
+- Real-time streaming
+- Secure authentication
 
 ## 🚀 Future Enhancements
 
--   **External integrations** (nutrition APIs, shopping)
--   **AI recommendations** based on history
--   **Recipe sharing** between users
--   **Automatic generation** of shopping lists
--   **Advanced planning** (calories, allergens)
--   **Mobile application** React Native/Flutter
+- **External integrations** (nutrition APIs, shopping)
+- **AI recommendations** based on history
+- **Recipe sharing** between users
+- **Automatic generation** of shopping lists
+- **Advanced planning** (calories, allergens)
+- **Mobile application** React Native/Flutter
 
 ## 📝 Technologies & Concepts Demonstrated
 
--   **Microservices Architecture** with inter-service communication
--   **Conversational Artificial Intelligence** with LangChain
--   **Full-Stack TypeScript** with type sharing
--   **Real-time streaming** with Server-Sent Events
--   **Secure JWT Authentication**
--   **Modern ORM** with TypeORM and migrations
--   **Modern User Interface** with Vue.js 3
--   **Multi-stage Docker** containerization
--   **Monorepo** with pnpm workspaces
--   **Data validation** with Zod schemas
+- **Microservices Architecture** with inter-service communication
+- **Conversational Artificial Intelligence** with LangChain
+- **Full-Stack TypeScript** with type sharing
+- **Real-time streaming** with Server-Sent Events
+- **Secure JWT Authentication**
+- **Modern ORM** with TypeORM and migrations
+- **Modern User Interface** with Vue.js 3
+- **Multi-stage Docker** containerization
+- **Monorepo** with pnpm workspaces
+- **Data validation** with Zod schemas
 
 ---
 

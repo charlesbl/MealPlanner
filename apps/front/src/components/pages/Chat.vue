@@ -68,7 +68,7 @@ const handleSendMessage = async (message: string) => {
     try {
         const stream = chatService.sendMessageToBotStream(
             message,
-            threadStore.threadId
+            threadStore.threadId,
         );
 
         for await (const event of stream) {
@@ -92,14 +92,14 @@ const handleSendMessage = async (message: string) => {
                     threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
-                        (part) => part.runId === event.runId
+                        (part) => part.runId === event.runId,
                     );
                     if (part != undefined && part.type === "text") {
                         part.isStreaming = true;
                         part.content += event.chunk;
                     } else {
                         throw new Error(
-                            "No matching part found for runId: " + event.runId
+                            "No matching part found for runId: " + event.runId,
                         );
                     }
 
@@ -111,14 +111,14 @@ const handleSendMessage = async (message: string) => {
                     threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
-                        (part) => part.runId === event.runId
+                        (part) => part.runId === event.runId,
                     );
                     if (part != undefined && part.type === "text") {
                         part.isStreaming = false;
                         part.content = event.text;
                     } else {
                         throw new Error(
-                            "No matching part found for runId: " + event.runId
+                            "No matching part found for runId: " + event.runId,
                         );
                     }
 
@@ -129,7 +129,7 @@ const handleSendMessage = async (message: string) => {
                 // Call event handler to update datas
                 if (event.toolData.updateEvent !== undefined)
                     toolDataUpdateStore.updateDataOnToolStart(
-                        event.toolData.updateEvent
+                        event.toolData.updateEvent,
                     );
                 // show indicator
                 const lastMessage =
@@ -148,20 +148,20 @@ const handleSendMessage = async (message: string) => {
                 // Call event handler to update datas
                 if (event.toolData.updateEvent !== undefined)
                     toolDataUpdateStore.updateDataOnToolEnd(
-                        event.toolData.updateEvent
+                        event.toolData.updateEvent,
                     );
                 // update indicator
                 const lastMessage =
                     threadStore.messages[threadStore.messages.length - 1];
                 if (lastMessage && !lastMessage.isUser) {
                     const part = lastMessage.parts.find(
-                        (part) => part.runId === event.runId
+                        (part) => part.runId === event.runId,
                     );
                     if (part && part.type === "tool") {
                         part.status = "completed";
                     } else {
                         throw new Error(
-                            "No matching part found for runId: " + event.runId
+                            "No matching part found for runId: " + event.runId,
                         );
                     }
                     await scrollToBottom();

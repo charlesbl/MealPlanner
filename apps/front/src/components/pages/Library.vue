@@ -7,8 +7,8 @@ const libraryStore = useLibraryStore();
 
 const sortedLibrary = computed(() =>
     libraryStore.library.sort(
-        (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    )
+        (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    ),
 );
 
 function handleDeleteRecipe(recipeId: string) {

@@ -1,6 +1,7 @@
 # 09 — Frontend : Page Journal
 
 ## Objectif
+
 Créer la page Journal permettant de visualiser les aliments consommés jour par jour,
 les totaux de calories et macros, et d'ajouter manuellement des entrées via texte libre.
 

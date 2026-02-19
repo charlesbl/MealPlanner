@@ -1,6 +1,7 @@
 # 11 — Frontend : Page Bibliothèque (refonte)
 
 ## Objectif
+
 Refondre la page Bibliothèque avec le nouveau design system : vue grille ou liste,
 filtres par type de repas, et affichage des calories/macros sur chaque carte.
 
@@ -156,6 +157,7 @@ filteredRecipes = computed(() => {
 ```
 
 Mapping filtres → RecipeType :
+
 ```
 'Matin'  → Breakfast
 'Midi'   → Lunch

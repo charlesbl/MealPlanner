@@ -7,7 +7,7 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
     const libraryStore = useLibraryStore();
     const planStore = usePlanStore();
     const updateDataOnToolStart = async (
-        toolDataUpdateEvent: ToolUpdateEvent
+        toolDataUpdateEvent: ToolUpdateEvent,
     ) => {
         switch (toolDataUpdateEvent.type) {
             case "updateLibrary":
@@ -19,13 +19,13 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
                 console.error(
                     `Unknown tool update type on tool start: ${
                         (toolDataUpdateEvent as any).type
-                    }`
+                    }`,
                 );
                 break;
         }
     };
     const updateDataOnToolEnd = async (
-        toolDataUpdateEvent: ToolUpdateEvent
+        toolDataUpdateEvent: ToolUpdateEvent,
     ) => {
         switch (toolDataUpdateEvent.type) {
             case "updateLibrary":
@@ -37,22 +37,22 @@ export const useToolDataUpdateStore = defineStore("toolDataUpdateStore", () => {
             case "updateRecipe":
                 // TODO Handle recipe update logic here
                 console.log(
-                    `Recipe updated with ID: ${toolDataUpdateEvent.recipeId}`
+                    `Recipe updated with ID: ${toolDataUpdateEvent.recipeId}`,
                 );
                 break;
             case "removeRecipe":
                 console.log(
-                    `Recipe deleted with ID: ${toolDataUpdateEvent.recipeId}`
+                    `Recipe deleted with ID: ${toolDataUpdateEvent.recipeId}`,
                 );
                 await libraryStore.updateDeletedRecipe(
-                    toolDataUpdateEvent.recipeId
+                    toolDataUpdateEvent.recipeId,
                 );
                 break;
             default:
                 console.error(
                     `Unknown tool update type on tool end: ${
                         (toolDataUpdateEvent as any).type
-                    }`
+                    }`,
                 );
                 break;
         }

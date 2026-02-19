@@ -85,7 +85,9 @@ function handleDelete(event: Event) {
     border-radius: 8px;
     padding: 0;
     margin: 8px 0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
     overflow: hidden;
 }
 
@@ -156,7 +158,9 @@ function handleDelete(event: Event) {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.2s ease, transform 0.1s ease;
+    transition:
+        background-color 0.2s ease,
+        transform 0.1s ease;
     min-width: 24px;
     height: 24px;
 }
@@ -223,7 +227,9 @@ function handleDelete(event: Event) {
 .toggle-hint {
     font-size: 1rem;
     color: var(--accent-color);
-    transition: transform 0.2s ease, color 0.2s ease;
+    transition:
+        transform 0.2s ease,
+        color 0.2s ease;
     user-select: none;
 }
 

@@ -16,7 +16,7 @@ export function mealControllerFactory() {
     return {
         get: async (
             req: Request,
-            res: AuthAPIResponse<PlanGetBodyResponse>
+            res: AuthAPIResponse<PlanGetBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             const selections = await selectionRepo.find({
@@ -28,7 +28,7 @@ export function mealControllerFactory() {
         },
         add: async (
             req: Request,
-            res: AuthAPIResponse<PlanAddBodyResponse>
+            res: AuthAPIResponse<PlanAddBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             const { recipeId, order } = addMealSchema.parse(req.body);

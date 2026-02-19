@@ -33,7 +33,7 @@ watch(
             });
         }
     },
-    { immediate: true }
+    { immediate: true },
 );
 
 // Reset positioned flag on logout
@@ -41,7 +41,7 @@ watch(
     () => isAuthenticated.value,
     (now, prev) => {
         if (!now && prev) positioned.value = false;
-    }
+    },
 );
 </script>
 

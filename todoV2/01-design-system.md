@@ -1,6 +1,7 @@
 # 01 — Design System
 
 ## Objectif
+
 Remplacer le CSS scoped custom actuel par Tailwind CSS v4 avec un design system cohérent.
 Définir les tokens, la typographie et les composants atomiques réutilisables.
 
@@ -53,30 +54,38 @@ Border width:      1px hairline partout
 ## Composants atomiques à créer
 
 ### `AppCard.vue`
+
 Wrapper de carte : fond `surface`, border `border`, radius 6px.
 Props : `noPadding` (boolean).
 
 ### `AppButton.vue`
+
 Variantes :
+
 - `ghost` : border hairline sand, texte sand, fond transparent
 - `muted` : texte muted, pas de border
 - `danger` : texte rouge muted
 
 ### `AppInput.vue`
+
 Input texte : fond `surface`, border `border`, focus border accent sand.
 Props : `placeholder`, `modelValue`.
 
 ### `AppDivider.vue`
+
 `<hr>` hairline `border-color: border`.
 
 ### `AppToggle.vue`
+
 Toggle switch custom : thumb sand sur track dark.
 
 ### `SectionLabel.vue`
+
 Label de section en uppercase spacé, taille xs, couleur accent sand.
 Exemple : "INFORMATIONS", "OBJECTIFS".
 
 ### `BottomNav.vue`
+
 Barre de navigation fixe en bas. 5 icônes Lucide.
 Props : `activePage` (enum: home | chat | library | journal | profile).
 Icône active : couleur accent + dot sand dessous. Autres : muted.
@@ -86,6 +95,7 @@ Icône active : couleur accent + dot sand dessous. Autres : muted.
 ## Migration du CSS existant
 
 Pour chaque composant `.vue` existant :
+
 1. Supprimer le bloc `<style scoped>`
 2. Remplacer les classes custom par des classes Tailwind
 3. Conserver la logique template/script intacte

@@ -14,7 +14,7 @@ export function userControllerFactory() {
     const update = async (
         req: Request,
         res: AuthAPIResponse<UserUpdateBodyResponse>,
-        next: NextFunction
+        next: NextFunction,
     ) => {
         try {
             const { id } = userIdParamSchema.parse(req.params);

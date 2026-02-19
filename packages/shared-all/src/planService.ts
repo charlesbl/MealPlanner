@@ -23,7 +23,7 @@ async function fetchPlan(token: string): Promise<Meal[]> {
 
 async function addToPlan(
     payload: PlanAddBodyRequest,
-    token: string
+    token: string,
 ): Promise<Meal> {
     const res = await fetch(`${getApiBase()}/plan/add`, {
         method: "POST",
@@ -42,7 +42,7 @@ async function addToPlan(
 
 async function removeFromPlan(
     payload: PlanRemoveBodyRequest,
-    token: string
+    token: string,
 ): Promise<void> {
     const res = await fetch(`${getApiBase()}/plan/remove`, {
         method: "POST",

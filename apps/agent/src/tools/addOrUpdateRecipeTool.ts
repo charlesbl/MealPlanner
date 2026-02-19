@@ -15,12 +15,12 @@ const addOrUpdateRecipeSchema = z.object({
         .string()
         .optional()
         .describe(
-            "Optional recipe ID for updating an existing recipe (leave empty to add new recipe)"
+            "Optional recipe ID for updating an existing recipe (leave empty to add new recipe)",
         ),
 });
 
 export const getAddOrUpdateRecipeTool = (
-    token: string
+    token: string,
 ): AgentTool<typeof addOrUpdateRecipeSchema> => {
     return {
         schema: addOrUpdateRecipeSchema,
@@ -39,13 +39,13 @@ export const getAddOrUpdateRecipeTool = (
         tool: new DynamicStructuredTool({
             name: "add_or_update_recipe",
             description: `Adds a new recipe or updates an existing recipe. Valid recipe types are: ${Object.values(
-                RecipeType
+                RecipeType,
             ).join(
-                ", "
+                ", ",
             )}. If recipeId is provided, the existing recipe will be updated; otherwise, a new recipe will be created.`,
             schema: addOrUpdateRecipeSchema,
             func: async (
-                input: z.infer<typeof addOrUpdateRecipeSchema>
+                input: z.infer<typeof addOrUpdateRecipeSchema>,
             ): Promise<string> => {
                 try {
                     if (input.recipeId) {
@@ -57,7 +57,7 @@ export const getAddOrUpdateRecipeTool = (
                                 description: input.description,
                                 recipeTypes: input.recipeTypes,
                             },
-                            token
+                            token,
                         );
                         return `Successfully updated recipe '${updated.name}' (${updated.recipeTypes}).`;
                     } else {
@@ -68,7 +68,7 @@ export const getAddOrUpdateRecipeTool = (
                                 description: input.description,
                                 recipeTypes: input.recipeTypes,
                             },
-                            token
+                            token,
                         );
                         return `Successfully added new ${created.recipeTypes} recipe: '${created.name}'. Recipe ID: ${created.id}. You can now add this recipe to your plan or manage it in your library.`;
                     }

@@ -44,7 +44,7 @@ export const useThreadStore = defineStore("thread", () => {
             const newMessages = await chatService.getHistory(newId);
             messages.value = newMessages.messages;
         },
-        { immediate: true }
+        { immediate: true },
     );
 
     function resetThreadId() {

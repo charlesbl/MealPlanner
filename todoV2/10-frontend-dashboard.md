@@ -1,6 +1,7 @@
 # 10 — Frontend : Page Dashboard (Home)
 
 ## Objectif
+
 Créer la page d'accueil qui résume la situation du jour : calories consommées,
 plan de la semaine en cours, et accès rapide au log alimentaire.
 

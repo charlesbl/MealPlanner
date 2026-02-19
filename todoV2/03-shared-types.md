@@ -1,6 +1,7 @@
 # 03 — Shared Types
 
 ## Objectif
+
 Ajouter dans `packages/shared-all` les nouveaux types Zod partagés entre front et back
 pour le profil utilisateur, le journal alimentaire et les conversations.
 
@@ -19,6 +20,7 @@ pour le profil utilisateur, le journal alimentaire et les conversations.
 ## Nouveaux types
 
 ### NutritionInfo
+
 Bloc de macros réutilisable, embarqué dans FoodEntry et Recipe.
 
 ```
@@ -31,6 +33,7 @@ NutritionInfo {
 ```
 
 ### MealType (enum)
+
 Utilisé pour classer les entrées du journal.
 
 ```
@@ -38,6 +41,7 @@ MealType = "breakfast" | "lunch" | "dinner" | "snack"
 ```
 
 ### FoodEntry
+
 Représente un aliment/plat logué dans le journal d'un jour donné.
 
 ```
@@ -53,6 +57,7 @@ FoodEntry {
 ```
 
 ### UserProfile
+
 Informations personnelles et objectifs nutritionnels de l'utilisateur.
 
 ```
@@ -70,6 +75,7 @@ UserProfile {
 ```
 
 ### Thread
+
 Représente une conversation sauvegardée.
 
 ```
@@ -100,12 +106,14 @@ Recipe {
 ## Schémas de requête/réponse API
 
 ### Profil
+
 ```
 UpdateProfileRequest  = Partial<Omit<UserProfile, "userId" | "updatedAt">>
 UpdateProfileResponse = UserProfile
 ```
 
 ### Journal
+
 ```
 CreateFoodEntryRequest {
   description: string
@@ -123,6 +131,7 @@ GetFoodEntriesQuery {
 ```
 
 ### Threads
+
 ```
 ThreadSummary {
   id:            string

@@ -1,6 +1,7 @@
 # 02 — Navigation
 
 ## Objectif
+
 Remplacer le layout scroll-snap horizontal 3 colonnes par une bottom navigation bar
 avec 5 pages en vue-router. Structurer l'arborescence des pages.
 
@@ -56,6 +57,7 @@ avec 5 pages en vue-router. Structurer l'arborescence des pages.
 ```
 
 CSS du layout :
+
 ```
 #app           → height: 100dvh, display: flex, flex-direction: column
 .page-content  → flex: 1, overflow-y: auto, padding-bottom: 72px (hauteur bottom nav)
@@ -67,6 +69,7 @@ BottomNav      → position: fixed, bottom: 0, width: 100%
 ## BottomNav.vue
 
 5 onglets avec icônes Lucide :
+
 ```
 Home        → icône LayoutDashboard  → route /dashboard
 Chat        → icône MessageCircle    → route /chat
@@ -76,6 +79,7 @@ Profil      → icône User             → route /profile
 ```
 
 Comportement :
+
 - Lire `useRoute().name` pour déterminer l'onglet actif
 - Onglet actif : icône couleur accent + petit dot sand centré en dessous
 - Onglets inactifs : icône couleur muted
@@ -87,6 +91,7 @@ Comportement :
 ## Guard de navigation
 
 Dans `router/index.ts` :
+
 ```
 beforeEach:
   si route nécessite auth ET utilisateur non connecté
@@ -103,7 +108,7 @@ Chaque page = un composant minimal avec juste un `<h1>` pour commencer.
 Elles seront enrichies dans les étapes 11 à 15.
 
 - `pages/DashboardPage.vue`
-- `pages/ChatPage.vue`         (reprend l'essentiel de `Chat.vue` actuel)
-- `pages/LibraryPage.vue`      (reprend l'essentiel de `Library.vue` actuel)
-- `pages/JournalPage.vue`      (nouvelle)
-- `pages/ProfilePage.vue`      (nouvelle)
+- `pages/ChatPage.vue` (reprend l'essentiel de `Chat.vue` actuel)
+- `pages/LibraryPage.vue` (reprend l'essentiel de `Library.vue` actuel)
+- `pages/JournalPage.vue` (nouvelle)
+- `pages/ProfilePage.vue` (nouvelle)

@@ -1,6 +1,7 @@
 # 04 — Backend : UserProfile
 
 ## Objectif
+
 Persister le profil personnel de l'utilisateur (taille, poids, âge, objectifs nutritionnels)
 en base de données et exposer une API REST pour le lire et le mettre à jour.
 
@@ -56,14 +57,16 @@ Le TDEE est calculé à la volée et retourné dans la réponse GET, pas stocké
 ## Endpoints API
 
 ### GET /profile
+
 - Auth requise (JWT middleware)
 - Si profil inexistant → créer un profil vide et le retourner
 - Réponse :
-  ```
-  UserProfile + { tdee: number | null }
-  ```
+    ```
+    UserProfile + { tdee: number | null }
+    ```
 
 ### PUT /profile
+
 - Auth requise
 - Body : `UpdateProfileRequest` (champs partiels)
 - Validation Zod du body

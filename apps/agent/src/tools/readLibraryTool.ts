@@ -10,21 +10,21 @@ const readLibrarySchema = z.object({
         .optional()
         .describe(
             `Optional recipe type filter (${Object.values(RecipeType).join(
-                " | "
-            )})`
+                " | ",
+            )})`,
         ),
     limit: z
         .number()
         .optional()
         .describe(
-            "Optional limit on number of recipes to return (default: all recipes in library)"
+            "Optional limit on number of recipes to return (default: all recipes in library)",
         ),
 });
 
 const recipeTypeDescription = Object.values(RecipeType).join(", ");
 
 export const getReadLibraryTool = (
-    token: string
+    token: string,
 ): AgentTool<typeof readLibrarySchema> => {
     return {
         schema: readLibrarySchema,
@@ -35,8 +35,8 @@ export const getReadLibraryTool = (
             func: async (input): Promise<string> => {
                 console.log(
                     `Executing readLibraryTool with input: ${JSON.stringify(
-                        input
-                    )}`
+                        input,
+                    )}`,
                 );
                 try {
                     console.log(`Fetching library with token: ${token}`);
@@ -45,7 +45,7 @@ export const getReadLibraryTool = (
 
                     let filteredLibrary = input.recipeType
                         ? library.filter((m: Recipe) =>
-                              m.recipeTypes.includes(input.recipeType!)
+                              m.recipeTypes.includes(input.recipeType!),
                           )
                         : library;
 
@@ -58,7 +58,7 @@ export const getReadLibraryTool = (
                             ? ` for ${input.recipeType}`
                             : "";
                         console.log(
-                            `No recipes found${filterText} in the library.`
+                            `No recipes found${filterText} in the library.`,
                         );
                         return `No recipes found${filterText} in your library.`;
                     }
@@ -85,8 +85,8 @@ export const getReadLibraryTool = (
 
                     console.log(
                         `Read library tool executed with input: ${JSON.stringify(
-                            input
-                        )}`
+                            input,
+                        )}`,
                     );
                     return output;
                 } catch (error: any) {

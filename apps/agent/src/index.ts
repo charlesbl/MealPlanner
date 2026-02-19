@@ -75,7 +75,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         const token = res.locals.token;
         const user = res.locals.user;
         console.log(
-            `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
+            `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`,
         );
 
         res.writeHead(200, {
@@ -100,11 +100,11 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         const agent = createAgent(
             llm,
             tools.map(({ tool }) => tool),
-            checkpointer
+            checkpointer,
         );
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },
-            { version: "v2", configurable: thread_id ? { thread_id } : {} }
+            { version: "v2", configurable: thread_id ? { thread_id } : {} },
         );
         let final = "";
 
@@ -120,12 +120,12 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                           .map((p: any) =>
                               typeof p === "string"
                                   ? p
-                                  : p?.text ?? p?.content ?? ""
+                                  : (p?.text ?? p?.content ?? ""),
                           )
                           .join("")
                     : typeof content === "string"
-                    ? content
-                    : "";
+                      ? content
+                      : "";
                 if (text) {
                     final += text;
                     send({ type: "stream", chunk: text, runId: e.run_id });
@@ -148,25 +148,25 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                 if (!isValidToolIO(inputString))
                     throw new Error(
                         `Tool input is not a string: ${JSON.stringify(
-                            inputString
-                        )}`
+                            inputString,
+                        )}`,
                     );
                 const input = tool.schema.safeParse(
                     inputString === undefined
                         ? undefined
-                        : JSON.parse(inputString)
+                        : JSON.parse(inputString),
                 );
                 if (input.success === false) {
                     throw new Error(
                         `Tool input does not match schema: ${JSON.stringify(
-                            input.error
-                        )}`
+                            input.error,
+                        )}`,
                     );
                 }
                 console.log(
                     `Tool started: ${toolName} with input: ${JSON.stringify(
-                        input
-                    )}`
+                        input,
+                    )}`,
                 );
 
                 send({
@@ -174,7 +174,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                     toolData: {
                         name: toolName,
                         updateEvent: tool.getToolUpdateEventOnToolStart?.(
-                            input.data
+                            input.data,
                         ),
                     },
                     runId: e.run_id,
@@ -190,32 +190,32 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                 if (!isValidToolIO(inputString))
                     throw new Error(
                         `Tool input is not a string: ${JSON.stringify(
-                            inputString
-                        )}`
+                            inputString,
+                        )}`,
                     );
                 const input = tool.schema.safeParse(
                     inputString === undefined
                         ? undefined
-                        : JSON.parse(inputString)
+                        : JSON.parse(inputString),
                 );
                 if (input.success === false) {
                     throw new Error(
                         `Tool input does not match schema: ${JSON.stringify(
-                            input.error
-                        )}`
+                            input.error,
+                        )}`,
                     );
                 }
 
                 const output = e.data.output?.lc_kwargs?.content;
                 if (!isValidToolIO(output)) {
                     throw new Error(
-                        `Tool output is not a string: ${JSON.stringify(output)}`
+                        `Tool output is not a string: ${JSON.stringify(output)}`,
                     );
                 }
                 console.log(
                     `Tool ended: ${toolName} with input: ${JSON.stringify(
-                        input
-                    )} and output: ${output}`
+                        input,
+                    )} and output: ${output}`,
                 );
                 send({
                     type: "toolEnd",
@@ -223,7 +223,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                         name: toolName,
                         updateEvent: tool.getToolUpdateEventOnToolEnd?.(
                             input.data,
-                            output
+                            output,
                         ),
                     },
                     runId: e.run_id,
@@ -241,12 +241,12 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                               .map((p: any) =>
                                   typeof p === "string"
                                       ? p
-                                      : p?.text ?? p?.content ?? ""
+                                      : (p?.text ?? p?.content ?? ""),
                               )
                               .join("")
                         : typeof content === "string"
-                        ? content
-                        : "";
+                          ? content
+                          : "";
                     if (text) final = text;
                 }
             }
@@ -266,7 +266,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             res.write(
                 `data: ${JSON.stringify({
                     message: err?.message ?? "Unknown error",
-                })}\n\n`
+                })}\n\n`,
             );
         } catch {}
         res.end();
@@ -329,7 +329,7 @@ app.get(
                 error: err?.message ?? "Unknown error",
             });
         }
-    }
+    },
 );
 
 type LangChainMessage =
@@ -346,7 +346,7 @@ type LangChainMessage =
           message: ToolMessage;
       };
 const convertLangChainMessagesToChatMessages = (
-    langchainMessages: unknown[]
+    langchainMessages: unknown[],
 ): ChatMessage[] => {
     const getCastedMessage = (m: unknown): LangChainMessage | undefined => {
         if (m instanceof HumanMessage) return { role: "user", message: m };

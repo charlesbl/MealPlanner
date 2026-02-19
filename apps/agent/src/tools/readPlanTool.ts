@@ -8,12 +8,12 @@ const readPlanSchema = z.object({
         .boolean()
         .optional()
         .describe(
-            "Whether to include recipe descriptions in the output (default: true)"
+            "Whether to include recipe descriptions in the output (default: true)",
         ),
 });
 
 export const getReadPlanTool = (
-    token: string
+    token: string,
 ): AgentTool<typeof readPlanSchema> => {
     return {
         schema: readPlanSchema,
@@ -23,7 +23,7 @@ export const getReadPlanTool = (
                 "Reads the current plan. Shows all items in plan, containing the recipe for each item.",
             schema: readPlanSchema,
             func: async (
-                input: z.infer<typeof readPlanSchema>
+                input: z.infer<typeof readPlanSchema>,
             ): Promise<string> => {
                 try {
                     const items = await planService.fetchPlan(token);

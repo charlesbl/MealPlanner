@@ -1,6 +1,7 @@
 # 08 — Frontend : Page Profil
 
 ## Objectif
+
 Créer la page Profil permettant à l'utilisateur de renseigner ses informations
 personnelles, ses objectifs nutritionnels, et d'accéder aux réglages de l'app.
 

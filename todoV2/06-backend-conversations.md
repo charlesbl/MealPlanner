@@ -1,6 +1,7 @@
 # 06 — Backend : Historique des conversations
 
 ## Objectif
+
 Persister les conversations (threads LangGraph) en base de données avec un titre
 auto-généré, et exposer une API pour les lister, les récupérer et les supprimer.
 
@@ -36,15 +37,17 @@ Colonnes :
 ## Endpoints API
 
 ### GET /threads
+
 - Auth requise
 - Liste tous les threads de l'utilisateur
 - Triés par `last_message_at` DESC
 - Réponse : `ThreadSummary[]`
-  ```
-  { id, title, createdAt, lastMessageAt }[]
-  ```
+    ```
+    { id, title, createdAt, lastMessageAt }[]
+    ```
 
 ### POST /threads
+
 - Auth requise
 - Créer un nouveau thread (appelé par le front quand l'utilisateur clique "Nouvelle conversation")
 - Génère un `thread_id` UUID côté backend
@@ -52,11 +55,13 @@ Colonnes :
 - Réponse : `Thread`
 
 ### PATCH /threads/:id
+
 - Auth requise
 - Mettre à jour le titre d'un thread (optionnel, pour renommage manuel)
 - Body : `{ title: string }`
 
 ### DELETE /threads/:id
+
 - Auth requise
 - Supprimer le thread et son historique LangGraph associé
 - Réponse : 204
@@ -98,6 +103,7 @@ Si pas de thread_id :
 ```
 
 Nouvel event SSE à ajouter :
+
 ```
 event: threadCreated
 data: { threadId: string, title: string }

@@ -30,7 +30,7 @@ import { authService } from "./authService";
 
 async function* sendMessageToBotStream(
     message: string,
-    threadId: string
+    threadId: string,
 ): AsyncGenerator<StreamEventData, void, unknown> {
     const controller = new AbortController();
 
@@ -114,7 +114,7 @@ function getAgentUrl(): string {
     const base = import.meta.env.VITE_AGENT_URL;
     if (base === undefined)
         throw new Error(
-            "Agent URL is not defined in environment variables, use VITE_AGENT_URL"
+            "Agent URL is not defined in environment variables, use VITE_AGENT_URL",
         );
     return base.replace(/\/$/, "");
 }

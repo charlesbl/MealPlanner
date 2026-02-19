@@ -9,7 +9,7 @@ const textContent = computed(() => {
         const slotNodes = slots.default();
         return slotNodes
             .map((node) =>
-                typeof node.children === "string" ? node.children : ""
+                typeof node.children === "string" ? node.children : "",
             )
             .join("");
     }

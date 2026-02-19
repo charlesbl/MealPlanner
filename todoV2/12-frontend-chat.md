@@ -1,6 +1,7 @@
 # 12 — Frontend : Page Chat (refonte + historique)
 
 ## Objectif
+
 Refondre la page Chat avec le nouveau design, ajouter le drawer d'historique
 des conversations, et enrichir les recipe cards dans les réponses de l'agent.
 

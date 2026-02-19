@@ -21,7 +21,7 @@ async function fetchLibrary(token: string): Promise<Recipe[]> {
 
 async function addRecipe(
     recipe: Omit<Recipe, "id" | "createdAt">,
-    token: string
+    token: string,
 ): Promise<Recipe> {
     const res = await fetch(`${getApiBase()}/recipe`, {
         method: "POST",
@@ -40,7 +40,7 @@ async function addRecipe(
 async function updateRecipe(
     id: string,
     updates: Partial<Omit<Recipe, "id" | "createdAt">>,
-    token: string
+    token: string,
 ): Promise<Recipe> {
     const res = await fetch(`${getApiBase()}/recipe/${id}`, {
         method: "PUT",

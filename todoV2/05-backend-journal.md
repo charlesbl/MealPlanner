@@ -1,6 +1,7 @@
 # 05 — Backend : Journal alimentaire (FoodEntry)
 
 ## Objectif
+
 Persister les entrées alimentaires loguées par l'utilisateur (via texte libre),
 avec leur estimation nutritionnelle calculée par le LLM.
 Exposer une API REST pour lire, créer et supprimer des entrées.
@@ -43,31 +44,34 @@ Index : `(user_id, date)` pour les requêtes par jour.
 ## Endpoints API
 
 ### GET /food-entries?date=YYYY-MM-DD
+
 - Auth requise
 - Retourne toutes les FoodEntry de l'utilisateur pour la date donnée
 - Triées par `created_at` ASC
 - Réponse :
-  ```
-  {
-    entries: FoodEntry[],
-    totals: NutritionInfo   // somme de toutes les entrées du jour
-  }
-  ```
+    ```
+    {
+      entries: FoodEntry[],
+      totals: NutritionInfo   // somme de toutes les entrées du jour
+    }
+    ```
 
 ### GET /food-entries/week?startDate=YYYY-MM-DD
+
 - Auth requise
 - Retourne les totaux agrégés par jour sur 7 jours à partir de startDate
 - Réponse :
-  ```
-  {
-    days: {
-      date:    string,
-      totals:  NutritionInfo
-    }[]
-  }
-  ```
+    ```
+    {
+      days: {
+        date:    string,
+        totals:  NutritionInfo
+      }[]
+    }
+    ```
 
 ### POST /food-entries
+
 - Auth requise
 - Body : `CreateFoodEntryRequest { description, date, mealType }`
 - Le service appelle le LLM pour estimer les macros depuis `description`
@@ -75,6 +79,7 @@ Index : `(user_id, date)` pour les requêtes par jour.
 - Réponse : `FoodEntry` créée
 
 ### DELETE /food-entries/:id
+
 - Auth requise
 - Vérifier que l'entrée appartient à l'utilisateur
 - Supprimer et retourner 204

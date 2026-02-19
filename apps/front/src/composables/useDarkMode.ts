@@ -8,7 +8,7 @@ export function useDarkMode() {
         isDark.value = e.matches;
         document.documentElement.setAttribute(
             "data-theme",
-            e.matches ? "dark" : "light"
+            e.matches ? "dark" : "light",
         );
     };
 
