@@ -5,6 +5,7 @@ export * from "./utils.js";
 
 export * from "./libraryService.js";
 export * from "./planService.js";
+export * from "./threadService.js";
 
 // Schemas
 export * from "./schemas/auth.schemas.js";

@@ -14,6 +14,7 @@ import {
     StreamEventData,
     chatMessageSchema,
     getHistorySchema,
+    threadService,
 } from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
@@ -78,6 +79,15 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`,
         );
 
+        // Thread lifecycle: create if not provided
+        let effectiveThreadId = thread_id;
+        let isNewThread = false;
+        if (!effectiveThreadId) {
+            const created = await threadService.createThread(token);
+            effectiveThreadId = created.id;
+            isNewThread = true;
+        }
+
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache, no-transform",
@@ -88,6 +98,10 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         const send = (event: StreamEventData) => {
             res.write(`data: ${JSON.stringify(event)}\n\n`);
         };
+
+        if (isNewThread) {
+            send({ type: "threadCreated", threadId: effectiveThreadId, title: "Nouvelle conversation" });
+        }
 
         const tools: AgentTool<ZodObject>[] = [
             getReadLibraryTool(token),
@@ -104,7 +118,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         );
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },
-            { version: "v2", configurable: thread_id ? { thread_id } : {} },
+            { version: "v2", configurable: { thread_id: effectiveThreadId } },
         );
         let final = "";
 
@@ -254,6 +268,15 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
 
         send({ type: "end", finalOutput: final });
         res.end();
+
+        // Async thread bookkeeping (non-blocking)
+        threadService.updateThread(effectiveThreadId, { lastMessageAt: new Date().toISOString() }, token)
+            .catch((err) => console.error("[agent] failed to update thread lastMessageAt", err));
+
+        if (isNewThread && final) {
+            generateThreadTitle(effectiveThreadId, userMessage, final, token)
+                .catch(() => {});
+        }
     } catch (err: any) {
         // Send error as SSE then close
         try {
@@ -404,6 +427,40 @@ const convertLangChainMessagesToChatMessages = (
     });
     return messages;
 };
+
+async function generateThreadTitle(
+    threadId: string,
+    userMessage: string,
+    agentResponse: string,
+    token: string,
+): Promise<void> {
+    try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+            },
+            body: JSON.stringify({
+                model: "z-ai/glm-4.7",
+                messages: [
+                    {
+                        role: "user",
+                        content: `Génère un titre court (5 mots max) pour cette conversation. Premier message : ${userMessage}. Première réponse : ${agentResponse.slice(0, 200)}. Réponds uniquement avec le titre, sans guillemets.`,
+                    },
+                ],
+            }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        const title: string = data.choices?.[0]?.message?.content?.trim() ?? "";
+        if (title) {
+            await threadService.updateThread(threadId, { title }, token);
+        }
+    } catch (err) {
+        console.error("[agent] generateThreadTitle error:", err);
+    }
+}
 
 const isValidToolIO = (input: any): input is string | undefined => {
     return (

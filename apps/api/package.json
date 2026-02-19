@@ -8,7 +8,7 @@
         "build": "tsc -p tsconfig.json",
         "start": "node dist/index.js",
         "typeorm": "typeorm-ts-node-esm -d src/data-source.ts",
-        "migration:generate": "typeorm-ts-node-esm -d src/data-source.ts migration:generate",
+        "migration:generate": "bash -c 'while [[ $# -gt 0 ]]; do case $1 in --name) NAME=$2; shift 2;; --) shift;; *) shift;; esac; done; typeorm-ts-node-esm -d src/data-source.ts migration:generate src/migrations/$NAME' --",
         "migration:run": "pnpm typeorm migration:run",
         "migration:revert": "pnpm typeorm migration:revert",
         "seed": "tsx src/seed.ts",

@@ -8,7 +8,7 @@
 
 ```
 Phase 1 — Fondations        [x] [x] [x]
-Phase 2 — Backend           [ ] [ ] [ ] [ ] [ ]
+Phase 2 — Backend           [x] [x] [x] [x] [x]
 Phase 3 — Agent / LLM       [ ] [ ]
 Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 ```
@@ -23,11 +23,11 @@ Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 
 ## Phase 2 — Backend (API)
 
-- [ ] **04 — DB : UserProfile** : Entité, migration, relation User 1-1
-- [ ] **05 — DB : FoodEntry** : Entité, migration, relation User + date + mealType
-- [ ] **06 — DB : Conversations** : Persistance des threads LangGraph, titres auto
-- [ ] **07 — API : Profil** : GET /profile, PUT /profile
-- [ ] **08 — API : Journal** : GET /food-entries, POST /food-entries, DELETE /food-entries/:id
+- [x] **04 — DB : UserProfile** : Entité, migration, relation User 1-1
+- [x] **05 — DB : FoodEntry** : Entité, migration, relation User + date + mealType
+- [x] **06 — DB : Conversations** : Persistance des threads LangGraph, titres auto
+- [x] **07 — API : Profil** : GET /profile, PUT /profile
+- [x] **08 — API : Journal** : GET /food-entries, POST /food-entries, DELETE /food-entries/:id
 
 ## Phase 3 — Agent / LLM
 

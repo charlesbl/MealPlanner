@@ -55,10 +55,17 @@ export interface ChainEndEventData {
     finalOutput: string;
 }
 
+export interface ThreadCreatedEventData {
+    type: "threadCreated";
+    threadId: string;
+    title: string;
+}
+
 export type StreamEventData =
     | ChatModelStartEventData
     | ChatModelStreamEventData
     | ChatModelEndEventData
     | ChainEndEventData
     | ToolCallEventData
-    | ToolEndEventData;
+    | ToolEndEventData
+    | ThreadCreatedEventData;

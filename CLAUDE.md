@@ -54,6 +54,7 @@ Shared packages must be built before apps consume them. `shared-all` is used by 
 - **Validation**: Zod schemas from `shared-all` at route boundaries
 - **Response envelope**: all responses use `{ status: "success"|"error", data?, error? }` — see `APIResponsePayload` in `packages/shared-all/src/schemas/common.schemas.ts`
 - **Database**: TypeORM with migrations (never `synchronize: true` in production — migrations are guarded to run only in production via env check)
+- **Migrations**: Always define indexes, constraints, and relations in entity decorators (`@Index`, `@Unique`, etc.) so `migration:generate` produces the correct SQL automatically. **Never manually edit generated migration files** — if a migration is missing something, fix the entity and regenerate.
 
 ### Agent (`apps/agent`)
 
