@@ -27,6 +27,12 @@
         "db:ps": "docker compose --project-name mealplanner-db --project-directory apps/db -f apps/db/docker-compose.yml ps",
         "migration:generate": "pnpm --filter @mealplanner/api migration:generate",
         "migration:run": "pnpm --filter @mealplanner/api migration:run",
-        "migration:revert": "pnpm --filter @mealplanner/api migration"
+        "migration:revert": "pnpm --filter @mealplanner/api migration",
+        "lint": "pnpm -r --if-present run lint",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "prettier": "^3.5.0"
     }
 }
