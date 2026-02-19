@@ -112,3 +112,12 @@ Elles seront enrichies dans les étapes 11 à 15.
 - `pages/LibraryPage.vue` (reprend l'essentiel de `Library.vue` actuel)
 - `pages/JournalPage.vue` (nouvelle)
 - `pages/ProfilePage.vue` (nouvelle)
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

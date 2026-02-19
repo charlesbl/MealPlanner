@@ -110,3 +110,12 @@ Utiliser le SDK Anthropic directement depuis l'API.
 - Les valeurs nutritionnelles sont des **estimations** — le préciser dans l'UI
 - Conserver la description originale pour permettre des corrections futures
 - Pas de modification d'une entrée pour l'instant (delete + recréer)
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

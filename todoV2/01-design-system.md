@@ -9,11 +9,11 @@ Définir les tokens, la typographie et les composants atomiques réutilisables.
 
 ## Checklist
 
-- [ ] Installer Tailwind CSS v4 + plugin Vite dans `apps/front`
-- [ ] Supprimer `style.css` actuel (variables CSS custom) et migrer les tokens vers Tailwind
-- [ ] Installer Lucide Vue pour les icônes
-- [ ] Définir les tokens de design
-- [ ] Créer les composants atomiques de base
+- [x] Installer Tailwind CSS v4 + plugin Vite dans `apps/front`
+- [x] Supprimer `style.css` actuel (variables CSS custom) et migrer les tokens vers Tailwind
+- [x] Installer Lucide Vue pour les icônes
+- [x] Définir les tokens de design
+- [x] Créer les composants atomiques de base
 
 ---
 
@@ -110,3 +110,12 @@ Ordre de migration recommandé : commencer par les composants les plus simples
 Tailwind v4 gère le dark mode via `data-theme="dark"` sur `<html>`.
 Le composable `useDarkMode` existant reste inchangé.
 Déclarer les variantes dark dans la config Tailwind.
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

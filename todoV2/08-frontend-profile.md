@@ -132,3 +132,12 @@ Feedback visuel : une brève animation de confirmation sur la ligne modifiée.
 - Le TDEE est recalculé et renvoyé par le backend à chaque PUT /profile
 - Si height/weight/age sont incomplets → afficher "Renseignez vos infos pour voir votre dépense estimée" à la place du bloc TDEE
 - Le bouton Déconnexion garde le pattern double-confirm existant
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

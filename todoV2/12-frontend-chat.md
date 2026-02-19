@@ -202,3 +202,12 @@ parts: Array<
 - Garder le streaming SSE existant, juste adapter la gestion des events
 - L'historique d'une conversation se charge via `chatService.getHistory(threadId)`
   au moment du switch de thread
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

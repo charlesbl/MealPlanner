@@ -1,0 +1,15 @@
+{
+    "permissions": {
+        "allow": [
+            "Bash(ls:*)",
+            "Bash(tailwind:*)",
+            "Bash(style \")",
+            "Bash(test:*)",
+            "Bash(pnpm add:*)",
+            "Bash(pnpm typecheck:*)",
+            "Bash(npx vue-tsc:*)",
+            "Bash(pnpm format:*)",
+            "Bash(pnpm lint:*)"
+        ]
+    }
+}

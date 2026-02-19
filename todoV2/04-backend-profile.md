@@ -82,3 +82,12 @@ Le TDEE est calculé à la volée et retourné dans la réponse GET, pas stocké
 - Le champ `gender` n'est pas demandé par l'utilisateur pour l'instant,
   donc le TDEE utilisera uniquement la formule neutre (moyenne homme/femme)
   ou on laisse `tdee: null` si les données sont incomplètes
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

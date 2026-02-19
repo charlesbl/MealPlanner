@@ -137,3 +137,12 @@ Rendu:
 - Si `todayTotals.calories === 0` → afficher "Aucun repas loggué aujourd'hui" à la place
   de l'anneau vide, avec un lien vers le journal
 - Le dashboard est volontairement léger : il redirige vers Journal et Plan pour les détails
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

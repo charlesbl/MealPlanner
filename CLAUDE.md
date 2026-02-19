@@ -5,6 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Project Overview
 
 MealPlanner is a monorepo (pnpm workspaces) with 3 apps and 2 shared packages:
+
 - **`apps/front`** — Vue 3 + Vite + Pinia SPA
 - **`apps/api`** — Express 5 + TypeORM + PostgreSQL REST API
 - **`apps/agent`** — LangChain + LangGraph AI agent (SSE streaming)
@@ -71,6 +72,7 @@ Shared packages must be built before apps consume them. `shared-all` is used by 
 ### Database
 
 Two PostgreSQL instances (both via Docker Compose in `apps/db`):
+
 - Port **5432**: API data (`users`, `recipes`, `meals`)
 - Port **5433**: LangGraph conversation checkpointer (agent)
 

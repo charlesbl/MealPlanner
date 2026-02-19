@@ -144,3 +144,12 @@ Cas limites à gérer :
 - Description trop vague ("j'ai mangé un truc") → demander précision avant de logger
 - Quantité non précisée → assumer une portion standard et le mentionner
 - Plat maison complexe → décomposer les ingrédients principaux si possible
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

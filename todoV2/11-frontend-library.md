@@ -174,3 +174,12 @@ Mapping filtres → RecipeType :
   (l'utilisateur peut dire "calcule les macros de ma recette X")
   ou via un bouton qui ouvre directement le chat avec un message pré-rempli
 - Conserver le comportement de suppression optimiste existant
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues

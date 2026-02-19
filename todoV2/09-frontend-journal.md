@@ -191,3 +191,12 @@ Au submit:
 - L'entrée LLM peut prendre 2-3s : afficher un état de chargement clair
 - Si pas d'objectif défini (profileStore vide) → afficher un nudge
   "Définissez votre objectif calorique dans le Profil" à la place du goal
+
+---
+
+## After Implementation
+
+1. Check every box in this file's Checklist
+2. Update the master checklist in `todoV2/README.md`
+3. Run `pnpm format` — auto-formats all changed files
+4. Run `pnpm lint` — catches any remaining issues
