@@ -97,13 +97,19 @@ export function journalControllerFactory() {
     const repo = AppDataSource.getRepository(FoodEntryEntity);
 
     return {
-        getByDate: async (req: Request, res: AuthAPIResponse<DayEntriesResponse>) => {
+        getByDate: async (
+            req: Request,
+            res: AuthAPIResponse<DayEntriesResponse>,
+        ) => {
             const userId = res.locals.user.sub;
             const date = req.query.date as string;
             if (!date) {
                 return res
                     .status(400)
-                    .json({ status: "error", error: "date query param required" });
+                    .json({
+                        status: "error",
+                        error: "date query param required",
+                    });
             }
             const entries = await repo.find({
                 where: { user: { id: userId }, date },
@@ -124,7 +130,10 @@ export function journalControllerFactory() {
             if (!startDate) {
                 return res
                     .status(400)
-                    .json({ status: "error", error: "startDate query param required" });
+                    .json({
+                        status: "error",
+                        error: "startDate query param required",
+                    });
             }
 
             const start = new Date(startDate);
@@ -145,7 +154,8 @@ export function journalControllerFactory() {
 
         create: async (req: Request, res: AuthAPIResponse<CreateResponse>) => {
             const userId = res.locals.user.sub;
-            const body: CreateFoodEntryRequest = createFoodEntryRequestSchema.parse(req.body);
+            const body: CreateFoodEntryRequest =
+                createFoodEntryRequestSchema.parse(req.body);
             const nutrition = await estimateNutrition(body.description);
 
             const entry = repo.create({
@@ -159,7 +169,10 @@ export function journalControllerFactory() {
                 fat: nutrition.fat,
             });
             await repo.save(entry);
-            res.status(201).json({ status: "success", data: toFoodEntry(entry, userId) });
+            res.status(201).json({
+                status: "success",
+                data: toFoodEntry(entry, userId),
+            });
         },
 
         remove: async (req: Request, res: AuthAPIResponse<never>) => {

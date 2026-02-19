@@ -59,3 +59,6 @@ export type RecipeListBodyResponse = APIResponsePayload<Recipe[]>;
 export const removeRecipeSchema = z.object({
     id: z.uuid(),
 });
+
+// Enrich nutrition
+export type EnrichRecipeBodyResponse = APIResponsePayload<Recipe>;

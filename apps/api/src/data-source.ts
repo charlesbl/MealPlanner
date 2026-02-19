@@ -24,6 +24,13 @@ export const AppDataSource = new DataSource({
     synchronize: false,
     logging: false,
     migrationsRun: process.env.NODE_ENV === "production",
-    entities: [UserEntity, RecipeEntity, MealEntity, UserProfileEntity, FoodEntryEntity, ThreadEntity],
+    entities: [
+        UserEntity,
+        RecipeEntity,
+        MealEntity,
+        UserProfileEntity,
+        FoodEntryEntity,
+        ThreadEntity,
+    ],
     migrations: [path.join(__dirname, "migrations/*.{ts,js}")],
 });

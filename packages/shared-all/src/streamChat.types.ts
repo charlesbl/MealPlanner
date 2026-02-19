@@ -12,6 +12,10 @@ export type ToolUpdateEvent =
     | {
           type: "removeRecipe";
           recipeId: string;
+      }
+    | {
+          type: "updateJournal";
+          date: string;
       };
 
 export type ToolUpdateEventType = ToolUpdateEvent["type"];

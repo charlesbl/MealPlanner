@@ -9,7 +9,7 @@
 ```
 Phase 1 — Fondations        [x] [x] [x]
 Phase 2 — Backend           [x] [x] [x] [x] [x]
-Phase 3 — Agent / LLM       [ ] [ ]
+Phase 3 — Agent / LLM       [x] [x]
 Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 ```
 
@@ -31,8 +31,8 @@ Phase 4 — Frontend          [ ] [ ] [ ] [ ] [ ]
 
 ## Phase 3 — Agent / LLM
 
-- [ ] **09 — Tool : logFood** : Estimation calories + macros depuis texte libre via LLM
-- [ ] **10 — Tool : enrichRecipe** : Calcul macros sur recettes existantes sans nutrition
+- [x] **09 — Tool : logFood** : Estimation calories + macros depuis texte libre via LLM
+- [x] **10 — Tool : enrichRecipe** : Calcul macros sur recettes existantes sans nutrition
 
 ## Phase 4 — Frontend
 

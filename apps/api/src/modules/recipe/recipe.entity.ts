@@ -1,4 +1,4 @@
-import { RecipeType } from "@mealplanner/shared-all";
+import { type NutritionInfo, RecipeType } from "@mealplanner/shared-all";
 import {
     Column,
     Entity,
@@ -22,6 +22,9 @@ export class RecipeEntity {
 
     @Column({ type: "simple-array" })
     recipeTypes!: RecipeType[];
+
+    @Column({ type: "jsonb", nullable: true })
+    nutrition?: NutritionInfo;
 
     @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
     createdAt!: Date;

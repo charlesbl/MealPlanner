@@ -1,4 +1,5 @@
 import {
+    type EnrichRecipeBodyResponse,
     type Recipe,
     type RecipeCreateBodyResponse,
     type RecipeListBodyResponse,
@@ -64,9 +65,24 @@ async function deleteRecipe(id: string, token: string): Promise<void> {
     if (!res.ok) throw new Error(`Delete recipe failed: ${res.status}`);
 }
 
+async function enrichRecipeNutrition(
+    id: string,
+    token: string,
+): Promise<Recipe> {
+    const res = await fetch(`${getApiBase()}/recipe/${id}/enrich-nutrition`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) throw new Error(`Enrich nutrition failed: ${res.status}`);
+    const body: EnrichRecipeBodyResponse = await res.json();
+    if (body.status === "error") throw new Error(body.error);
+    return body.data;
+}
+
 export const libraryService = {
     fetchLibrary,
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    enrichRecipeNutrition,
 };

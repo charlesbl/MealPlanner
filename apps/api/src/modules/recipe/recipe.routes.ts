@@ -9,6 +9,11 @@ export function recipeRouterFactory() {
     router.get("/:id", requireAuth, controller.getById);
     router.post("/", requireAuth, controller.create);
     router.put("/:id", requireAuth, controller.update);
+    router.post(
+        "/:id/enrich-nutrition",
+        requireAuth,
+        controller.enrichNutrition,
+    );
     router.delete("/:id", requireAuth, controller.remove);
     return router;
 }

@@ -50,13 +50,18 @@ export function threadsControllerFactory() {
                 lastMessageAt: new Date(),
             });
             await repo.save(thread);
-            res.status(201).json({ status: "success", data: toThread(thread, userId) });
+            res.status(201).json({
+                status: "success",
+                data: toThread(thread, userId),
+            });
         },
 
         update: async (req: Request, res: AuthAPIResponse<SingleResponse>) => {
             const userId = res.locals.user.sub;
             const { id } = req.params;
-            const thread = await repo.findOne({ where: { id, user: { id: userId } } });
+            const thread = await repo.findOne({
+                where: { id, user: { id: userId } },
+            });
             if (!thread) {
                 return res
                     .status(404)
@@ -76,7 +81,9 @@ export function threadsControllerFactory() {
         remove: async (req: Request, res: AuthAPIResponse<never>) => {
             const userId = res.locals.user.sub;
             const { id } = req.params;
-            const thread = await repo.findOne({ where: { id, user: { id: userId } } });
+            const thread = await repo.findOne({
+                where: { id, user: { id: userId } },
+            });
             if (!thread) {
                 return res
                     .status(404)

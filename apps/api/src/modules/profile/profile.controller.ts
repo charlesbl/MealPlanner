@@ -17,7 +17,9 @@ function computeTdee(profile: UserProfileEntity): number | null {
     return Math.round(((bmrMale + bmrFemale) / 2) * 1.55);
 }
 
-function toProfileResponse(entity: UserProfileEntity): UserProfile & { tdee: number | null } {
+function toProfileResponse(
+    entity: UserProfileEntity,
+): UserProfile & { tdee: number | null } {
     return {
         userId: entity.userId,
         height: entity.height,
@@ -32,7 +34,9 @@ function toProfileResponse(entity: UserProfileEntity): UserProfile & { tdee: num
     };
 }
 
-type ProfileResponse = APIResponsePayload<UserProfile & { tdee: number | null }>;
+type ProfileResponse = APIResponsePayload<
+    UserProfile & { tdee: number | null }
+>;
 
 export function profileControllerFactory() {
     const repo = AppDataSource.getRepository(UserProfileEntity);
@@ -59,7 +63,8 @@ export function profileControllerFactory() {
 
         update: async (req: Request, res: AuthAPIResponse<ProfileResponse>) => {
             const userId = res.locals.user.sub;
-            const patch: UpdateProfileRequest = updateProfileRequestSchema.parse(req.body);
+            const patch: UpdateProfileRequest =
+                updateProfileRequestSchema.parse(req.body);
 
             let profile = await repo.findOne({ where: { userId } });
             if (!profile) {

@@ -24,6 +24,8 @@ import { ZodObject } from "zod";
 import { createAgent, createCheckpointer } from "./agent.js";
 import { getAddMealTool } from "./tools/addMealTool.js";
 import { getAddOrUpdateRecipeTool } from "./tools/addOrUpdateRecipeTool.js";
+import { getEnrichRecipeNutritionTool } from "./tools/enrichRecipeNutritionTool.js";
+import { getLogFoodTool } from "./tools/logFoodTool.js";
 import { getReadLibraryTool } from "./tools/readLibraryTool.js";
 import { getReadPlanTool } from "./tools/readPlanTool.js";
 import { getRemoveRecipeFromPlanTool } from "./tools/removeMealTool.js";
@@ -100,7 +102,11 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         };
 
         if (isNewThread) {
-            send({ type: "threadCreated", threadId: effectiveThreadId, title: "Nouvelle conversation" });
+            send({
+                type: "threadCreated",
+                threadId: effectiveThreadId,
+                title: "Nouvelle conversation",
+            });
         }
 
         const tools: AgentTool<ZodObject>[] = [
@@ -110,6 +116,8 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             getAddMealTool(token),
             getRemoveRecipeFromPlanTool(token),
             getReadPlanTool(token),
+            getLogFoodTool(token),
+            getEnrichRecipeNutritionTool(token),
         ];
         const agent = createAgent(
             llm,
@@ -270,12 +278,26 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         res.end();
 
         // Async thread bookkeeping (non-blocking)
-        threadService.updateThread(effectiveThreadId, { lastMessageAt: new Date().toISOString() }, token)
-            .catch((err) => console.error("[agent] failed to update thread lastMessageAt", err));
+        threadService
+            .updateThread(
+                effectiveThreadId,
+                { lastMessageAt: new Date().toISOString() },
+                token,
+            )
+            .catch((err) =>
+                console.error(
+                    "[agent] failed to update thread lastMessageAt",
+                    err,
+                ),
+            );
 
         if (isNewThread && final) {
-            generateThreadTitle(effectiveThreadId, userMessage, final, token)
-                .catch(() => {});
+            generateThreadTitle(
+                effectiveThreadId,
+                userMessage,
+                final,
+                token,
+            ).catch(() => {});
         }
     } catch (err: any) {
         // Send error as SSE then close
@@ -435,22 +457,25 @@ async function generateThreadTitle(
     token: string,
 ): Promise<void> {
     try {
-        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+        const res = await fetch(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "z-ai/glm-4.7",
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Génère un titre court (5 mots max) pour cette conversation. Premier message : ${userMessage}. Première réponse : ${agentResponse.slice(0, 200)}. Réponds uniquement avec le titre, sans guillemets.`,
+                        },
+                    ],
+                }),
             },
-            body: JSON.stringify({
-                model: "z-ai/glm-4.7",
-                messages: [
-                    {
-                        role: "user",
-                        content: `Génère un titre court (5 mots max) pour cette conversation. Premier message : ${userMessage}. Première réponse : ${agentResponse.slice(0, 200)}. Réponds uniquement avec le titre, sans guillemets.`,
-                    },
-                ],
-            }),
-        });
+        );
         if (!res.ok) return;
         const data = await res.json();
         const title: string = data.choices?.[0]?.message?.content?.trim() ?? "";
