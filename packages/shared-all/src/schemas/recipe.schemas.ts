@@ -61,4 +61,10 @@ export const removeRecipeSchema = z.object({
 });
 
 // Enrich nutrition
+export const enrichRecipeNutritionRequestSchema = z.object({
+    nutrition: nutritionInfoSchema,
+});
+export type EnrichRecipeNutritionRequest = z.infer<
+    typeof enrichRecipeNutritionRequestSchema
+>;
 export type EnrichRecipeBodyResponse = APIResponsePayload<Recipe>;

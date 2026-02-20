@@ -159,7 +159,9 @@ async function handleSendMessage(message: string) {
                 }
             } else if (event.type === "threadCreated") {
                 // Agent created the thread (no thread_id was provided)
-                threadStore.setThreadId(event.threadId);
+                threadStore.setThreadId(event.threadId, {
+                    hydrateHistory: false,
+                });
                 conversationsStore.updateThreadTitle(
                     event.threadId,
                     event.title,

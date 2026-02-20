@@ -11,6 +11,7 @@ const THREAD_KEY = "langgraph_thread_id";
 export const useThreadStore = defineStore("thread", () => {
     const threadId = ref<string>(localStorage.getItem(THREAD_KEY) ?? "");
     const messages = ref<ChatMessage[]>([]);
+    const skipNextHistoryFetch = ref(false);
 
     // Persist to localStorage whenever threadId changes
     watch(threadId, (newId) => {
@@ -25,6 +26,10 @@ export const useThreadStore = defineStore("thread", () => {
     watch(
         threadId,
         async (newId) => {
+            if (skipNextHistoryFetch.value) {
+                skipNextHistoryFetch.value = false;
+                return;
+            }
             if (!newId) {
                 messages.value = [];
                 return;
@@ -39,7 +44,10 @@ export const useThreadStore = defineStore("thread", () => {
         { immediate: true },
     );
 
-    function setThreadId(id: string) {
+    function setThreadId(id: string, options?: { hydrateHistory?: boolean }) {
+        if (options?.hydrateHistory === false) {
+            skipNextHistoryFetch.value = true;
+        }
         threadId.value = id;
     }
 

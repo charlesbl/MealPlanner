@@ -21,6 +21,7 @@ export const createFoodEntryRequestSchema = z.object({
     description: z.string().min(1),
     date: z.string(),
     mealType: MealTypeSchema,
+    nutrition: nutritionInfoSchema.optional(),
 });
 export type CreateFoodEntryRequest = z.infer<
     typeof createFoodEntryRequestSchema

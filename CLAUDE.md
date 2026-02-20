@@ -26,6 +26,7 @@ pnpm build              # Build all packages in parallel
 pnpm build:shared-all   # Must build shared packages before apps
 
 # Code quality
+pnpm typecheck          # Type-check all packages (tsc/vue-tsc --noEmit)
 pnpm lint               # Lint all packages
 pnpm format             # Format with Prettier
 pnpm format:check       # Check formatting without writing

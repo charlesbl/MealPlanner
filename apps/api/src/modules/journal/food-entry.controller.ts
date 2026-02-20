@@ -10,48 +10,12 @@ import { Request } from "express";
 import { AppDataSource } from "../../data-source.js";
 import { FoodEntryEntity } from "./food-entry.entity.js";
 
-async function estimateNutrition(description: string): Promise<NutritionInfo> {
-    try {
-        const apiKey = process.env.OPENROUTER_API_KEY;
-        if (!apiKey) throw new Error("OPENROUTER_API_KEY not set");
-
-        const res = await fetch(
-            "https://openrouter.ai/api/v1/chat/completions",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${apiKey}`,
-                },
-                body: JSON.stringify({
-                    model: "z-ai/glm-4.7",
-                    messages: [
-                        {
-                            role: "user",
-                            content: `Tu es un nutritionniste expert. Estime les macronutriments pour : ${description}. Réponds UNIQUEMENT en JSON valide, sans texte autour : { "calories": number, "protein": number, "carbs": number, "fat": number }. Toutes les valeurs en nombres entiers.`,
-                        },
-                    ],
-                }),
-            },
-        );
-
-        if (!res.ok) throw new Error(`OpenRouter error: ${res.status}`);
-        const data = await res.json();
-        const content: string = data.choices?.[0]?.message?.content ?? "";
-        const jsonMatch = content.match(/\{[\s\S]*\}/);
-        if (!jsonMatch) throw new Error("No JSON found in response");
-        const parsed = JSON.parse(jsonMatch[0]);
-        return {
-            calories: Number(parsed.calories) || 0,
-            protein: Number(parsed.protein) || 0,
-            carbs: Number(parsed.carbs) || 0,
-            fat: Number(parsed.fat) || 0,
-        };
-    } catch (err) {
-        console.error("[journal] estimateNutrition error:", err);
-        return { calories: 0, protein: 0, carbs: 0, fat: 0 };
-    }
-}
+const EMPTY_NUTRITION: NutritionInfo = {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+};
 
 function toFoodEntry(entity: FoodEntryEntity, userId: string): FoodEntry {
     return {
@@ -152,7 +116,7 @@ export function journalControllerFactory() {
             const userId = res.locals.user.sub;
             const body: CreateFoodEntryRequest =
                 createFoodEntryRequestSchema.parse(req.body);
-            const nutrition = await estimateNutrition(body.description);
+            const nutrition = body.nutrition ?? EMPTY_NUTRITION;
 
             const entry = repo.create({
                 user: { id: userId },

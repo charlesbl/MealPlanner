@@ -13,9 +13,13 @@ import {
     Part,
     StreamEventData,
     chatMessageSchema,
+    createFoodEntryRequestSchema,
     getHistorySchema,
+    journalService,
     threadService,
+    type FoodEntry,
 } from "@mealplanner/shared-all";
+import type { APIResponsePayload } from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
@@ -31,6 +35,7 @@ import { getReadPlanTool } from "./tools/readPlanTool.js";
 import { getRemoveRecipeFromPlanTool } from "./tools/removeMealTool.js";
 import { getDeleteRecipeTool } from "./tools/removeRecipeTool.js";
 import { AgentTool } from "./tools/types.js";
+import { estimateNutrition } from "./utils/estimateNutrition.js";
 
 //dotenv
 config();
@@ -369,6 +374,38 @@ app.get(
             });
         } catch (err: any) {
             console.error("[agent] /history error:", err);
+            return res.status(500).json({
+                status: "error",
+                error: err?.message ?? "Unknown error",
+            });
+        }
+    },
+);
+
+app.post(
+    "/food-entries",
+    requireAuth,
+    async (
+        req: Request,
+        res: AuthAPIResponse<APIResponsePayload<FoodEntry>>,
+    ) => {
+        try {
+            const parsed = createFoodEntryRequestSchema.safeParse(req.body);
+            if (!parsed.success) {
+                return res.status(400).json({
+                    status: "error",
+                    error: parsed.error.message,
+                });
+            }
+            const token = res.locals.token;
+            const nutrition = await estimateNutrition(parsed.data.description);
+            const entry = await journalService.createFoodEntry(
+                { ...parsed.data, nutrition },
+                token,
+            );
+            return res.status(201).json({ status: "success", data: entry });
+        } catch (err: any) {
+            console.error("[agent] /food-entries error:", err);
             return res.status(500).json({
                 status: "error",
                 error: err?.message ?? "Unknown error",

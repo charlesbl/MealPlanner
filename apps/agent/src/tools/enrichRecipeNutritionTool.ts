@@ -1,10 +1,16 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { libraryService } from "@mealplanner/shared-all";
 import { z } from "zod";
+import { estimateNutrition } from "../utils/estimateNutrition.js";
 import { AgentTool } from "./types.js";
 
 const enrichRecipeNutritionSchema = z.object({
     recipeId: z.string().describe("ID of the recipe to compute nutrition for"),
+    recipeName: z.string().describe("Name of the recipe"),
+    recipeDescription: z
+        .string()
+        .optional()
+        .describe("Description of the recipe, if available"),
 });
 
 export const getEnrichRecipeNutritionTool = (
@@ -25,8 +31,16 @@ export const getEnrichRecipeNutritionTool = (
                 input: z.infer<typeof enrichRecipeNutritionSchema>,
             ): Promise<string> => {
                 try {
+                    const description = [
+                        input.recipeName,
+                        input.recipeDescription,
+                    ]
+                        .filter(Boolean)
+                        .join("\n");
+                    const nutrition = await estimateNutrition(description);
                     const recipe = await libraryService.enrichRecipeNutrition(
                         input.recipeId,
+                        nutrition,
                         token,
                     );
                     if (!recipe.nutrition) {

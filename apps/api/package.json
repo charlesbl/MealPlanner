@@ -12,7 +12,8 @@
         "migration:run": "pnpm typeorm migration:run",
         "migration:revert": "pnpm typeorm migration:revert",
         "seed": "tsx src/seed.ts",
-        "lint": "tsc --noEmit"
+        "lint": "tsc --noEmit",
+        "typecheck": "tsc --noEmit"
     },
     "dependencies": {
         "@mealplanner/shared-all": "workspace:*",

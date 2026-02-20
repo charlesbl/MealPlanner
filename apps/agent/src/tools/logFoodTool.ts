@@ -5,6 +5,7 @@ import {
     MealTypeSchema,
 } from "@mealplanner/shared-all";
 import { z } from "zod";
+import { estimateNutrition } from "../utils/estimateNutrition.js";
 import { AgentTool } from "./types.js";
 
 const logFoodSchema = z.object({
@@ -41,11 +42,13 @@ export const getLogFoodTool = (
                 input: z.infer<typeof logFoodSchema>,
             ): Promise<string> => {
                 try {
+                    const nutrition = await estimateNutrition(input.description);
                     const entry = await journalService.createFoodEntry(
                         {
                             description: input.description,
                             date: input.date,
                             mealType: input.mealType as MealType,
+                            nutrition,
                         },
                         token,
                     );

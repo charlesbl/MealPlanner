@@ -28,6 +28,7 @@
         "migration:generate": "pnpm --filter @mealplanner/api migration:generate",
         "migration:run": "pnpm --filter @mealplanner/api migration:run",
         "migration:revert": "pnpm --filter @mealplanner/api migration",
+        "typecheck": "pnpm -r --if-present run typecheck",
         "lint": "pnpm -r --if-present run lint",
         "format": "prettier --write .",
         "format:check": "prettier --check ."

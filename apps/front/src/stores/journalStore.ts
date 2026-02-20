@@ -85,14 +85,20 @@ export const useJournalStore = defineStore("journalStore", () => {
         if (!auth.token) return;
         adding.value = true;
         try {
-            await journalService.createFoodEntry(
-                {
+            const agentUrl = import.meta.env.VITE_AGENT_URL as string;
+            const res = await fetch(`${agentUrl}/food-entries`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${auth.token}`,
+                },
+                body: JSON.stringify({
                     description,
                     date: date ?? currentDate.value,
-                    mealType: mealType as any,
-                },
-                auth.token,
-            );
+                    mealType,
+                }),
+            });
+            if (!res.ok) throw new Error(`Add food entry failed: ${res.status}`);
             await fetchDay(date ?? currentDate.value);
         } catch (e) {
             console.error("addEntry error:", e);
