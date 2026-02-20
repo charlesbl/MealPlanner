@@ -9,6 +9,7 @@ import {
 import type { UserEntity } from "../user/user.entity.js";
 
 export type MealTypeValue = "breakfast" | "lunch" | "dinner" | "snack";
+export type FoodEntryStatus = "pending" | "completed" | "error";
 
 @Entity({ name: "food_entries" })
 export class FoodEntryEntity {
@@ -43,6 +44,16 @@ export class FoodEntryEntity {
 
     @Column({ type: "float", default: 0 })
     fat!: number;
+
+    @Column({
+        type: "enum",
+        enum: ["pending", "completed", "error"],
+        default: "completed",
+    })
+    status!: FoodEntryStatus;
+
+    @Column({ type: "text", nullable: true, name: "error_message", default: null })
+    errorMessage!: string | null;
 
     @CreateDateColumn({ name: "created_at" })
     createdAt!: Date;

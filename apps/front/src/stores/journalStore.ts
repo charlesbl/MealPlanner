@@ -4,7 +4,7 @@ import {
     type NutritionInfo,
 } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { useAuthStore } from "./authStore";
 
 function todayISO(): string {
@@ -27,6 +27,8 @@ const EMPTY_TOTALS: NutritionInfo = {
     fat: 0,
 };
 
+const POLL_INTERVAL_MS = 2000;
+
 export const useJournalStore = defineStore("journalStore", () => {
     const auth = useAuthStore();
 
@@ -37,6 +39,31 @@ export const useJournalStore = defineStore("journalStore", () => {
     const loadingDay = ref(false);
     const loadingWeek = ref(false);
     const adding = ref(false);
+
+    const pollingInterval = ref<ReturnType<typeof setInterval> | null>(null);
+
+    const hasPendingEntries = computed(() =>
+        entries.value.some((e) => e.status === "pending"),
+    );
+
+    function stopPolling() {
+        if (pollingInterval.value !== null) {
+            clearInterval(pollingInterval.value);
+            pollingInterval.value = null;
+        }
+    }
+
+    function syncPolling() {
+        if (hasPendingEntries.value) {
+            if (pollingInterval.value === null) {
+                pollingInterval.value = setInterval(() => {
+                    void fetchDay(currentDate.value);
+                }, POLL_INTERVAL_MS);
+            }
+        } else {
+            stopPolling();
+        }
+    }
 
     async function fetchDay(date: string) {
         if (!auth.token) return;
@@ -51,6 +78,7 @@ export const useJournalStore = defineStore("journalStore", () => {
         } finally {
             loadingDay.value = false;
         }
+        syncPolling();
     }
 
     async function fetchWeek(date: string) {
@@ -99,12 +127,28 @@ export const useJournalStore = defineStore("journalStore", () => {
                 }),
             });
             if (!res.ok) throw new Error(`Add food entry failed: ${res.status}`);
+            // Fetch immediately to display the pending entry
             await fetchDay(date ?? currentDate.value);
         } catch (e) {
             console.error("addEntry error:", e);
             throw e;
         } finally {
             adding.value = false;
+        }
+    }
+
+    async function retryEntry(id: string) {
+        if (!auth.token) return;
+        try {
+            const agentUrl = import.meta.env.VITE_AGENT_URL as string;
+            const res = await fetch(`${agentUrl}/food-entries/${id}/retry`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${auth.token}` },
+            });
+            if (!res.ok) throw new Error(`Retry food entry failed: ${res.status}`);
+            await fetchDay(currentDate.value);
+        } catch (e) {
+            console.error("retryEntry error:", e);
         }
     }
 
@@ -138,10 +182,13 @@ export const useJournalStore = defineStore("journalStore", () => {
         loadingDay,
         loadingWeek,
         adding,
+        hasPendingEntries,
         fetchDay,
         fetchWeek,
         addEntry,
+        retryEntry,
         deleteEntry,
+        stopPolling,
         todayISO,
         getWeekStartISO,
     };

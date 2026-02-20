@@ -2,8 +2,12 @@ import type {
     CreateFoodEntryRequest,
     FoodEntry,
     NutritionInfo,
+    UpdateFoodEntryRequest,
 } from "@mealplanner/shared-all";
-import { createFoodEntryRequestSchema } from "@mealplanner/shared-all";
+import {
+    createFoodEntryRequestSchema,
+    updateFoodEntryRequestSchema,
+} from "@mealplanner/shared-all";
 import type { APIResponsePayload } from "@mealplanner/shared-all";
 import type { AuthAPIResponse } from "@mealplanner/shared-back";
 import { Request } from "express";
@@ -30,20 +34,24 @@ function toFoodEntry(entity: FoodEntryEntity, userId: string): FoodEntry {
             carbs: entity.carbs,
             fat: entity.fat,
         },
+        status: entity.status,
+        errorMessage: entity.errorMessage,
         createdAt: entity.createdAt,
     };
 }
 
 function sumNutrition(entries: FoodEntryEntity[]): NutritionInfo {
-    return entries.reduce(
-        (acc, e) => ({
-            calories: acc.calories + e.calories,
-            protein: acc.protein + e.protein,
-            carbs: acc.carbs + e.carbs,
-            fat: acc.fat + e.fat,
-        }),
-        { calories: 0, protein: 0, carbs: 0, fat: 0 },
-    );
+    return entries
+        .filter((e) => e.status === "completed")
+        .reduce(
+            (acc, e) => ({
+                calories: acc.calories + e.calories,
+                protein: acc.protein + e.protein,
+                carbs: acc.carbs + e.carbs,
+                fat: acc.fat + e.fat,
+            }),
+            { calories: 0, protein: 0, carbs: 0, fat: 0 },
+        );
 }
 
 type DayEntriesResponse = APIResponsePayload<{
@@ -56,6 +64,7 @@ type WeekResponse = APIResponsePayload<{
 }>;
 
 type CreateResponse = APIResponsePayload<FoodEntry>;
+type UpdateResponse = APIResponsePayload<FoodEntry>;
 
 export function journalControllerFactory() {
     const repo = AppDataSource.getRepository(FoodEntryEntity);
@@ -127,12 +136,40 @@ export function journalControllerFactory() {
                 protein: nutrition.protein,
                 carbs: nutrition.carbs,
                 fat: nutrition.fat,
+                status: body.status ?? "completed",
             });
             await repo.save(entry);
             res.status(201).json({
                 status: "success",
                 data: toFoodEntry(entry, userId),
             });
+        },
+
+        update: async (req: Request, res: AuthAPIResponse<UpdateResponse>) => {
+            const userId = res.locals.user.sub;
+            const { id } = req.params;
+            const body: UpdateFoodEntryRequest =
+                updateFoodEntryRequestSchema.parse(req.body);
+            const entry = await repo.findOne({
+                where: { id, user: { id: userId } },
+            });
+            if (!entry) {
+                return res
+                    .status(404)
+                    .json({ status: "error", error: "Food entry not found" });
+            }
+            entry.status = body.status;
+            if (body.nutrition) {
+                entry.calories = body.nutrition.calories;
+                entry.protein = body.nutrition.protein;
+                entry.carbs = body.nutrition.carbs;
+                entry.fat = body.nutrition.fat;
+            }
+            if (body.errorMessage !== undefined) {
+                entry.errorMessage = body.errorMessage;
+            }
+            await repo.save(entry);
+            res.json({ status: "success", data: toFoodEntry(entry, userId) });
         },
 
         remove: async (req: Request, res: AuthAPIResponse<never>) => {

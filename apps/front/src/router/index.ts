@@ -64,7 +64,7 @@ router.beforeEach((to) => {
     const isAuthenticated = !!auth.token || !!auth.user;
 
     if (to.meta.requiresAuth && !isAuthenticated) {
-        return { name: "login" };
+        return { name: "login", query: { redirect: to.fullPath } };
     }
 
     if ((to.name === "login" || to.name === "register") && isAuthenticated) {

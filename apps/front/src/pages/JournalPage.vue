@@ -166,11 +166,33 @@ watch(
                     v-for="entry in entriesForMeal(mealType)"
                     :key="entry.id"
                 >
-                    <div class="entry-row">
+                    <div
+                        class="entry-row"
+                        :class="{ 'entry-row--error': entry.status === 'error' }"
+                    >
                         <span class="entry-desc">{{ entry.description }}</span>
-                        <span class="entry-cal"
-                            >{{ entry.nutrition.calories }} kcal</span
+                        <!-- Pending: spinner -->
+                        <span
+                            v-if="entry.status === 'pending'"
+                            class="entry-status-pending"
                         >
+                            <span class="loading-spinner"></span>
+                        </span>
+                        <!-- Error: message + retry -->
+                        <template v-else-if="entry.status === 'error'">
+                            <span class="entry-status-error">Erreur</span>
+                            <button
+                                class="retry-btn"
+                                @click="journalStore.retryEntry(entry.id)"
+                                aria-label="Réessayer"
+                            >
+                                ↺
+                            </button>
+                        </template>
+                        <!-- Completed: kcal -->
+                        <span v-else class="entry-cal">
+                            {{ entry.nutrition.calories }} kcal
+                        </span>
                         <button
                             class="entry-delete"
                             @click="journalStore.deleteEntry(entry.id)"
@@ -182,15 +204,9 @@ watch(
                     <AppDivider />
                 </template>
 
-                <!-- Loading row while agent computes kcal -->
-                <div v-if="addingMeal === mealType" class="entry-loading">
-                    <span class="loading-spinner"></span>
-                    <span class="loading-text">Calcul des calories…</span>
-                </div>
-
                 <!-- Add entry row -->
                 <div
-                    v-else-if="expandedMeal !== mealType"
+                    v-if="expandedMeal !== mealType"
                     class="add-collapsed"
                     @click="toggleAdd(mealType)"
                 >
@@ -343,12 +359,35 @@ watch(
     color: #f87171;
 }
 
-/* Loading row */
-.entry-loading {
+/* Entry status */
+.entry-row--error .entry-desc {
+    opacity: 0.6;
+}
+
+.entry-status-pending {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
+}
+
+.entry-status-error {
+    font-size: 12px;
+    color: #f87171;
+    white-space: nowrap;
+}
+
+.retry-btn {
+    background: none;
+    border: none;
+    color: #f87171;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 4px;
+    line-height: 1;
+    transition: opacity 0.15s;
+}
+
+.retry-btn:hover {
+    opacity: 0.7;
 }
 
 .loading-spinner {
@@ -359,11 +398,6 @@ watch(
     border-radius: 50%;
     animation: spin 0.7s linear infinite;
     flex-shrink: 0;
-}
-
-.loading-text {
-    font-size: 13px;
-    color: var(--color-muted);
 }
 
 @keyframes spin {

@@ -9,6 +9,7 @@ export function journalRouterFactory() {
     router.get("/week", requireAuth, controller.getWeek);
     router.get("/", requireAuth, controller.getByDate);
     router.post("/", requireAuth, controller.create);
+    router.patch("/:id", requireAuth, controller.update);
     router.delete("/:id", requireAuth, controller.remove);
     return router;
 }

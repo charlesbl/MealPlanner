@@ -1,9 +1,12 @@
 <script lang="ts" setup>
 import { useAuthStore } from "@/stores/authStore";
 import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
 
 const emit = defineEmits<{ "go-register": [] }>();
 const auth = useAuthStore();
+const route = useRoute();
+const router = useRouter();
 
 const email = ref("");
 const password = ref("");
@@ -14,6 +17,8 @@ async function onSubmit(e: Event) {
     formError.value = null;
     try {
         await auth.login(email.value, password.value);
+        const redirect = route.query.redirect as string | undefined;
+        router.push(redirect || "/dashboard");
     } catch (err: any) {
         formError.value = auth.error || "Échec de connexion";
     }

@@ -18,6 +18,7 @@ import {
     journalService,
     threadService,
     type FoodEntry,
+    type NutritionInfo,
 } from "@mealplanner/shared-all";
 import type { APIResponsePayload } from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
@@ -382,6 +383,39 @@ app.get(
     },
 );
 
+const ZERO_NUTRITION: NutritionInfo = {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+};
+
+async function runNutritionEstimation(
+    entryId: string,
+    description: string,
+    token: string,
+): Promise<void> {
+    try {
+        const nutrition = await estimateNutrition(description);
+        await journalService.updateFoodEntry(
+            entryId,
+            { status: "completed", nutrition },
+            token,
+        );
+    } catch (err: any) {
+        console.error("[agent] nutrition estimation failed:", err);
+        try {
+            await journalService.updateFoodEntry(
+                entryId,
+                { status: "error", errorMessage: err?.message ?? "Unknown error" },
+                token,
+            );
+        } catch (updateErr) {
+            console.error("[agent] failed to mark entry as error:", updateErr);
+        }
+    }
+}
+
 app.post(
     "/food-entries",
     requireAuth,
@@ -398,14 +432,46 @@ app.post(
                 });
             }
             const token = res.locals.token;
-            const nutrition = await estimateNutrition(parsed.data.description);
+            // Create entry immediately as pending
             const entry = await journalService.createFoodEntry(
-                { ...parsed.data, nutrition },
+                { ...parsed.data, nutrition: ZERO_NUTRITION, status: "pending" },
                 token,
             );
-            return res.status(201).json({ status: "success", data: entry });
+            // Return 202 immediately so frontend can show pending state
+            res.status(202).json({ status: "success", data: entry });
+            // Estimate nutrition in the background
+            void runNutritionEstimation(entry.id, parsed.data.description, token);
         } catch (err: any) {
             console.error("[agent] /food-entries error:", err);
+            return res.status(500).json({
+                status: "error",
+                error: err?.message ?? "Unknown error",
+            });
+        }
+    },
+);
+
+app.post(
+    "/food-entries/:id/retry",
+    requireAuth,
+    async (
+        req: Request,
+        res: AuthAPIResponse<APIResponsePayload<FoodEntry>>,
+    ) => {
+        try {
+            const { id } = req.params;
+            const token = res.locals.token;
+            // Reset to pending
+            const entry = await journalService.updateFoodEntry(
+                id,
+                { status: "pending", errorMessage: null },
+                token,
+            );
+            res.status(202).json({ status: "success", data: entry });
+            // Re-run estimation in the background
+            void runNutritionEstimation(id, entry.description, token);
+        } catch (err: any) {
+            console.error("[agent] /food-entries/:id/retry error:", err);
             return res.status(500).json({
                 status: "error",
                 error: err?.message ?? "Unknown error",
