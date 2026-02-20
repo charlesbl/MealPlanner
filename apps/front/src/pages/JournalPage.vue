@@ -182,9 +182,15 @@ watch(
                     <AppDivider />
                 </template>
 
+                <!-- Loading row while agent computes kcal -->
+                <div v-if="addingMeal === mealType" class="entry-loading">
+                    <span class="loading-spinner"></span>
+                    <span class="loading-text">Calcul des calories…</span>
+                </div>
+
                 <!-- Add entry row -->
                 <div
-                    v-if="expandedMeal !== mealType"
+                    v-else-if="expandedMeal !== mealType"
                     class="add-collapsed"
                     @click="toggleAdd(mealType)"
                 >
@@ -204,8 +210,7 @@ watch(
                         @click="submitAdd(mealType)"
                         :disabled="addingMeal === mealType"
                     >
-                        <span v-if="addingMeal === mealType">…</span>
-                        <span v-else>▶</span>
+                        ▶
                     </button>
                 </div>
             </AppCard>
@@ -336,6 +341,35 @@ watch(
 .entry-delete:hover {
     opacity: 1;
     color: #f87171;
+}
+
+/* Loading row */
+.entry-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+}
+
+.loading-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+.loading-text {
+    font-size: 13px;
+    color: var(--color-muted);
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Add row */
