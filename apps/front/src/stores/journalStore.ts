@@ -126,7 +126,8 @@ export const useJournalStore = defineStore("journalStore", () => {
                     mealType,
                 }),
             });
-            if (!res.ok) throw new Error(`Add food entry failed: ${res.status}`);
+            if (!res.ok)
+                throw new Error(`Add food entry failed: ${res.status}`);
             // Fetch immediately to display the pending entry
             await fetchDay(date ?? currentDate.value);
         } catch (e) {
@@ -145,7 +146,8 @@ export const useJournalStore = defineStore("journalStore", () => {
                 method: "POST",
                 headers: { Authorization: `Bearer ${auth.token}` },
             });
-            if (!res.ok) throw new Error(`Retry food entry failed: ${res.status}`);
+            if (!res.ok)
+                throw new Error(`Retry food entry failed: ${res.status}`);
             await fetchDay(currentDate.value);
         } catch (e) {
             console.error("retryEntry error:", e);

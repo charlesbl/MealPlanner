@@ -168,7 +168,9 @@ watch(
                 >
                     <div
                         class="entry-row"
-                        :class="{ 'entry-row--error': entry.status === 'error' }"
+                        :class="{
+                            'entry-row--error': entry.status === 'error',
+                        }"
                     >
                         <span class="entry-desc">{{ entry.description }}</span>
                         <!-- Pending: spinner -->

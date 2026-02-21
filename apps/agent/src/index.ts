@@ -56,17 +56,7 @@ if (!OPENROUTER_API_KEY) {
 const llm = new ChatOpenAI({
     configuration: { baseURL: OPENAI_BASE_URL },
     apiKey: OPENROUTER_API_KEY,
-    // modelName: "z-ai/glm-4.5",
-    // modelName: "openai/gpt-oss-120b",
-    // modelName: "mistralai/mistral-medium-3",
-    modelName: "z-ai/glm-4.7",
-    temperature: 0.7,
-    modelKwargs: {
-        // preset: "@preset/default",
-        provider: {
-            order: ["google-vertex"],
-        },
-    },
+    modelName: "@preset/meal-planner",
 });
 
 const checkpointer = await createCheckpointer();
@@ -407,7 +397,10 @@ async function runNutritionEstimation(
         try {
             await journalService.updateFoodEntry(
                 entryId,
-                { status: "error", errorMessage: err?.message ?? "Unknown error" },
+                {
+                    status: "error",
+                    errorMessage: err?.message ?? "Unknown error",
+                },
                 token,
             );
         } catch (updateErr) {
@@ -434,13 +427,21 @@ app.post(
             const token = res.locals.token;
             // Create entry immediately as pending
             const entry = await journalService.createFoodEntry(
-                { ...parsed.data, nutrition: ZERO_NUTRITION, status: "pending" },
+                {
+                    ...parsed.data,
+                    nutrition: ZERO_NUTRITION,
+                    status: "pending",
+                },
                 token,
             );
             // Return 202 immediately so frontend can show pending state
             res.status(202).json({ status: "success", data: entry });
             // Estimate nutrition in the background
-            void runNutritionEstimation(entry.id, parsed.data.description, token);
+            void runNutritionEstimation(
+                entry.id,
+                parsed.data.description,
+                token,
+            );
         } catch (err: any) {
             console.error("[agent] /food-entries error:", err);
             return res.status(500).json({

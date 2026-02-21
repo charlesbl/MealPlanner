@@ -42,7 +42,9 @@ export const getLogFoodTool = (
                 input: z.infer<typeof logFoodSchema>,
             ): Promise<string> => {
                 try {
-                    const nutrition = await estimateNutrition(input.description);
+                    const nutrition = await estimateNutrition(
+                        input.description,
+                    );
                     const entry = await journalService.createFoodEntry(
                         {
                             description: input.description,

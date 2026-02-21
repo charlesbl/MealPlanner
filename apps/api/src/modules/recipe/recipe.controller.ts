@@ -114,8 +114,9 @@ export function recipeControllerFactory() {
                     error: "Recipe not found",
                 });
 
-            const { nutrition } =
-                enrichRecipeNutritionRequestSchema.parse(req.body);
+            const { nutrition } = enrichRecipeNutritionRequestSchema.parse(
+                req.body,
+            );
             recipe.nutrition = nutrition;
             await recipeRepo.save(recipe);
             res.json({ status: "success", data: recipe });

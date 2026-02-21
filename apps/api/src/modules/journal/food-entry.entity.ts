@@ -52,7 +52,12 @@ export class FoodEntryEntity {
     })
     status!: FoodEntryStatus;
 
-    @Column({ type: "text", nullable: true, name: "error_message", default: null })
+    @Column({
+        type: "text",
+        nullable: true,
+        name: "error_message",
+        default: null,
+    })
     errorMessage!: string | null;
 
     @CreateDateColumn({ name: "created_at" })
