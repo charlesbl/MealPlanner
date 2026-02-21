@@ -25,6 +25,8 @@ import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
 import express, { Request } from "express";
+import path from "node:path";
+import { fileURLToPath } from "url";
 import { ZodObject } from "zod";
 import { createAgent, createCheckpointer } from "./agent.js";
 import { getAddMealTool } from "./tools/addMealTool.js";
@@ -38,8 +40,8 @@ import { getDeleteRecipeTool } from "./tools/removeRecipeTool.js";
 import { AgentTool } from "./tools/types.js";
 import { estimateNutrition } from "./utils/estimateNutrition.js";
 
-//dotenv
-config();
+const __agentDirname = path.dirname(fileURLToPath(import.meta.url));
+config({ path: path.resolve(__agentDirname, "../../../.env") });
 
 const app = express();
 app.use(cors());
@@ -598,12 +600,12 @@ const isValidToolIO = (input: any): input is string | undefined => {
     );
 };
 
-if (process.env.PORT === undefined) {
-    throw new Error("PORT environment variable is not set");
+if (process.env.AGENT_PORT === undefined) {
+    throw new Error("AGENT_PORT environment variable is not set");
 }
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env.AGENT_PORT);
 if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
-    throw new Error("PORT environment variable is not a valid port number");
+    throw new Error("AGENT_PORT environment variable is not a valid port number");
 }
 app.listen(PORT, () => {
     console.log(`[agent] SSE server listening on http://localhost:${PORT}`);

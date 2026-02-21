@@ -7,12 +7,12 @@ import { Pool } from "pg";
 import { systemPromptString } from "./prompt.js";
 
 export async function createCheckpointer() {
-    if (typeof process.env.DB_URL !== "string") {
-        throw new Error("DB_URL environment variable is not set");
+    if (typeof process.env.AGENT_DB_URL !== "string") {
+        throw new Error("AGENT_DB_URL environment variable is not set");
     }
 
     const pool = new Pool({
-        connectionString: process.env.DB_URL,
+        connectionString: process.env.AGENT_DB_URL,
     });
 
     const checkpointer = new PostgresSaver(pool);

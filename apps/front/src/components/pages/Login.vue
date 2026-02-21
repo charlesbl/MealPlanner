@@ -1,9 +1,10 @@
 <script lang="ts" setup>
+import AppButton from "@/components/ui/AppButton.vue";
+import AppInput from "@/components/ui/AppInput.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
-const emit = defineEmits<{ "go-register": [] }>();
 const auth = useAuthStore();
 const route = useRoute();
 const router = useRouter();
@@ -26,102 +27,115 @@ async function onSubmit(e: Event) {
 </script>
 
 <template>
-    <div class="auth-card">
-        <h1>Connexion</h1>
-        <form @submit="onSubmit" class="form">
-            <label>
-                <span>Email</span>
-                <input
-                    v-model="email"
-                    type="email"
-                    required
-                    placeholder="vous@exemple.com"
-                />
-            </label>
-            <label>
-                <span>Mot de passe</span>
-                <input
-                    v-model="password"
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                />
-            </label>
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <h1>Connexion</h1>
+            <form @submit="onSubmit" class="form">
+                <label>
+                    <span>Email</span>
+                    <AppInput
+                        v-model="email"
+                        type="email"
+                        required
+                        placeholder="vous@exemple.com"
+                    />
+                </label>
+                <label>
+                    <span>Mot de passe</span>
+                    <AppInput
+                        v-model="password"
+                        type="password"
+                        required
+                        placeholder="••••••••"
+                    />
+                </label>
 
-            <button class="primary" :disabled="auth.loading" type="submit">
-                {{ auth.loading ? "Connexion…" : "Se connecter" }}
-            </button>
-            <p v-if="formError" class="error">{{ formError }}</p>
-        </form>
+                <AppButton
+                    type="submit"
+                    :disabled="auth.loading"
+                    class="submit-btn"
+                >
+                    {{ auth.loading ? "Connexion…" : "Se connecter" }}
+                </AppButton>
+                <p v-if="formError" class="error">{{ formError }}</p>
+            </form>
 
-        <p class="hint">
-            Pas de compte ?
-            <button class="link" @click="emit('go-register')">
-                Créer un compte
-            </button>
-        </p>
+            <p class="hint">
+                Pas de compte ?
+                <AppButton variant="muted" @click="router.push('/register')" class="link-btn">
+                    Créer un compte
+                </AppButton>
+            </p>
+        </div>
     </div>
 </template>
 
 <style scoped>
+.auth-wrapper {
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .auth-card {
     width: 100%;
-    max-width: 400px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-light);
-    border-radius: 12px;
-    padding: 24px;
-    margin: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    max-width: 380px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card);
+    padding: 28px 24px;
+    margin: 16px;
 }
+
 h1 {
-    margin: 0 0 16px;
-    font-size: 22px;
-    color: var(--text-primary);
+    margin: 0 0 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text);
+    letter-spacing: -0.01em;
 }
+
 .form {
     display: grid;
-    gap: 12px;
+    gap: 14px;
 }
+
 label {
     display: grid;
     gap: 6px;
 }
+
 label span {
-    font-size: 13px;
-    color: var(--text-secondary);
+    font-size: 11px;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
-input {
-    padding: 10px 12px;
-    border: 1px solid var(--border-medium);
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border-radius: 8px;
-}
-button.primary {
+
+.submit-btn {
     margin-top: 4px;
-    padding: 10px 12px;
-    background: var(--accent-blue);
-    color: var(--bg-primary);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    width: 100%;
+    justify-content: center;
 }
+
 .hint {
-    margin-top: 12px;
-    color: var(--text-secondary);
-    font-size: 14px;
+    margin-top: 16px;
+    color: var(--color-muted);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
-.link {
-    border: none;
-    background: none;
-    color: var(--accent-blue);
-    cursor: pointer;
-    padding: 0 4px;
+
+.link-btn {
+    padding-left: 0;
+    padding-right: 0;
 }
+
 .error {
-    color: var(--accent-red);
-    margin: 4px 0 0;
-    font-size: 14px;
+    color: #f87171;
+    margin: 0;
+    font-size: 13px;
 }
 </style>
