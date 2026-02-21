@@ -1,0 +1,39 @@
+name: Deploy to Production
+
+on:
+    push:
+        branches: [master]
+
+jobs:
+    deploy:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Deploy via SSH
+              uses: appleboy/ssh-action@v1
+              with:
+                  host: ${{ secrets.SERVER_HOST }}
+                  username: ${{ secrets.SERVER_USER }}
+                  key: ${{ secrets.SERVER_SSH_KEY }}
+                  envs: ENV_FILE
+                  script: |
+                      set -e
+                      cd ${{ secrets.SERVER_DEPLOY_PATH }}
+
+                      echo "==> Writing .env from GitHub secrets..."
+                      printf '%s' "$ENV_FILE" > .env
+
+                      echo "==> Pulling latest code..."
+                      git pull origin master
+
+                      echo "==> Building new images (services still running)..."
+                      docker compose -f docker-compose.prod.yml build api agent front
+
+                      echo "==> Swapping containers (DB stays up, migrations run on API startup)..."
+                      docker compose -f docker-compose.prod.yml up -d --no-deps api agent front
+
+                      echo "==> Cleaning up old images..."
+                      docker image prune -f
+
+                      echo "==> Deploy complete."
+              env:
+                  ENV_FILE: ${{ secrets.ENV_FILE }}
