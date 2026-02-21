@@ -26,7 +26,7 @@ const isOver = computed(() => !!props.goal && props.current > props.goal);
                 :style="`width: ${pct}%`"
             />
         </div>
-        <span class="compact-value">{{ current }}g</span>
+        <span class="compact-value">{{ current }}<template v-if="goal"> / {{ goal }}</template>g</span>
         <span class="compact-label">{{ label }}</span>
     </div>
 
@@ -34,7 +34,7 @@ const isOver = computed(() => !!props.goal && props.current > props.goal);
     <div v-else class="macro-full">
         <div class="full-header">
             <span class="full-label">{{ label }}</span>
-            <span class="full-value">{{ current }} g</span>
+            <span class="full-value">{{ current }}<template v-if="goal"> / {{ goal }}</template> g</span>
         </div>
         <div class="full-bar-track">
             <div

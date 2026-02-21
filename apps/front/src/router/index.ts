@@ -12,49 +12,49 @@ const router = createRouter({
     history: createWebHistory(),
     routes: [
         { path: "/", redirect: "/dashboard" },
-        { path: "/login", name: "login", component: Login },
-        { path: "/register", name: "register", component: Register },
+        { path: "/login", name: "login", component: Login, meta: { title: "MealPlanner" } },
+        { path: "/register", name: "register", component: Register, meta: { title: "MealPlanner" } },
         {
             path: "/dashboard",
             name: "dashboard",
             component: DashboardPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Dashboard – MealPlanner" },
         },
         {
             path: "/chat",
             name: "chat",
             component: ChatPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Chat – MealPlanner" },
         },
         {
             path: "/chat/:threadId",
             name: "chat-thread",
             component: ChatPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Chat – MealPlanner" },
         },
         {
             path: "/library",
             name: "library",
             component: LibraryPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Library – MealPlanner" },
         },
         {
             path: "/journal",
             name: "journal",
             component: JournalPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Journal – MealPlanner" },
         },
         {
             path: "/journal/:date",
             name: "journal-date",
             component: JournalPage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Journal – MealPlanner" },
         },
         {
             path: "/profile",
             name: "profile",
             component: ProfilePage,
-            meta: { requiresAuth: true },
+            meta: { requiresAuth: true, title: "Profile – MealPlanner" },
         },
     ],
 });
@@ -70,6 +70,10 @@ router.beforeEach((to) => {
     if ((to.name === "login" || to.name === "register") && isAuthenticated) {
         return { name: "dashboard" };
     }
+});
+
+router.afterEach((to) => {
+    document.title = (to.meta.title as string) ?? "MealPlanner";
 });
 
 export default router;

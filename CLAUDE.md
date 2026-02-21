@@ -66,9 +66,12 @@ Shared packages must be built before apps consume them. `shared-all` is used by 
 
 ### Frontend (`apps/front`)
 
-- Horizontal scroll layout with 3 "pages": Library, Plan, Chat
-- Pinia stores: `authStore`, `libraryStore`, `planStore`, `threadStore`, `toolDataUpdateStore`
-- `toolDataUpdateStore` receives tool execution events from SSE to update library/plan in real-time without extra API calls
+- Standard router-based SPA with a fixed **bottom navigation bar** (5 tabs) and a `<main>` scroll area
+- **Pages** (`src/pages/`): `DashboardPage`, `ChatPage`, `LibraryPage`, `JournalPage`, `ProfilePage`
+- **Routes**: `/dashboard`, `/chat`, `/chat/:threadId`, `/library`, `/journal`, `/journal/:date`, `/profile` — all require auth; `/login` and `/register` are public
+- **Pinia stores**: `authStore`, `libraryStore`, `planStore`, `threadStore`, `conversationsStore`, `journalStore`, `profileStore`, `toolDataUpdateStore`
+- `toolDataUpdateStore` receives SSE tool events and updates `libraryStore`, `planStore`, and `journalStore` in real-time without extra API calls
+- All stores watch `authStore.token` and auto-fetch on login/logout
 - Auth token stored in localStorage, injected into API requests by `authService`
 
 ### Database
