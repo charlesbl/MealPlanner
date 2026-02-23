@@ -11,19 +11,39 @@ jobs:
             - name: Deploy via SSH
               uses: appleboy/ssh-action@v1
               with:
-                  host: ${{ secrets.SERVER_HOST }}
-                  username: ${{ secrets.SERVER_USER }}
+                  host: ${{ vars.SERVER_HOST }}
+                  username: ${{ vars.SERVER_USER }}
                   key: ${{ secrets.SERVER_SSH_KEY }}
-                  envs: ENV_FILE
+                  envs: API_POSTGRES_USER,API_POSTGRES_PASSWORD,API_POSTGRES_DB,API_POSTGRES_PORT,AGENT_POSTGRES_USER,AGENT_POSTGRES_PASSWORD,AGENT_POSTGRES_DB,AGENT_POSTGRES_PORT,API_PORT,API_DB_URL,JWT_SECRET,AGENT_PORT,AGENT_DB_URL,OPENROUTER_API_KEY,OPENAI_BASE_URL,API_URL,CADDY_DOMAIN,VITE_API_URL,VITE_AGENT_URL
                   script: |
                       set -e
-                      cd ${{ secrets.SERVER_DEPLOY_PATH }}
+                      cd ${{ vars.SERVER_DEPLOY_PATH }}
 
-                      echo "==> Writing .env from GitHub secrets..."
-                      printf '%s' "$ENV_FILE" > .env
+                      echo "==> Writing .env from GitHub secrets/variables..."
+                      cat > .env <<EOF
+                      API_POSTGRES_USER=$API_POSTGRES_USER
+                      API_POSTGRES_PASSWORD=$API_POSTGRES_PASSWORD
+                      API_POSTGRES_DB=$API_POSTGRES_DB
+                      API_POSTGRES_PORT=$API_POSTGRES_PORT
+                      AGENT_POSTGRES_USER=$AGENT_POSTGRES_USER
+                      AGENT_POSTGRES_PASSWORD=$AGENT_POSTGRES_PASSWORD
+                      AGENT_POSTGRES_DB=$AGENT_POSTGRES_DB
+                      AGENT_POSTGRES_PORT=$AGENT_POSTGRES_PORT
+                      API_PORT=$API_PORT
+                      API_DB_URL=$API_DB_URL
+                      JWT_SECRET=$JWT_SECRET
+                      AGENT_PORT=$AGENT_PORT
+                      AGENT_DB_URL=$AGENT_DB_URL
+                      OPENROUTER_API_KEY=$OPENROUTER_API_KEY
+                      OPENAI_BASE_URL=$OPENAI_BASE_URL
+                      API_URL=$API_URL
+                      CADDY_DOMAIN=$CADDY_DOMAIN
+                      VITE_API_URL=$VITE_API_URL
+                      VITE_AGENT_URL=$VITE_AGENT_URL
+                      EOF
 
                       echo "==> Pulling latest code..."
-                      git pull origin master
+                      git pull --rebase origin master
 
                       echo "==> Building new images (services still running)..."
                       docker compose -f docker-compose.prod.yml build api agent front
@@ -36,4 +56,24 @@ jobs:
 
                       echo "==> Deploy complete."
               env:
-                  ENV_FILE: ${{ secrets.ENV_FILE }}
+                  # --- Secrets (valeurs sensibles) ---
+                  API_POSTGRES_PASSWORD: ${{ secrets.API_POSTGRES_PASSWORD }}
+                  AGENT_POSTGRES_PASSWORD: ${{ secrets.AGENT_POSTGRES_PASSWORD }}
+                  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+                  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+                  API_DB_URL: ${{ secrets.API_DB_URL }}
+                  AGENT_DB_URL: ${{ secrets.AGENT_DB_URL }}
+                  # --- Variables (non sensibles) ---
+                  API_POSTGRES_USER: ${{ vars.API_POSTGRES_USER }}
+                  API_POSTGRES_DB: ${{ vars.API_POSTGRES_DB }}
+                  API_POSTGRES_PORT: ${{ vars.API_POSTGRES_PORT }}
+                  AGENT_POSTGRES_USER: ${{ vars.AGENT_POSTGRES_USER }}
+                  AGENT_POSTGRES_DB: ${{ vars.AGENT_POSTGRES_DB }}
+                  AGENT_POSTGRES_PORT: ${{ vars.AGENT_POSTGRES_PORT }}
+                  API_PORT: ${{ vars.API_PORT }}
+                  AGENT_PORT: ${{ vars.AGENT_PORT }}
+                  OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
+                  API_URL: ${{ vars.API_URL }}
+                  CADDY_DOMAIN: ${{ vars.CADDY_DOMAIN }}
+                  VITE_API_URL: ${{ vars.VITE_API_URL }}
+                  VITE_AGENT_URL: ${{ vars.VITE_AGENT_URL }}
