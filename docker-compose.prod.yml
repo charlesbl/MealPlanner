@@ -84,7 +84,7 @@ services:
             OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
             OPENAI_BASE_URL: ${OPENAI_BASE_URL:-https://openrouter.ai/api/v1}
             AGENT_DB_URL: ${AGENT_DB_URL:-postgresql://mealplanner_agent:mealplanner_agent@postgres-agent:5432/mealplanner_agent}
-            API_BASE_URL: ${API_BASE_URL:-http://api:3000}
+            API_URL: ${API_URL:-http://api:3000}
             JWT_SECRET: ${JWT_SECRET}
         ports:
             - "${AGENT_EXTERNAL_PORT:-3001}:${AGENT_PORT:-3001}"
