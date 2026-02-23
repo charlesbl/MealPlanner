@@ -1,0 +1,18 @@
+{$CADDY_DOMAIN} {
+    # API — strip /api avant forward
+    handle_path /api/* {
+        reverse_proxy api:{$API_PORT}
+    }
+
+    # Agent — strip /agent avant forward, flush SSE immédiatement
+    handle_path /agent/* {
+        reverse_proxy agent:{$AGENT_PORT} {
+            flush_interval -1
+        }
+    }
+
+    # Front — tout le reste
+    handle {
+        reverse_proxy front:80
+    }
+}
