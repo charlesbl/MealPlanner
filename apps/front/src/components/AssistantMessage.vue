@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { ChatMessage } from "@mealplanner/shared-all";
+import ChatRecipeCard from "./ChatRecipeCard.vue";
 import MarkdownRenderer from "./MarkdownRenderer.vue";
 import ToolStatus from "./ToolStatus.vue";
 
@@ -23,6 +24,10 @@ defineProps<Props>();
                     class="tool-part"
                     :name="part.toolName"
                     :status="part.status"
+                />
+                <ChatRecipeCard
+                    v-else-if="part.type === 'recipeCard'"
+                    :recipe="part.recipe"
                 />
             </template>
         </div>

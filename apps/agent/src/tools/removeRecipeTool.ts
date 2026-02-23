@@ -8,7 +8,7 @@ const deleteRecipeSchema = z.object({
 });
 
 export const getDeleteRecipeTool = (
-    token: string
+    token: string,
 ): AgentTool<typeof deleteRecipeSchema> => {
     return {
         schema: deleteRecipeSchema,

@@ -18,7 +18,7 @@ This service runs a local PostgreSQL instance using Docker Compose for developme
 
 To delete all local database data by removing the Docker volume, run from the repo root:
 
--   `pnpm db:purge`
+- `pnpm db:purge`
 
 Then you can bring the DB back up with `pnpm db:up` and re-run migrations/seed from the API if needed.
 

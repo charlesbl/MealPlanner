@@ -11,14 +11,14 @@ export function getJwtSecret(): Secret {
 
 export function verifyToken<T extends JwtUserPayload = JwtUserPayload>(
     token: string,
-    secret: Secret = getJwtSecret()
+    secret: Secret = getJwtSecret(),
 ): T {
     return jwt.verify(token, secret) as T;
 }
 
 export function signToken(
     payload: JwtUserPayload,
-    options?: { secret?: Secret; expiresInSeconds?: number }
+    options?: { secret?: Secret; expiresInSeconds?: number },
 ): string {
     const secret = options?.secret ?? getJwtSecret();
     const expiresIn = options?.expiresInSeconds ?? 60 * 60 * 24 * 7;
@@ -37,7 +37,7 @@ export type AuthAPIResponse<T = never> = Response<
 export function requireAuth(
     req: Request,
     res: Response<any, Partial<AuthPayload>>,
-    next: NextFunction
+    next: NextFunction,
 ) {
     const secret = getJwtSecret();
     const header = req.headers.authorization;

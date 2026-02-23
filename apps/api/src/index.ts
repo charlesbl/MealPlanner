@@ -1,16 +1,19 @@
 import dotenv from "dotenv";
 import "reflect-metadata";
+import path from "node:path";
+import { fileURLToPath } from "url";
 import { createApp } from "./app.js";
 import { AppDataSource } from "./data-source.js";
 
-dotenv.config();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
-if (process.env.PORT === undefined) {
-    throw new Error("PORT environment variable is not set");
+if (process.env.API_PORT === undefined) {
+    throw new Error("API_PORT environment variable is not set");
 }
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env.API_PORT);
 if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
-    throw new Error("PORT environment variable is not a valid port number");
+    throw new Error("API_PORT environment variable is not a valid port number");
 }
 
 async function bootstrap() {

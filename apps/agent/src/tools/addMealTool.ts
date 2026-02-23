@@ -10,7 +10,7 @@ const addMealSchema = z.object({
 });
 
 export const getAddMealTool = (
-    token: string
+    token: string,
 ): AgentTool<typeof addMealSchema> => {
     return {
         schema: addMealSchema,
@@ -23,14 +23,14 @@ export const getAddMealTool = (
                 "Adds a recipe from the library to the current plan as a meal.",
             schema: addMealSchema,
             func: async (
-                input: z.infer<typeof addMealSchema>
+                input: z.infer<typeof addMealSchema>,
             ): Promise<string> => {
                 try {
                     // Determine next order based on current plan length
                     const current = await planService.fetchPlan(token);
                     const created = await planService.addToPlan(
                         { recipeId: input.recipeId, order: current.length },
-                        token
+                        token,
                     );
                     return `Added '${
                         created.recipe.name

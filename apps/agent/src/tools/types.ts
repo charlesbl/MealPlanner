@@ -6,10 +6,10 @@ export interface AgentTool<T extends ZodObject> {
     schema: T;
     tool: DynamicStructuredTool<T>;
     getToolUpdateEventOnToolStart?: (
-        input: z.infer<T>
+        input: z.infer<T>,
     ) => ToolUpdateEvent | undefined;
     getToolUpdateEventOnToolEnd?: (
         input: z.infer<T>,
-        output?: string
+        output?: string,
     ) => ToolUpdateEvent | undefined;
 }

@@ -13,24 +13,35 @@ import {
     Part,
     StreamEventData,
     chatMessageSchema,
+    createFoodEntryRequestSchema,
     getHistorySchema,
+    journalService,
+    threadService,
+    type FoodEntry,
+    type NutritionInfo,
 } from "@mealplanner/shared-all";
+import type { APIResponsePayload } from "@mealplanner/shared-all";
 import { AuthAPIResponse, requireAuth } from "@mealplanner/shared-back";
 import cors from "cors";
 import { config } from "dotenv";
 import express, { Request } from "express";
+import path from "node:path";
+import { fileURLToPath } from "url";
 import { ZodObject } from "zod";
 import { createAgent, createCheckpointer } from "./agent.js";
 import { getAddMealTool } from "./tools/addMealTool.js";
 import { getAddOrUpdateRecipeTool } from "./tools/addOrUpdateRecipeTool.js";
+import { getEnrichRecipeNutritionTool } from "./tools/enrichRecipeNutritionTool.js";
+import { getLogFoodTool } from "./tools/logFoodTool.js";
 import { getReadLibraryTool } from "./tools/readLibraryTool.js";
 import { getReadPlanTool } from "./tools/readPlanTool.js";
 import { getRemoveRecipeFromPlanTool } from "./tools/removeMealTool.js";
 import { getDeleteRecipeTool } from "./tools/removeRecipeTool.js";
 import { AgentTool } from "./tools/types.js";
+import { estimateNutrition } from "./utils/estimateNutrition.js";
 
-//dotenv
-config();
+const __agentDirname = path.dirname(fileURLToPath(import.meta.url));
+config({ path: path.resolve(__agentDirname, "../../../.env") });
 
 const app = express();
 app.use(cors());
@@ -47,17 +58,7 @@ if (!OPENROUTER_API_KEY) {
 const llm = new ChatOpenAI({
     configuration: { baseURL: OPENAI_BASE_URL },
     apiKey: OPENROUTER_API_KEY,
-    // modelName: "z-ai/glm-4.5",
-    // modelName: "openai/gpt-oss-120b",
-    // modelName: "mistralai/mistral-medium-3",
-    modelName: "z-ai/glm-4.7",
-    temperature: 0.7,
-    modelKwargs: {
-        // preset: "@preset/default",
-        provider: {
-            order: ["google-vertex"],
-        },
-    },
+    modelName: "@preset/meal-planner",
 });
 
 const checkpointer = await createCheckpointer();
@@ -75,8 +76,17 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
         const token = res.locals.token;
         const user = res.locals.user;
         console.log(
-            `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`
+            `[agent] User ${user?.sub} (${user?.name}) started chat with token ${token}`,
         );
+
+        // Thread lifecycle: create if not provided
+        let effectiveThreadId = thread_id;
+        let isNewThread = false;
+        if (!effectiveThreadId) {
+            const created = await threadService.createThread(token);
+            effectiveThreadId = created.id;
+            isNewThread = true;
+        }
 
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
@@ -89,6 +99,14 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             res.write(`data: ${JSON.stringify(event)}\n\n`);
         };
 
+        if (isNewThread) {
+            send({
+                type: "threadCreated",
+                threadId: effectiveThreadId,
+                title: "Nouvelle conversation",
+            });
+        }
+
         const tools: AgentTool<ZodObject>[] = [
             getReadLibraryTool(token),
             getAddOrUpdateRecipeTool(token),
@@ -96,15 +114,17 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             getAddMealTool(token),
             getRemoveRecipeFromPlanTool(token),
             getReadPlanTool(token),
+            getLogFoodTool(token),
+            getEnrichRecipeNutritionTool(token),
         ];
         const agent = createAgent(
             llm,
             tools.map(({ tool }) => tool),
-            checkpointer
+            checkpointer,
         );
         const stream = await agent.streamEvents(
             { messages: [new HumanMessage(userMessage)] },
-            { version: "v2", configurable: thread_id ? { thread_id } : {} }
+            { version: "v2", configurable: { thread_id: effectiveThreadId } },
         );
         let final = "";
 
@@ -120,12 +140,12 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                           .map((p: any) =>
                               typeof p === "string"
                                   ? p
-                                  : p?.text ?? p?.content ?? ""
+                                  : (p?.text ?? p?.content ?? ""),
                           )
                           .join("")
                     : typeof content === "string"
-                    ? content
-                    : "";
+                      ? content
+                      : "";
                 if (text) {
                     final += text;
                     send({ type: "stream", chunk: text, runId: e.run_id });
@@ -148,25 +168,25 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                 if (!isValidToolIO(inputString))
                     throw new Error(
                         `Tool input is not a string: ${JSON.stringify(
-                            inputString
-                        )}`
+                            inputString,
+                        )}`,
                     );
                 const input = tool.schema.safeParse(
                     inputString === undefined
                         ? undefined
-                        : JSON.parse(inputString)
+                        : JSON.parse(inputString),
                 );
                 if (input.success === false) {
                     throw new Error(
                         `Tool input does not match schema: ${JSON.stringify(
-                            input.error
-                        )}`
+                            input.error,
+                        )}`,
                     );
                 }
                 console.log(
                     `Tool started: ${toolName} with input: ${JSON.stringify(
-                        input
-                    )}`
+                        input,
+                    )}`,
                 );
 
                 send({
@@ -174,7 +194,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                     toolData: {
                         name: toolName,
                         updateEvent: tool.getToolUpdateEventOnToolStart?.(
-                            input.data
+                            input.data,
                         ),
                     },
                     runId: e.run_id,
@@ -190,32 +210,32 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                 if (!isValidToolIO(inputString))
                     throw new Error(
                         `Tool input is not a string: ${JSON.stringify(
-                            inputString
-                        )}`
+                            inputString,
+                        )}`,
                     );
                 const input = tool.schema.safeParse(
                     inputString === undefined
                         ? undefined
-                        : JSON.parse(inputString)
+                        : JSON.parse(inputString),
                 );
                 if (input.success === false) {
                     throw new Error(
                         `Tool input does not match schema: ${JSON.stringify(
-                            input.error
-                        )}`
+                            input.error,
+                        )}`,
                     );
                 }
 
                 const output = e.data.output?.lc_kwargs?.content;
                 if (!isValidToolIO(output)) {
                     throw new Error(
-                        `Tool output is not a string: ${JSON.stringify(output)}`
+                        `Tool output is not a string: ${JSON.stringify(output)}`,
                     );
                 }
                 console.log(
                     `Tool ended: ${toolName} with input: ${JSON.stringify(
-                        input
-                    )} and output: ${output}`
+                        input,
+                    )} and output: ${output}`,
                 );
                 send({
                     type: "toolEnd",
@@ -223,7 +243,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                         name: toolName,
                         updateEvent: tool.getToolUpdateEventOnToolEnd?.(
                             input.data,
-                            output
+                            output,
                         ),
                     },
                     runId: e.run_id,
@@ -241,12 +261,12 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
                               .map((p: any) =>
                                   typeof p === "string"
                                       ? p
-                                      : p?.text ?? p?.content ?? ""
+                                      : (p?.text ?? p?.content ?? ""),
                               )
                               .join("")
                         : typeof content === "string"
-                        ? content
-                        : "";
+                          ? content
+                          : "";
                     if (text) final = text;
                 }
             }
@@ -254,6 +274,29 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
 
         send({ type: "end", finalOutput: final });
         res.end();
+
+        // Async thread bookkeeping (non-blocking)
+        threadService
+            .updateThread(
+                effectiveThreadId,
+                { lastMessageAt: new Date().toISOString() },
+                token,
+            )
+            .catch((err) =>
+                console.error(
+                    "[agent] failed to update thread lastMessageAt",
+                    err,
+                ),
+            );
+
+        if (isNewThread && final) {
+            generateThreadTitle(
+                effectiveThreadId,
+                userMessage,
+                final,
+                token,
+            ).catch(() => {});
+        }
     } catch (err: any) {
         // Send error as SSE then close
         try {
@@ -266,7 +309,7 @@ app.post("/chat", requireAuth, async (req: Request, res: AuthAPIResponse) => {
             res.write(
                 `data: ${JSON.stringify({
                     message: err?.message ?? "Unknown error",
-                })}\n\n`
+                })}\n\n`,
             );
         } catch {}
         res.end();
@@ -329,7 +372,115 @@ app.get(
                 error: err?.message ?? "Unknown error",
             });
         }
+    },
+);
+
+const ZERO_NUTRITION: NutritionInfo = {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+};
+
+async function runNutritionEstimation(
+    entryId: string,
+    description: string,
+    token: string,
+): Promise<void> {
+    try {
+        const nutrition = await estimateNutrition(description);
+        await journalService.updateFoodEntry(
+            entryId,
+            { status: "completed", nutrition },
+            token,
+        );
+    } catch (err: any) {
+        console.error("[agent] nutrition estimation failed:", err);
+        try {
+            await journalService.updateFoodEntry(
+                entryId,
+                {
+                    status: "error",
+                    errorMessage: err?.message ?? "Unknown error",
+                },
+                token,
+            );
+        } catch (updateErr) {
+            console.error("[agent] failed to mark entry as error:", updateErr);
+        }
     }
+}
+
+app.post(
+    "/food-entries",
+    requireAuth,
+    async (
+        req: Request,
+        res: AuthAPIResponse<APIResponsePayload<FoodEntry>>,
+    ) => {
+        try {
+            const parsed = createFoodEntryRequestSchema.safeParse(req.body);
+            if (!parsed.success) {
+                return res.status(400).json({
+                    status: "error",
+                    error: parsed.error.message,
+                });
+            }
+            const token = res.locals.token;
+            // Create entry immediately as pending
+            const entry = await journalService.createFoodEntry(
+                {
+                    ...parsed.data,
+                    nutrition: ZERO_NUTRITION,
+                    status: "pending",
+                },
+                token,
+            );
+            // Return 202 immediately so frontend can show pending state
+            res.status(202).json({ status: "success", data: entry });
+            // Estimate nutrition in the background
+            void runNutritionEstimation(
+                entry.id,
+                parsed.data.description,
+                token,
+            );
+        } catch (err: any) {
+            console.error("[agent] /food-entries error:", err);
+            return res.status(500).json({
+                status: "error",
+                error: err?.message ?? "Unknown error",
+            });
+        }
+    },
+);
+
+app.post(
+    "/food-entries/:id/retry",
+    requireAuth,
+    async (
+        req: Request,
+        res: AuthAPIResponse<APIResponsePayload<FoodEntry>>,
+    ) => {
+        try {
+            const { id } = req.params;
+            const token = res.locals.token;
+            // Reset to pending
+            const entry = await journalService.updateFoodEntry(
+                id,
+                { status: "pending", errorMessage: null },
+                token,
+            );
+            res.status(202).json({ status: "success", data: entry });
+            // Re-run estimation in the background
+            void runNutritionEstimation(id, entry.description, token);
+        } catch (err: any) {
+            console.error("[agent] /food-entries/:id/retry error:", err);
+            return res.status(500).json({
+                status: "error",
+                error: err?.message ?? "Unknown error",
+            });
+        }
+    },
 );
 
 type LangChainMessage =
@@ -346,7 +497,7 @@ type LangChainMessage =
           message: ToolMessage;
       };
 const convertLangChainMessagesToChatMessages = (
-    langchainMessages: unknown[]
+    langchainMessages: unknown[],
 ): ChatMessage[] => {
     const getCastedMessage = (m: unknown): LangChainMessage | undefined => {
         if (m instanceof HumanMessage) return { role: "user", message: m };
@@ -405,6 +556,43 @@ const convertLangChainMessagesToChatMessages = (
     return messages;
 };
 
+async function generateThreadTitle(
+    threadId: string,
+    userMessage: string,
+    agentResponse: string,
+    token: string,
+): Promise<void> {
+    try {
+        const res = await fetch(
+            "https://openrouter.ai/api/v1/chat/completions",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+                },
+                body: JSON.stringify({
+                    model: "z-ai/glm-4.7",
+                    messages: [
+                        {
+                            role: "user",
+                            content: `Génère un titre court (5 mots max) pour cette conversation. Premier message : ${userMessage}. Première réponse : ${agentResponse.slice(0, 200)}. Réponds uniquement avec le titre, sans guillemets.`,
+                        },
+                    ],
+                }),
+            },
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        const title: string = data.choices?.[0]?.message?.content?.trim() ?? "";
+        if (title) {
+            await threadService.updateThread(threadId, { title }, token);
+        }
+    } catch (err) {
+        console.error("[agent] generateThreadTitle error:", err);
+    }
+}
+
 const isValidToolIO = (input: any): input is string | undefined => {
     return (
         input === undefined ||
@@ -412,12 +600,12 @@ const isValidToolIO = (input: any): input is string | undefined => {
     );
 };
 
-if (process.env.PORT === undefined) {
-    throw new Error("PORT environment variable is not set");
+if (process.env.AGENT_PORT === undefined) {
+    throw new Error("AGENT_PORT environment variable is not set");
 }
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env.AGENT_PORT);
 if (isNaN(PORT) || PORT <= 0 || PORT >= 65536) {
-    throw new Error("PORT environment variable is not a valid port number");
+    throw new Error("AGENT_PORT environment variable is not a valid port number");
 }
 app.listen(PORT, () => {
     console.log(`[agent] SSE server listening on http://localhost:${PORT}`);

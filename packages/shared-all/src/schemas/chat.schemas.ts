@@ -22,6 +22,15 @@ export type GetHistoryBodyResponse = {
     messages: ChatMessage[];
 };
 
+export type RecipeCardData = {
+    id: string;
+    name: string;
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+};
+
 export type Part = {
     runId?: string;
     isStreaming?: boolean;
@@ -34,6 +43,10 @@ export type Part = {
           type: "tool";
           status: "running" | "completed";
           toolName: string;
+      }
+    | {
+          type: "recipeCard";
+          recipe: RecipeCardData;
       }
 );
 

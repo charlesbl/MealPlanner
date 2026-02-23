@@ -16,7 +16,7 @@ export function authControllerFactory() {
     const register = async (
         req: Request,
         res: Response<AuthRegisterBodyResponse>,
-        next: NextFunction
+        next: NextFunction,
     ) => {
         try {
             const { name, email, password } = registerSchema.parse(req.body);
@@ -52,7 +52,7 @@ export function authControllerFactory() {
     const login = async (
         req: Request,
         res: Response<AuthLoginBodyResponse>,
-        next: NextFunction
+        next: NextFunction,
     ) => {
         try {
             const { email, password } = loginSchema.parse(req.body);
@@ -90,7 +90,7 @@ export function authControllerFactory() {
     const me = async (
         req: Request,
         res: AuthAPIResponse<AuthMeBodyResponse>,
-        next: NextFunction
+        next: NextFunction,
     ) => {
         try {
             const user = await usersRepo.findOne({

@@ -12,6 +12,10 @@ export type ToolUpdateEvent =
     | {
           type: "removeRecipe";
           recipeId: string;
+      }
+    | {
+          type: "updateJournal";
+          date: string;
       };
 
 export type ToolUpdateEventType = ToolUpdateEvent["type"];
@@ -55,10 +59,37 @@ export interface ChainEndEventData {
     finalOutput: string;
 }
 
+export interface ThreadCreatedEventData {
+    type: "threadCreated";
+    threadId: string;
+    title: string;
+}
+
+export interface ThreadTitleUpdatedEventData {
+    type: "threadTitleUpdated";
+    threadId: string;
+    title: string;
+}
+
+export interface RecipeCardEventData {
+    type: "recipeCard";
+    recipe: {
+        id: string;
+        name: string;
+        calories: number;
+        protein: number;
+        carbs: number;
+        fat: number;
+    };
+}
+
 export type StreamEventData =
     | ChatModelStartEventData
     | ChatModelStreamEventData
     | ChatModelEndEventData
     | ChainEndEventData
     | ToolCallEventData
-    | ToolEndEventData;
+    | ToolEndEventData
+    | ThreadCreatedEventData
+    | ThreadTitleUpdatedEventData
+    | RecipeCardEventData;

@@ -6,7 +6,7 @@ services:
         container_name: mealplanner-postgres-api
         restart: unless-stopped
         env_file:
-            - .env
+            - ../../.env
         environment:
             POSTGRES_USER: ${API_POSTGRES_USER:-mealplanner_api}
             POSTGRES_PASSWORD: ${API_POSTGRES_PASSWORD:-mealplanner_api}
@@ -14,7 +14,7 @@ services:
         ports:
             - "${API_HOST_PORT:-5432}:5432"
         volumes:
-            - pg_data:/var/lib/postgresql/data
+            - ./api-data:/var/lib/postgresql/data
         healthcheck:
             test:
                 [
@@ -36,7 +36,7 @@ services:
         ports:
             - "${AGENT_HOST_PORT:-5433}:5432"
         volumes:
-            - pg_agent_data:/var/lib/postgresql/data
+            - ./agent-data:/var/lib/postgresql/data
         healthcheck:
             test:
                 [
@@ -46,9 +46,3 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
-
-volumes:
-    pg_data:
-        name: mealplanner_pg_data
-    pg_agent_data:
-        name: mealplanner_pg_agent_data

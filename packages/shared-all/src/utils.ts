@@ -13,7 +13,7 @@ export function getApiBase(): string {
     }
     if (base === undefined)
         throw new Error(
-            "API base URL is not defined in environment variables, use VITE_API_URL or API_URL"
+            "API base URL is not defined in environment variables, use VITE_API_URL or API_URL",
         );
 
     return base.replace(/\/$/, "");

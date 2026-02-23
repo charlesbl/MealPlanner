@@ -48,7 +48,7 @@ export const useLibraryStore = defineStore("libraryStore", () => {
             if (token) void updateLibrary();
             else library.value = [];
         },
-        { immediate: true }
+        { immediate: true },
     );
 
     return {

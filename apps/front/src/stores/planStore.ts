@@ -24,7 +24,7 @@ export const usePlanStore = defineStore("planStore", () => {
             if (!auth.token) throw new Error("Not authenticated");
             const created = await planService.addToPlan(
                 { recipeId },
-                auth.token
+                auth.token,
             );
             plan.value.push(created);
             return created;
@@ -39,7 +39,7 @@ export const usePlanStore = defineStore("planStore", () => {
             if (!auth.token) throw new Error("Not authenticated");
             await planService.removeFromPlan({ id: mealId }, auth.token);
             const idx = plan.value.findIndex(
-                (meal: Meal) => meal.id === mealId
+                (meal: Meal) => meal.id === mealId,
             );
             if (idx === -1) return false;
             plan.value.splice(idx, 1);
@@ -65,7 +65,7 @@ export const usePlanStore = defineStore("planStore", () => {
             if (token) void updatePlan();
             else plan.value = [];
         },
-        { immediate: true }
+        { immediate: true },
     );
 
     return {

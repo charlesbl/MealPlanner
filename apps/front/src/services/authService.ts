@@ -12,7 +12,7 @@ import {
 async function authRegister(
     name: string,
     email: string,
-    password: string
+    password: string,
 ): Promise<AuthUserWithToken> {
     const res = await fetch(`${getApiBase()}/auth/register`, {
         method: "POST",
@@ -27,7 +27,7 @@ async function authRegister(
 
 async function authLogin(
     email: string,
-    password: string
+    password: string,
 ): Promise<AuthUserWithToken> {
     const res = await fetch(`${getApiBase()}/auth/login`, {
         method: "POST",

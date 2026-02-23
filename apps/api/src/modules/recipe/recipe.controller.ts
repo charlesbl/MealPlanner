@@ -6,6 +6,7 @@ import type {
 } from "@mealplanner/shared-all";
 import {
     createRecipeSchema,
+    enrichRecipeNutritionRequestSchema,
     getRecipeSchema,
     removeRecipeSchema,
     updateRecipeSchema,
@@ -20,7 +21,7 @@ export function recipeControllerFactory() {
     return {
         getLibrary: async (
             req: Request,
-            res: AuthAPIResponse<RecipeListBodyResponse>
+            res: AuthAPIResponse<RecipeListBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             const recipes = await recipeRepo.find({
@@ -30,7 +31,7 @@ export function recipeControllerFactory() {
         },
         getById: async (
             req: Request,
-            res: AuthAPIResponse<RecipeGetBodyResponse>
+            res: AuthAPIResponse<RecipeGetBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             const { id } = getRecipeSchema.parse(req.params);
@@ -46,7 +47,7 @@ export function recipeControllerFactory() {
         },
         create: async (
             req: Request,
-            res: AuthAPIResponse<RecipeCreateBodyResponse>
+            res: AuthAPIResponse<RecipeCreateBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             try {
@@ -63,14 +64,14 @@ export function recipeControllerFactory() {
                     error: (err && typeof err === "object" && "message" in err
                         ? (err as any).message
                         : typeof err === "string"
-                        ? err
-                        : "Invalid data") as string,
+                          ? err
+                          : "Invalid data") as string,
                 });
             }
         },
         update: async (
             req: Request,
-            res: AuthAPIResponse<RecipeUpdateBodyResponse>
+            res: AuthAPIResponse<RecipeUpdateBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
             try {
@@ -93,10 +94,32 @@ export function recipeControllerFactory() {
                     error: (err && typeof err === "object" && "message" in err
                         ? (err as any).message
                         : typeof err === "string"
-                        ? err
-                        : "Invalid data") as string,
+                          ? err
+                          : "Invalid data") as string,
                 });
             }
+        },
+        enrichNutrition: async (
+            req: Request,
+            res: AuthAPIResponse<RecipeGetBodyResponse>,
+        ) => {
+            const userId = res.locals.user.sub;
+            const { id } = getRecipeSchema.parse(req.params);
+            const recipe = await recipeRepo.findOne({
+                where: { id, user: { id: userId } },
+            });
+            if (!recipe)
+                return res.status(404).json({
+                    status: "error",
+                    error: "Recipe not found",
+                });
+
+            const { nutrition } = enrichRecipeNutritionRequestSchema.parse(
+                req.body,
+            );
+            recipe.nutrition = nutrition;
+            await recipeRepo.save(recipe);
+            res.json({ status: "success", data: recipe });
         },
         remove: async (req: Request, res: AuthAPIResponse<never>) => {
             const userId = res.locals.user.sub;

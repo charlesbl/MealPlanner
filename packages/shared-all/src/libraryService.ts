@@ -1,4 +1,6 @@
+import { type NutritionInfo } from "./schemas/nutrition.schemas.js";
 import {
+    type EnrichRecipeBodyResponse,
     type Recipe,
     type RecipeCreateBodyResponse,
     type RecipeListBodyResponse,
@@ -21,7 +23,7 @@ async function fetchLibrary(token: string): Promise<Recipe[]> {
 
 async function addRecipe(
     recipe: Omit<Recipe, "id" | "createdAt">,
-    token: string
+    token: string,
 ): Promise<Recipe> {
     const res = await fetch(`${getApiBase()}/recipe`, {
         method: "POST",
@@ -40,7 +42,7 @@ async function addRecipe(
 async function updateRecipe(
     id: string,
     updates: Partial<Omit<Recipe, "id" | "createdAt">>,
-    token: string
+    token: string,
 ): Promise<Recipe> {
     const res = await fetch(`${getApiBase()}/recipe/${id}`, {
         method: "PUT",
@@ -64,9 +66,29 @@ async function deleteRecipe(id: string, token: string): Promise<void> {
     if (!res.ok) throw new Error(`Delete recipe failed: ${res.status}`);
 }
 
+async function enrichRecipeNutrition(
+    id: string,
+    nutrition: NutritionInfo,
+    token: string,
+): Promise<Recipe> {
+    const res = await fetch(`${getApiBase()}/recipe/${id}/enrich-nutrition`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ nutrition }),
+    });
+    if (!res.ok) throw new Error(`Enrich nutrition failed: ${res.status}`);
+    const body: EnrichRecipeBodyResponse = await res.json();
+    if (body.status === "error") throw new Error(body.error);
+    return body.data;
+}
+
 export const libraryService = {
     fetchLibrary,
     addRecipe,
     updateRecipe,
     deleteRecipe,
+    enrichRecipeNutrition,
 };
