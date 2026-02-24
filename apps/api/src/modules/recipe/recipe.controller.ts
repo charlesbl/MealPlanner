@@ -50,54 +50,32 @@ export function recipeControllerFactory() {
             res: AuthAPIResponse<RecipeCreateBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
-            try {
-                const data = createRecipeSchema.parse(req.body);
-                const recipe = recipeRepo.create({
-                    ...data,
-                    user: { id: userId },
-                });
-                await recipeRepo.save(recipe);
-                res.status(201).json({ status: "success", data: recipe });
-            } catch (err) {
-                res.status(400).json({
-                    status: "error",
-                    error: (err && typeof err === "object" && "message" in err
-                        ? (err as any).message
-                        : typeof err === "string"
-                          ? err
-                          : "Invalid data") as string,
-                });
-            }
+            const data = createRecipeSchema.parse(req.body);
+            const recipe = recipeRepo.create({
+                ...data,
+                user: { id: userId },
+            });
+            await recipeRepo.save(recipe);
+            res.status(201).json({ status: "success", data: recipe });
         },
         update: async (
             req: Request,
             res: AuthAPIResponse<RecipeUpdateBodyResponse>,
         ) => {
             const userId = res.locals.user.sub;
-            try {
-                const { id } = updateRecipeSchema.parse(req.params);
-                const recipe = await recipeRepo.findOne({
-                    where: { id, user: { id: userId } },
-                });
-                if (!recipe)
-                    return res.status(404).json({
-                        status: "error",
-                        error: "Recipe not found",
-                    });
-                const updates = updateRecipeSchema.parse(req.body);
-                Object.assign(recipe, updates);
-                await recipeRepo.save(recipe);
-                res.json({ status: "success", data: recipe });
-            } catch (err) {
-                res.status(400).json({
+            const { id } = updateRecipeSchema.parse(req.params);
+            const recipe = await recipeRepo.findOne({
+                where: { id, user: { id: userId } },
+            });
+            if (!recipe)
+                return res.status(404).json({
                     status: "error",
-                    error: (err && typeof err === "object" && "message" in err
-                        ? (err as any).message
-                        : typeof err === "string"
-                          ? err
-                          : "Invalid data") as string,
+                    error: "Recipe not found",
                 });
-            }
+            const updates = updateRecipeSchema.parse(req.body);
+            Object.assign(recipe, updates);
+            await recipeRepo.save(recipe);
+            res.json({ status: "success", data: recipe });
         },
         enrichNutrition: async (
             req: Request,

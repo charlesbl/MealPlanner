@@ -3,6 +3,12 @@ import type { APIResponsePayload } from "@mealplanner/shared-all";
 import type { AuthAPIResponse } from "@mealplanner/shared-back";
 import { Request } from "express";
 import crypto from "node:crypto";
+import { z } from "zod";
+
+const updateThreadSchema = z.object({
+    title: z.string().optional(),
+    lastMessageAt: z.string().optional(),
+});
 import { AppDataSource } from "../../data-source.js";
 import { ThreadEntity } from "./thread.entity.js";
 
@@ -67,10 +73,7 @@ export function threadsControllerFactory() {
                     .status(404)
                     .json({ status: "error", error: "Thread not found" });
             }
-            const { title, lastMessageAt } = req.body as {
-                title?: string;
-                lastMessageAt?: string;
-            };
+            const { title, lastMessageAt } = updateThreadSchema.parse(req.body);
             if (title !== undefined) thread.title = title;
             if (lastMessageAt !== undefined)
                 thread.lastMessageAt = new Date(lastMessageAt);

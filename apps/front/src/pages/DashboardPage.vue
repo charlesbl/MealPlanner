@@ -6,16 +6,13 @@ import AppCard from "@/components/ui/AppCard.vue";
 import SectionLabel from "@/components/ui/SectionLabel.vue";
 import { useJournalStore } from "@/stores/journalStore";
 import { useProfileStore } from "@/stores/profileStore";
+import { todayISO } from "@/utils/date";
 import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
 const journalStore = useJournalStore();
 const profileStore = useProfileStore();
-
-function todayISO() {
-    return new Date().toISOString().split("T")[0];
-}
 
 const today = todayISO();
 

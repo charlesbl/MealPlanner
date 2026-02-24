@@ -25,7 +25,7 @@ export const getEnrichRecipeNutritionTool = (
         tool: new DynamicStructuredTool({
             name: "enrich_recipe_nutrition",
             description:
-                "Calcule et sauvegarde les informations nutritionnelles (calories, macros) d'une recette existante dans la bibliothèque. Utilise ce tool quand l'utilisateur veut connaître les macros d'une recette ou quand une recette n'a pas encore de valeurs nutritionnelles.",
+                "Computes and saves the nutritional information (calories, macros) for an existing recipe in the library. Use this tool when the user wants to know the macros of a recipe or when a recipe does not yet have nutritional values.",
             schema: enrichRecipeNutritionSchema,
             func: async (
                 input: z.infer<typeof enrichRecipeNutritionSchema>,
@@ -44,13 +44,13 @@ export const getEnrichRecipeNutritionTool = (
                         token,
                     );
                     if (!recipe.nutrition) {
-                        return `Impossible d'estimer la nutrition pour la recette '${recipe.name}'.`;
+                        return `Could not estimate nutrition for recipe '${recipe.name}'.`;
                     }
                     const { calories, protein, carbs, fat } = recipe.nutrition;
-                    return `Nutrition calculée pour '${recipe.name}' : ${calories} kcal, P: ${protein}g, G: ${carbs}g, L: ${fat}g`;
+                    return `Nutrition computed for '${recipe.name}': ${calories} kcal, P: ${protein}g, C: ${carbs}g, F: ${fat}g`;
                 } catch (error: any) {
                     console.error("Error in enrichRecipeNutritionTool:", error);
-                    return `Erreur lors du calcul nutritionnel : ${error.message}`;
+                    return `Error computing nutritional values: ${error.message}`;
                 }
             },
         }),

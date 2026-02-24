@@ -7,6 +7,7 @@ import AppDivider from "@/components/ui/AppDivider.vue";
 import SectionLabel from "@/components/ui/SectionLabel.vue";
 import { useJournalStore } from "@/stores/journalStore";
 import { useProfileStore } from "@/stores/profileStore";
+import { todayISO } from "@/utils/date";
 import type { MealType } from "@mealplanner/shared-all";
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
@@ -15,10 +16,6 @@ const route = useRoute();
 const router = useRouter();
 const journalStore = useJournalStore();
 const profileStore = useProfileStore();
-
-function todayISO() {
-    return new Date().toISOString().split("T")[0];
-}
 
 const currentDate = computed(() => {
     const p = route.params.date;

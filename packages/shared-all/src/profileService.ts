@@ -5,19 +5,7 @@ import type {
 } from "./schemas/profile.schemas.js";
 import { getApiBase } from "./utils.js";
 
-type ProfilePayloadFlat = UserProfile & { tdee: number | null };
-type ProfilePayloadNested = {
-    profile: UserProfile;
-    tdee: number | null;
-};
-
-function normalizeProfilePayload(
-    data: ProfilePayloadFlat | ProfilePayloadNested,
-): ProfilePayloadNested {
-    if ("profile" in data) return data;
-    const { tdee, ...profile } = data;
-    return { profile, tdee };
-}
+type ProfilePayload = UserProfile & { tdee: number | null };
 
 async function fetchProfile(
     token: string,
@@ -26,10 +14,10 @@ async function fetchProfile(
         headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Fetch profile failed: ${res.status}`);
-    const body: APIResponsePayload<ProfilePayloadFlat | ProfilePayloadNested> =
-        await res.json();
+    const body: APIResponsePayload<ProfilePayload> = await res.json();
     if (body.status === "error") throw new Error(body.error);
-    return normalizeProfilePayload(body.data);
+    const { tdee, ...profile } = body.data;
+    return { profile, tdee };
 }
 
 async function updateProfile(
@@ -45,10 +33,10 @@ async function updateProfile(
         body: JSON.stringify(patch),
     });
     if (!res.ok) throw new Error(`Update profile failed: ${res.status}`);
-    const body: APIResponsePayload<ProfilePayloadFlat | ProfilePayloadNested> =
-        await res.json();
+    const body: APIResponsePayload<ProfilePayload> = await res.json();
     if (body.status === "error") throw new Error(body.error);
-    return normalizeProfilePayload(body.data);
+    const { tdee, ...profile } = body.data;
+    return { profile, tdee };
 }
 
 export const profileService = { fetchProfile, updateProfile };

@@ -25,7 +25,7 @@ async function addToPlan(
     payload: PlanAddBodyRequest,
     token: string,
 ): Promise<Meal> {
-    const res = await fetch(`${getApiBase()}/plan/add`, {
+    const res = await fetch(`${getApiBase()}/plan`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -44,13 +44,9 @@ async function removeFromPlan(
     payload: PlanRemoveBodyRequest,
     token: string,
 ): Promise<void> {
-    const res = await fetch(`${getApiBase()}/plan/remove`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
+    const res = await fetch(`${getApiBase()}/plan/${payload.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) throw new Error(`Remove from plan failed: ${res.status}`);
 }

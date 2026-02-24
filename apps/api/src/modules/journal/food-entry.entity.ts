@@ -6,10 +6,8 @@ import {
     ManyToOne,
     PrimaryGeneratedColumn,
 } from "typeorm";
+import type { FoodEntryStatus, MealType } from "@mealplanner/shared-all";
 import type { UserEntity } from "../user/user.entity.js";
-
-export type MealTypeValue = "breakfast" | "lunch" | "dinner" | "snack";
-export type FoodEntryStatus = "pending" | "completed" | "error";
 
 @Entity({ name: "food_entries" })
 export class FoodEntryEntity {
@@ -31,7 +29,7 @@ export class FoodEntryEntity {
         type: "enum",
         enum: ["breakfast", "lunch", "dinner", "snack"],
     })
-    mealType!: MealTypeValue;
+    mealType!: MealType;
 
     @Column({ type: "float", default: 0 })
     calories!: number;

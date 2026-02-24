@@ -136,7 +136,7 @@ export function journalControllerFactory() {
                 protein: nutrition.protein,
                 carbs: nutrition.carbs,
                 fat: nutrition.fat,
-                status: body.status ?? "completed",
+                status: body.status ?? (body.nutrition ? "completed" : "pending"),
             });
             await repo.save(entry);
             res.status(201).json({

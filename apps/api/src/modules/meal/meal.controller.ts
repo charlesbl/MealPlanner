@@ -52,7 +52,7 @@ export function mealControllerFactory() {
         },
         remove: async (req: Request, res: AuthAPIResponse) => {
             const userId = res.locals.user.sub;
-            const { id } = removeMealSchema.parse(req.body);
+            const { id } = removeMealSchema.parse(req.params);
             const selection = await selectionRepo.findOne({
                 where: { id, user: { id: userId } },
             });

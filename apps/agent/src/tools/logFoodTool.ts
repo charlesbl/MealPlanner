@@ -36,7 +36,7 @@ export const getLogFoodTool = (
         tool: new DynamicStructuredTool({
             name: "log_food",
             description:
-                "Loggue un aliment ou repas consommé par l'utilisateur dans son journal alimentaire. Utilise ce tool quand l'utilisateur mentionne avoir mangé quelque chose. Les calories et macronutriments sont estimés automatiquement depuis la description.",
+                "Logs a food or meal consumed by the user in their food journal. Use this tool when the user mentions having eaten something. Calories and macronutrients are estimated automatically from the description.",
             schema: logFoodSchema,
             func: async (
                 input: z.infer<typeof logFoodSchema>,
@@ -55,10 +55,10 @@ export const getLogFoodTool = (
                         token,
                     );
                     const { calories, protein, carbs, fat } = entry.nutrition;
-                    return `Loggué : ${entry.description} — ${calories} kcal, P: ${protein}g, G: ${carbs}g, L: ${fat}g`;
+                    return `Logged: ${entry.description} — ${calories} kcal, P: ${protein}g, C: ${carbs}g, F: ${fat}g`;
                 } catch (error: any) {
                     console.error("Error in logFoodTool:", error);
-                    return `Erreur lors du log alimentaire : ${error.message}`;
+                    return `Error logging food entry: ${error.message}`;
                 }
             },
         }),

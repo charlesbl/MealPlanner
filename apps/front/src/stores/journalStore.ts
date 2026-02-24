@@ -1,15 +1,13 @@
 import {
     journalService,
     type FoodEntry,
+    type MealType,
     type NutritionInfo,
 } from "@mealplanner/shared-all";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
 import { useAuthStore } from "./authStore";
-
-function todayISO(): string {
-    return new Date().toISOString().split("T")[0];
-}
+import { todayISO } from "../utils/date";
 
 function getWeekStartISO(date: string): string {
     // Monday of the ISO week containing `date`
@@ -112,24 +110,24 @@ export const useJournalStore = defineStore("journalStore", () => {
     ) {
         if (!auth.token) return;
         adding.value = true;
+        const agentUrl = import.meta.env.VITE_AGENT_URL as string;
+        const entryDate = date ?? currentDate.value;
         try {
-            const agentUrl = import.meta.env.VITE_AGENT_URL as string;
-            const res = await fetch(`${agentUrl}/food-entries`, {
+            const entry = await journalService.createFoodEntry(
+                { description, date: entryDate, mealType: mealType as MealType },
+                auth.token,
+            );
+            // Fire-and-forget: trigger async nutrition estimation in agent
+            fetch(`${agentUrl}/food-entries/${entry.id}/estimate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${auth.token}`,
                 },
-                body: JSON.stringify({
-                    description,
-                    date: date ?? currentDate.value,
-                    mealType,
-                }),
-            });
-            if (!res.ok)
-                throw new Error(`Add food entry failed: ${res.status}`);
+                body: JSON.stringify({ description }),
+            }).catch((e) => console.error("estimate request failed:", e));
             // Fetch immediately to display the pending entry
-            await fetchDay(date ?? currentDate.value);
+            await fetchDay(entryDate);
         } catch (e) {
             console.error("addEntry error:", e);
             throw e;
@@ -140,14 +138,24 @@ export const useJournalStore = defineStore("journalStore", () => {
 
     async function retryEntry(id: string) {
         if (!auth.token) return;
+        const agentUrl = import.meta.env.VITE_AGENT_URL as string;
         try {
-            const agentUrl = import.meta.env.VITE_AGENT_URL as string;
-            const res = await fetch(`${agentUrl}/food-entries/${id}/retry`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${auth.token}` },
-            });
-            if (!res.ok)
-                throw new Error(`Retry food entry failed: ${res.status}`);
+            await journalService.updateFoodEntry(
+                id,
+                { status: "pending", errorMessage: null },
+                auth.token,
+            );
+            const entry = entries.value.find((e) => e.id === id);
+            if (entry) {
+                fetch(`${agentUrl}/food-entries/${id}/estimate`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${auth.token}`,
+                    },
+                    body: JSON.stringify({ description: entry.description }),
+                }).catch((e) => console.error("estimate request failed:", e));
+            }
             await fetchDay(currentDate.value);
         } catch (e) {
             console.error("retryEntry error:", e);
@@ -191,7 +199,6 @@ export const useJournalStore = defineStore("journalStore", () => {
         retryEntry,
         deleteEntry,
         stopPolling,
-        todayISO,
         getWeekStartISO,
     };
 });

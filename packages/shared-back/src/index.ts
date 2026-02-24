@@ -1,7 +1,7 @@
 import { JwtUserPayload } from "@mealplanner/shared-all";
 import type { NextFunction, Request, Response } from "express";
 import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
-import { APIResponsePayload } from "../../shared-all/dist/schemas/common.schemas.js";
+import type { APIResponsePayload } from "@mealplanner/shared-all";
 
 export function getJwtSecret(): Secret {
     return (
